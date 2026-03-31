@@ -17,8 +17,8 @@ echo "[1/4] Stopping existing containers..."
 docker-compose down 2>/dev/null || true
 
 # Build images
-echo "[2/4] Building images (no cache)..."
-docker-compose build --no-cache
+echo "[2/4] Building images..."
+docker-compose build
 
 # Start services
 echo "[3/4] Starting services..."

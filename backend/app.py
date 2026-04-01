@@ -61,17 +61,15 @@ def create_app():
     def health():
         return {'status': 'healthy'}
 
+    # Static file serving - only setup if files exist
+    static_path = os.path.join(os.path.dirname(__file__), 'workspace', 'dist')
+
     @app.route('/')
     def serve_index():
-        # __file__ = /app/app.py, so ../workspace/dist = /app/workspace/dist
-        static_path = os.path.join(os.path.dirname(__file__), 'workspace', 'dist')
-        if os.path.exists(static_path):
-            return send_from_directory(static_path, 'index.html')
-        return "Static files not found", 503
+        return send_from_directory(static_path, 'index.html')
 
     @app.route('/static/<path:filename>')
     def serve_static_files(filename):
-        static_path = os.path.join(os.path.dirname(__file__), 'workspace', 'dist')
         return send_from_directory(static_path, filename)
 
     return app

@@ -15,10 +15,10 @@ def create_app():
 
     env = os.environ.get('FLASK_ENV', 'development')
     if env == 'production':
-        from backend.config import ProductionConfig
+        from config import ProductionConfig
         app.config.from_object(ProductionConfig)
     else:
-        from backend.config import DevelopmentConfig
+        from config import DevelopmentConfig
         app.config.from_object(DevelopmentConfig)
 
     # Initialize extensions
@@ -31,11 +31,11 @@ def create_app():
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
     # Register blueprints
-    from .routes.auth import auth_bp
-    from .routes.participants import participants_bp
-    from .routes.referrals import referrals_bp
-    from .routes.updates import updates_bp
-    from .routes.messages import messages_bp
+    from routes.auth import auth_bp
+    from routes.participants import participants_bp
+    from routes.referrals import referrals_bp
+    from routes.updates import updates_bp
+    from routes.messages import messages_bp
 
     app.register_blueprint(auth_bp, url_prefix='/api/v1/auth')
     app.register_blueprint(participants_bp, url_prefix='/api/v1/participants')

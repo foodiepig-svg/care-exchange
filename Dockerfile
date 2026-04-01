@@ -1,11 +1,11 @@
-# ─── Python backend serving React SPA (Whitenoise) ───────────────────────────
+# ─── Python backend + nginx reverse proxy ──────────────────────────────────
 FROM python:3.11-slim
 
 WORKDIR /app
 
-# Install system deps (gcc for psycopg2)
+# Install system deps (nginx for proxy, gcc for psycopg2)
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    gcc libpq-dev && rm -rf /var/lib/apt/lists/*
+    gcc libpq-dev nginx && rm -rf /var/lib/apt/lists/*
 
 # Install Python deps
 COPY backend/requirements.txt .
@@ -27,5 +27,5 @@ ENV DATABASE_URL=postgresql://vendue_db_user:xSC9skfpDz7KrNOlfOFfp632eLrfOJ5j@dp
 
 EXPOSE 8000
 
-# Gunicorn on port 8000 (matches Render LB routing)
-CMD gunicorn --bind 0.0.0.0:8000 --workers 1 --threads 4 --timeout 120 wsgi:app
+# Nginx proxies to gunicorn on 8000; gunicorn listens on 5000
+CMD sh -c "gunicorn --bind 0.0.0.0:5000 --workers 1 --threads 4 --timeout 120 wsgi:app & nginx -c /etc/nginx/nginx.conf -g 'daemon off;' && wait -n"

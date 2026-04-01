@@ -62,9 +62,9 @@ def create_app():
             'index.html'
         )
 
-    # Static files - Whitenoise serves from /app/workspace/dist with /static/ prefix
+    # Static files - Whitenoise serves from /app/workspace/dist at root level
     static_path = os.path.join(os.path.dirname(__file__), 'workspace', 'dist')
     if os.path.exists(static_path):
-        app.wsgi_app = WhiteNoise(app.wsgi_app, root=static_path, prefix='/static/')
+        app.wsgi_app = WhiteNoise(app.wsgi_app, root=static_path)
 
     return app

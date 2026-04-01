@@ -11,7 +11,7 @@ class Thread(db.Model):
     created_by_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    messages = db.relationship('Message', backref='thread', lazy=True, order_by='Message.created_at')
+    messages = db.relationship('Message', backref='thread', lazy=True, order_by='Message.sent_at')
 
     def to_dict(self):
         return {

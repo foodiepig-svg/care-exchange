@@ -1,6 +1,6 @@
 from datetime import datetime
 from app import db
-import bcrypt
+from werkzeug.security import generate_password_hash, check_password_hash
 
 
 class User(db.Model):
@@ -10,7 +10,7 @@ class User(db.Model):
     email = db.Column(db.String(255), unique=True, nullable=False, index=True)
     password_hash = db.Column(db.String(255), nullable=False)
     role = db.Column(db.String(20), nullable=False)  # participant, family, provider, coordinator
-    full_name = db.Column(db.String(255), nullable=False)
+    full_name = db.Column(db.String(255), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     verified_at = db.Column(db.DateTime, nullable=True)
     is_active = db.Column(db.Boolean, default=True)
@@ -21,10 +21,10 @@ class User(db.Model):
     coordinator = db.relationship('Coordinator', backref='user', uselist=False, lazy=True)
 
     def set_password(self, password):
-        self.password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+        self.password_hash = generate_password_hash(password)
 
     def check_password(self, password):
-        return bcrypt.checkpw(password.encode('utf-8'), self.password_hash.encode('utf-8'))
+        return check_password_hash(self.password_hash, password)
 
     def to_dict(self):
         return {

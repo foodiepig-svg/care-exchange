@@ -64,6 +64,10 @@ def create_app():
 
     @app.route('/<path:path>')
     def serve_spa(path):
+        print(f"CATCH-ALL HIT: path={path} static_dir={_static_dir}", flush=True)
+        # Test with plain text first to isolate send_from_directory issue
+        if path == 'debug':
+            return f"DEBUG: path={path}, static_dir={_static_dir}, exists={os.path.exists(_static_dir)}"
         # API paths go to Flask blueprints (registered earlier) - this won't match them
         # But just in case, redirect api/* to proper handling
         if path.startswith('api/'):

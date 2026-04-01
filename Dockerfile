@@ -28,4 +28,4 @@ ENV DATABASE_URL=postgresql://vendue_db_user:xSC9skfpDz7KrNOlfOFfp632eLrfOJ5j@dp
 EXPOSE 8000
 
 # Nginx proxies to gunicorn on 8000; gunicorn listens on 5000
-CMD sh -c "gunicorn --bind 0.0.0.0:5000 --workers 1 --threads 4 --timeout 120 --access-logfile - --error-logfile - --log-level debug wsgi:app & nginx -c /etc/nginx/nginx.conf -g 'daemon off;' && wait -n"
+CMD sh -c "gunicorn --bind 0.0.0.0:5000 --workers 2 --timeout 120 --access-logfile - --error-logfile - --log-level debug wsgi:app & nginx -c /etc/nginx/nginx.conf -g 'daemon off;' && wait -n"

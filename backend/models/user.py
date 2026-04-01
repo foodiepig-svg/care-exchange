@@ -21,7 +21,8 @@ class User(db.Model):
     coordinator = db.relationship('Coordinator', backref='user', uselist=False, lazy=True)
 
     def set_password(self, password):
-        self.password_hash = generate_password_hash(password)
+        # Use pbkdf2:sha256 method for compatibility with Python 3.9 (no scrypt on macOS)
+        self.password_hash = generate_password_hash(password, method='pbkdf2:sha256')
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)

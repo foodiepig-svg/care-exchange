@@ -48,8 +48,9 @@ def create_app():
     def health():
         return {'status': 'healthy'}
 
-    # Create tables
+    # Run migrations (Flask-Migrate handles schema management)
+    from flask_migrate import upgrade
     with app.app_context():
-        db.create_all()
+        upgrade()
 
     return app

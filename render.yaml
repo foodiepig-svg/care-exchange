@@ -12,8 +12,8 @@ services:
   # ── PostgreSQL Database ───────────────────────────────────────────────────
   - name: care-exchange-db
     plan: free
-    databaseName: careexchange
-    databaseUser: careexchange
+    databaseName: vendee_db
+    databaseUser: vendee_db_user
     ipAllowLock: false
     postgresMajorVersion: 15
 

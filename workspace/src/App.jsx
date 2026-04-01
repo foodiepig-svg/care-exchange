@@ -21,24 +21,39 @@ function App() {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
+          {/* Public routes */}
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/app/dashboard" element={<Navigate to="/dashboard" replace />} />
+
+          {/* Protected routes — all under /app/* */}
           <Route
-            path="/*"
+            path="/app/*"
             element={
               <ProtectedRoute>
                 <Layout />
               </ProtectedRoute>
             }
           >
-            <Route index element={<Navigate to="/dashboard" replace />} />
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="referrals" element={<Referrals />} />
             <Route path="care-record" element={<CareRecord />} />
             <Route path="care-team" element={<CareTeam />} />
             <Route path="messages" element={<Messages />} />
             <Route path="updates" element={<Updates />} />
+          </Route>
+
+          {/* Fallback protected routes at root */}
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Layout />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<Dashboard />} />
           </Route>
         </Routes>
       </BrowserRouter>

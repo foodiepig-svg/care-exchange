@@ -56,26 +56,20 @@ def create_app():
 
     # Serve index.html for SPA fallback - catch-all for React Router routes
     # Excludes /api/* and /assets/* which are handled by Flask routes and Whitenoise
+    _static_dir = os.path.dirname(os.path.abspath(__file__))
+    _static_dir = os.path.join(_static_dir, '..', 'workspace', 'dist')
+
     @app.route('/')
     def serve_index():
-        return send_from_directory(
-            os.path.join(os.path.dirname(__file__), 'workspace', 'dist'),
-            'index.html'
-        )
+        return send_from_directory(_static_dir, 'index.html')
 
     @app.route('/<path:path>')
     def serve_spa(path):
         # Only serve index.html for non-API, non-static paths (React Router routes)
         if path.startswith('api/') or path.startswith('assets/') or path.startswith('content/'):
-            return send_from_directory(
-                os.path.join(os.path.dirname(__file__), 'workspace', 'dist'),
-                path
-            )
+            return send_from_directory(_static_dir, path)
         # All other paths -> serve index.html for client-side routing
-        return send_from_directory(
-            os.path.join(os.path.dirname(__file__), 'workspace', 'dist'),
-            'index.html'
-        )
+        return send_from_directory(_static_dir, 'index.html')
 
     # Static files - Whitenoise serves from /app/workspace/dist at root level
     # STATIC_ROOT is set in Dockerfile to /app/workspace/dist

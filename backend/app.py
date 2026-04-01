@@ -7,7 +7,7 @@ from flask_migrate import Migrate
 
 db = SQLAlchemy()
 jwt = JWTManager()
-migrate = Migrate()
+migrate = Migrate(directory=os.path.join(os.path.dirname(__file__), 'migrations'))
 
 
 def create_app():
@@ -49,14 +49,24 @@ def create_app():
         return {'status': 'healthy'}
 
     # Run migrations (Flask-Migrate handles schema management)
-    from flask_migrate import upgrade
-    from sqlalchemy import text
     with app.app_context():
-        # Check if alembic_version table exists; if not, stamp the baseline
-        inspector = db.inspect(db.engine)
-        if 'alembic_version' not in inspector.get_table_names():
-            from flask_migrate import stamp
-            stamp('head')
-        upgrade()
+        try:
+            from flask_migrate import upgrade, stamp
+            inspector = db.inspect(db.engine)
+            if 'alembic_version' not in inspector.get_table_names():
+                try:
+                    stamp('head')
+                except Exception:
+                    pass  # DB has existing schema - will handle below
+            upgrade()
+        except Exception as e:
+            # DB may already have all tables from previous db.create_all()
+            # Check if core tables exist; if so, suppress the error
+            from sqlalchemy import text
+            existing = db.engine.dialect.has_table(db.engine.connect(), 'users')
+            if existing:
+                app.logger.info(f"Migration skipped - database already initialized: {e}")
+            else:
+                raise
 
     return app

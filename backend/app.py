@@ -15,10 +15,10 @@ def create_app():
 
     env = os.environ.get('FLASK_ENV', 'development')
     if env == 'production':
-        from .config import ProductionConfig
+        from backend.config import ProductionConfig
         app.config.from_object(ProductionConfig)
     else:
-        from .config import DevelopmentConfig
+        from backend.config import DevelopmentConfig
         app.config.from_object(DevelopmentConfig)
 
     # Initialize extensions

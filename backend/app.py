@@ -65,10 +65,4 @@ def create_app():
             # Fallback to index.html for SPA routing
             return send_from_directory(static_path, 'index.html')
 
-    # Verify database connection on startup
-    with app.app_context():
-        from sqlalchemy import text
-        db.session.execute(text('SELECT 1'))
-        app.logger.info("Database connection verified")
-
     return app

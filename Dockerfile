@@ -1,16 +1,5 @@
-# ─── Stage 1: Build React frontend ─────────────────────────────────────────
-FROM node:20-alpine AS frontend-builder
-
-WORKDIR /app
-
-COPY workspace/package*.json ./
-RUN npm install
-
-COPY workspace/ ./
-RUN npm run build
-
-# ─── Stage 2: Python backend + nginx serving everything ──────────────────────
-FROM python:3.11-slim AS backend
+# ─── Python backend + nginx serving pre-built React SPA ───────────────────
+FROM python:3.11-slim
 
 WORKDIR /app
 
@@ -28,8 +17,8 @@ COPY backend/ .
 # Copy nginx config
 COPY deploy/nginx.conf /etc/nginx/conf.d/default.conf
 
-# Copy built React SPA
-COPY --from=frontend-builder /app/dist /usr/share/nginx/html
+# Copy pre-built React SPA (workspace/dist was pre-built and committed)
+COPY workspace/dist /usr/share/nginx/html
 
 # Content files for the content API
 COPY workspace/public/content/ /app/content/
@@ -40,6 +29,4 @@ ENV FLASK_ENV=production
 
 EXPOSE 8000
 
-# Start gunicorn (Flask API) in background, then nginx in foreground.
-# wait -n exits when any background process exits (gunicorn crash = container stops).
 CMD sh -c "gunicorn --bind 0.0.0.0:5000 --workers 2 --timeout 120 wsgi:app & nginx -g 'daemon off;' && wait -n"

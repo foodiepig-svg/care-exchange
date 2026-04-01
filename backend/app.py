@@ -50,7 +50,13 @@ def create_app():
 
     # Run migrations (Flask-Migrate handles schema management)
     from flask_migrate import upgrade
+    from sqlalchemy import text
     with app.app_context():
+        # Check if alembic_version table exists; if not, stamp the baseline
+        inspector = db.inspect(db.engine)
+        if 'alembic_version' not in inspector.get_table_names():
+            from flask_migrate import stamp
+            stamp('head')
         upgrade()
 
     return app

@@ -48,6 +48,14 @@ def create_app():
     def health():
         return {'status': 'healthy'}
 
+    @app.route('/api/debug/db')
+    def debug_db():
+        try:
+            result = db.session.execute(db.text('SELECT 1')).fetchone()
+            return {'db': 'ok', 'result': result[0]}
+        except Exception as e:
+            return {'db': 'error', 'message': str(e)}, 500
+
     # Render health check hits /health (not /api/health)
     @app.route('/health')
     def render_health():

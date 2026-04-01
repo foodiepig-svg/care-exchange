@@ -52,17 +52,16 @@ def create_app():
     # Serve React static files with Whitenoise (gzip pre-compressed, cached)
     static_path = os.path.join(os.path.dirname(__file__), '..', 'workspace', 'dist')
     if os.path.exists(static_path):
-        app.wsgi_app = WhiteNoise(app.wsgi_app, root=static_path, prefix='/static/')
-        @app.route('/')
-        def serve_index():
-            return send_from_directory(static_path, 'index.html')
-        @app.route('/<path:path>')
-        def serve_static(path):
-            # Try static folder first
-            static_file = os.path.join(static_path, path)
-            if os.path.exists(static_file):
-                return send_from_directory(static_path, path)
-            # Fallback to index.html for SPA routing
-            return send_from_directory(static_path, 'index.html')
+        app.wsgi_app = WhiteNoise(app.wsgi_app, root=static_path)
+
+    @app.route('/')
+    def serve_index():
+        static_path = os.path.join(os.path.dirname(__file__), '..', 'workspace', 'dist')
+        return send_from_directory(static_path, 'index.html')
+
+    @app.route('/static/<path:filename>')
+    def serve_static_files(filename):
+        static_path = os.path.join(os.path.dirname(__file__), '..', 'workspace', 'dist')
+        return send_from_directory(static_path, filename)
 
     return app

@@ -27,5 +27,5 @@ ENV DATABASE_URL=postgresql://vendue_db_user:xSC9skfpDz7KrNOlfOFfp632eLrfOJ5j@dp
 
 EXPOSE 8000
 
-# Single worker with threads for Render free tier
-CMD gunicorn --bind 0.0.0.0:${PORT:-8000} --workers 1 --threads 4 --timeout 120 wsgi:app
+# Gunicorn on port 8000 (matches Render LB routing)
+CMD gunicorn --bind 0.0.0.0:8000 --workers 1 --threads 4 --timeout 120 wsgi:app

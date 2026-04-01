@@ -22,8 +22,8 @@ services:
     plan: free
     dockerfilepath: ./Dockerfile
     healthCheckPath: /health
-    # Pull port from Dockerfile EXPOSE (8000)
-    port: 8000
+    # Pull port from Dockerfile EXPOSE (10000)
+    port: 10000
 
     envVars:
       - key: FLASK_ENV

@@ -73,7 +73,13 @@ def create_app():
         return send_from_directory(_static_dir, 'index.html')
 
     # Static files - Whitenoise serves from /app/workspace/dist at root level
-    if os.path.exists(_static_dir):
-        app.wsgi_app = WhiteNoise(app.wsgi_app, root=_static_dir)
+    # Disabled for debugging - assets should be served via Flask route below
+    # if os.path.exists(_static_dir):
+    #     app.wsgi_app = WhiteNoise(app.wsgi_app, root=_static_dir)
+    
+    # Serve static assets via Flask directly (avoids Whitenoise wrapping issues)
+    @app.route('/assets/<path:filename>')
+    def serve_assets(filename):
+        return send_from_directory(_static_dir, os.path.join('assets', filename))
 
     return app

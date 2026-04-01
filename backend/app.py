@@ -4,7 +4,6 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
 from flask_migrate import Migrate
-from whitenoise import WhiteNoise
 
 db = SQLAlchemy()
 jwt = JWTManager()
@@ -62,19 +61,17 @@ def create_app():
     def health():
         return {'status': 'healthy'}
 
-    # Serve React static files with Whitenoise (gzip pre-compressed, cached)
-    static_path = os.path.join(os.path.dirname(__file__), '..', 'workspace', 'dist')
-    if os.path.exists(static_path):
-        app.wsgi_app = WhiteNoise(app.wsgi_app, root=static_path)
-
     @app.route('/')
     def serve_index():
-        static_path = os.path.join(os.path.dirname(__file__), '..', 'workspace', 'dist')
-        return send_from_directory(static_path, 'index.html')
+        # __file__ = /app/app.py, so ../workspace/dist = /app/workspace/dist
+        static_path = os.path.join(os.path.dirname(__file__), 'workspace', 'dist')
+        if os.path.exists(static_path):
+            return send_from_directory(static_path, 'index.html')
+        return "Static files not found", 503
 
     @app.route('/static/<path:filename>')
     def serve_static_files(filename):
-        static_path = os.path.join(os.path.dirname(__file__), '..', 'workspace', 'dist')
+        static_path = os.path.join(os.path.dirname(__file__), 'workspace', 'dist')
         return send_from_directory(static_path, filename)
 
     return app

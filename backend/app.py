@@ -1,5 +1,6 @@
 import os
-from flask import Flask
+from flask import Flask, send_from_directory
+from whitenoise import WhiteNoise
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
@@ -47,5 +48,10 @@ def create_app():
     @app.route('/api/health')
     def health():
         return {'status': 'healthy'}
+
+    # Static files - Whitenoise serves from /app/workspace/dist
+    static_path = os.path.join(os.path.dirname(__file__), 'workspace', 'dist')
+    if os.path.exists(static_path):
+        app.wsgi_app = WhiteNoise(app.wsgi_app, root=static_path, prefix='/static/')
 
     return app

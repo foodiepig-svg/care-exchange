@@ -44,12 +44,25 @@ def create_app():
     app.register_blueprint(updates_bp, url_prefix='/api/v1/updates')
     app.register_blueprint(messages_bp, url_prefix='/api/v1/messages')
 
-    # Health check
+    # Health check - must be before Whitenoise wraps wsgi_app
     @app.route('/api/health')
     def health():
         return {'status': 'healthy'}
 
-    # Static files - Whitenoise serves from /app/workspace/dist
+    # Render health check hits /health (not /api/health)
+    @app.route('/health')
+    def render_health():
+        return {'status': 'healthy'}
+
+    # Serve index.html for SPA fallback (before Whitenoise)
+    @app.route('/')
+    def serve_index():
+        return send_from_directory(
+            os.path.join(os.path.dirname(__file__), 'workspace', 'dist'),
+            'index.html'
+        )
+
+    # Static files - Whitenoise serves from /app/workspace/dist with /static/ prefix
     static_path = os.path.join(os.path.dirname(__file__), 'workspace', 'dist')
     if os.path.exists(static_path):
         app.wsgi_app = WhiteNoise(app.wsgi_app, root=static_path, prefix='/static/')

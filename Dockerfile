@@ -24,7 +24,7 @@ ENV PYTHONPATH=/app
 ENV PYTHONUNBUFFERED=1
 ENV FLASK_ENV=production
 ENV STATIC_ROOT=/app/workspace/dist
-# DATABASE_URL is set in Render dashboard (internal URL: postgresql://vendue_db_user:[password]@dpg-d74fnrp4tr6s73coe66g-a/vendue_db)
+ENV DATABASE_URL=postgresql://vendue_db_user:xSC9skfpDz7KrNOlfOFfp632eLrfOJ5j@dpg-d74fnrp4tr6s73coe66g-a.oregon-postgres.render.com/vendue_db?sslmode=require
 
 EXPOSE 8000
 

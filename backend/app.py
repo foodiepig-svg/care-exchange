@@ -54,9 +54,24 @@ def create_app():
     def render_health():
         return {'status': 'healthy'}
 
-    # Serve index.html for SPA fallback (before Whitenoise)
+    # Serve index.html for SPA fallback - catch-all for React Router routes
+    # Excludes /api/* and /assets/* which are handled by Flask routes and Whitenoise
     @app.route('/')
     def serve_index():
+        return send_from_directory(
+            os.path.join(os.path.dirname(__file__), 'workspace', 'dist'),
+            'index.html'
+        )
+
+    @app.route('/<path:path>')
+    def serve_spa(path):
+        # Only serve index.html for non-API, non-static paths (React Router routes)
+        if path.startswith('api/') or path.startswith('assets/') or path.startswith('content/'):
+            return send_from_directory(
+                os.path.join(os.path.dirname(__file__), 'workspace', 'dist'),
+                path
+            )
+        # All other paths -> serve index.html for client-side routing
         return send_from_directory(
             os.path.join(os.path.dirname(__file__), 'workspace', 'dist'),
             'index.html'

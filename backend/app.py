@@ -1,9 +1,10 @@
 import os
-from flask import Flask
+from flask import Flask, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
 from flask_migrate import Migrate
+from whitenoise import WhiteNoise
 
 db = SQLAlchemy()
 jwt = JWTManager()
@@ -47,6 +48,22 @@ def create_app():
     @app.route('/api/health')
     def health():
         return {'status': 'healthy'}
+
+    # Serve React static files with Whitenoise (gzip pre-compressed, cached)
+    static_path = os.path.join(os.path.dirname(__file__), '..', 'workspace', 'dist')
+    if os.path.exists(static_path):
+        app.wsgi_app = WhiteNoise(app.wsgi_app, root=static_path, prefix='/static/')
+        @app.route('/')
+        def serve_index():
+            return send_from_directory(static_path, 'index.html')
+        @app.route('/<path:path>')
+        def serve_static(path):
+            # Try static folder first
+            static_file = os.path.join(static_path, path)
+            if os.path.exists(static_file):
+                return send_from_directory(static_path, path)
+            # Fallback to index.html for SPA routing
+            return send_from_directory(static_path, 'index.html')
 
     # Verify database connection on startup
     with app.app_context():

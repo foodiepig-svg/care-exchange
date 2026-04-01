@@ -22,9 +22,9 @@ services:
         value: production
 
       - key: DATABASE_URL
-        # Replace with your actual Render PostgreSQL connection string
-        # Format: postgresql://user:password@host:5432/dbname
-        sync: false
+        fromDatabase:
+          name: vendee_db
+          property: connectionString
 
       - key: SECRET_KEY
         generateValue: true

@@ -1,6 +1,5 @@
 import os
 from flask import Flask, send_from_directory
-from whitenoise import WhiteNoise
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
@@ -60,30 +59,32 @@ def create_app():
 
     @app.route('/')
     def serve_index():
-        return send_from_directory(_static_dir, 'index.html')
+        try:
+            with open(os.path.join(_static_dir, 'index.html'), 'r') as f:
+                return f.read(), 200, {'Content-Type': 'text/html'}
+        except Exception as e:
+            print(f"ERROR reading index.html: {e}", flush=True)
+            return f"Error: {e}", 500
 
     @app.route('/<path:path>')
     def serve_spa(path):
-        print(f"CATCH-ALL HIT: path={path} static_dir={_static_dir}", flush=True)
-        # Test with plain text first to isolate send_from_directory issue
-        if path == 'debug':
-            return f"DEBUG: path={path}, static_dir={_static_dir}, exists={os.path.exists(_static_dir)}"
-        # API paths go to Flask blueprints (registered earlier) - this won't match them
-        # But just in case, redirect api/* to proper handling
-        if path.startswith('api/'):
-            return send_from_directory(_static_dir, path)
-        # assets/* and content/* served by Whitenoise - pass through
-        # All other routes (React Router: /login, /register, /dashboard, etc.) -> index.html
-        return send_from_directory(_static_dir, 'index.html')
+        print(f"CATCH-ALL HIT: {path}", flush=True)
+        # Read and return index.html directly instead of using send_from_directory
+        try:
+            with open(os.path.join(_static_dir, 'index.html'), 'r') as f:
+                return f.read(), 200, {'Content-Type': 'text/html'}
+        except Exception as e:
+            print(f"ERROR reading index.html: {e}", flush=True)
+            return f"Error: {e}", 500
 
-    # Static files - Whitenoise serves from /app/workspace/dist at root level
-    # Disabled for debugging - assets should be served via Flask route below
-    # if os.path.exists(_static_dir):
-    #     app.wsgi_app = WhiteNoise(app.wsgi_app, root=_static_dir)
-    
-    # Serve static assets via Flask directly (avoids Whitenoise wrapping issues)
+    # Serve static assets via Flask directly
     @app.route('/assets/<path:filename>')
     def serve_assets(filename):
-        return send_from_directory(_static_dir, os.path.join('assets', filename))
+        try:
+            with open(os.path.join(_static_dir, 'assets', filename), 'r') as f:
+                return f.read(), 200, {'Content-Type': 'application/javascript'}
+        except Exception as e:
+            print(f"ERROR reading asset {filename}: {e}", flush=True)
+            return f"Error: {e}", 500
 
     return app

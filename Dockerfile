@@ -28,5 +28,5 @@ ENV DATABASE_URL=postgresql://vendeu_db_user:xSC9skfpDz7KrNOlfOFfp632eLrfOJ5j@dp
 EXPOSE 8000
 
 # Single-process gunicorn: serves Flask API + static files via WhiteNoise
-# Render injects PORT env var - honor it so health checks reach the app
-CMD ["sh", "-c", "gunicorn --bind 0.0.0.0:${PORT:-8000} --workers 1 --threads 4 --timeout 300 wsgi:app"]
+# Sync workers (no threads) for maximum compatibility
+CMD ["sh", "-c", "gunicorn --bind 0.0.0.0:${PORT:-8000} --workers 1 --timeout 300 --log-level info --access-logfile - --error-logfile - wsgi:app"]

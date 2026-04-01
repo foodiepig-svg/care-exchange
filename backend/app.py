@@ -63,7 +63,8 @@ def create_app():
         )
 
     # Static files - Whitenoise serves from /app/workspace/dist at root level
-    static_path = os.path.join(os.path.dirname(__file__), 'workspace', 'dist')
+    # STATIC_ROOT is set in Dockerfile to /app/workspace/dist
+    static_path = os.environ.get('STATIC_ROOT', os.path.join(os.path.dirname(os.path.abspath(__file__)), 'workspace', 'dist'))
     if os.path.exists(static_path):
         app.wsgi_app = WhiteNoise(app.wsgi_app, root=static_path)
 

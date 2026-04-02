@@ -25,7 +25,7 @@ ENV STATIC_ROOT=/app/dist
 ENV FLASK_APP=backend/app.py
 ENV DATABASE_URL=postgresql://hermes_user:GyxI3gudu78nfDOha18KR3cZmtZGUJE9@dpg-d74fnrp4tr6s73coe66g-a.oregon-postgres.render.com/vendue_db?sslmode=require
 
-EXPOSE 8000
+EXPOSE 10000
 
 # Build React frontend in the same container
 COPY workspace/package.json workspace/package-lock.json* ./

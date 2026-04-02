@@ -58,6 +58,14 @@ def create_app():
     app.register_blueprint(providers_bp, url_prefix='/api/v1/providers')
 
     # Health check - must be before Whitenoise wraps wsgi_app
+    @app.route('/api/debug/migrate', methods=['POST'])
+    def debug_migrate():
+        try:
+            migrate.upgrade()
+            return {'migrated': True}
+        except Exception as e:
+            return {'migrated': False, 'error': str(e)}, 500
+
     @app.route('/api/health')
     def health():
         return {'status': 'healthy'}
@@ -125,3 +133,13 @@ def create_app():
             return f.read(), 200, {'Content-Type': mime_type}
 
     return app
+
+
+    @app.route('/api/debug/migrate', methods=['POST'])
+    def debug_migrate():
+        from flask_migrate import upgrade
+        try:
+            upgrade()
+            return {'migrated': True}
+        except Exception as e:
+            return {'migrated': False, 'error': str(e)}, 500

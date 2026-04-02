@@ -124,3 +124,27 @@ def create_app():
             return f"Error: {e}", 500
 
     return app
+
+    @app.route('/api/debug/register', methods=['POST'])
+    def debug_register():
+        from routes.auth import User
+        from models import Participant
+        data = request.get_json()
+        email = data.get('email', '').strip().lower()
+        try:
+            existing = User.query.filter_by(email=email).first()
+            if existing:
+                return {"step": "check_existing", "result": "found existing user"}
+            user = User(email=email, full_name=data.get('full_name', ''), role=data.get('role', 'participant'))
+            user.set_password(data.get('password', 'testpass123'))
+            db.session.add(user)
+            db.session.flush()
+            p = Participant(user_id=user.id)
+            db.session.add(p)
+            db.session.commit()
+            return {"step": "success", "user_id": user.id}
+        except Exception as e:
+            db.session.rollback()
+            import traceback
+            return {"step": "error", "message": str(e), "tb": traceback.format_exc()[-500:]}, 500
+

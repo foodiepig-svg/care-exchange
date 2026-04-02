@@ -54,7 +54,7 @@ function App() {
             <Route path="consent" element={<ConsentSettings />} />
           </Route>
 
-          {/* Fallback protected routes at root */}
+          {/* Root-level routes — all protected, all use Layout */}
           <Route
             path="/dashboard"
             element={
@@ -64,6 +64,86 @@ function App() {
             }
           >
             <Route index element={<Dashboard />} />
+          </Route>
+          <Route
+            path="/referrals"
+            element={
+              <ProtectedRoute>
+                <Layout />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<Referrals />} />
+          </Route>
+          <Route
+            path="/care-record"
+            element={
+              <ProtectedRoute>
+                <Layout />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<CareRecord />} />
+          </Route>
+          <Route
+            path="/care-team"
+            element={
+              <ProtectedRoute>
+                <Layout />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<CareTeam />} />
+          </Route>
+          <Route
+            path="/messages"
+            element={
+              <ProtectedRoute>
+                <Layout />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<Messages />} />
+          </Route>
+          <Route
+            path="/updates"
+            element={
+              <ProtectedRoute>
+                <Layout />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<Updates />} />
+          </Route>
+          <Route
+            path="/notifications"
+            element={
+              <ProtectedRoute>
+                <Layout />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<Notifications />} />
+          </Route>
+          <Route
+            path="/documents"
+            element={
+              <ProtectedRoute>
+                <Layout />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<Documents />} />
+          </Route>
+          <Route
+            path="/consent"
+            element={
+              <ProtectedRoute>
+                <Layout />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<ConsentSettings />} />
           </Route>
         </Routes>
       </BrowserRouter>

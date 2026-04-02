@@ -60,8 +60,9 @@ def create_app():
     # Health check - must be before Whitenoise wraps wsgi_app
     @app.route('/api/debug/migrate', methods=['POST'])
     def debug_migrate():
+        from flask_migrate import upgrade
         try:
-            migrate.upgrade()
+            upgrade()
             return {'migrated': True}
         except Exception as e:
             return {'migrated': False, 'error': str(e)}, 500

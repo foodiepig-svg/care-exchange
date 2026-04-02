@@ -5,13 +5,9 @@ services:
     envVars:
       - key: FLASK_ENV
         value: production
-      - key: DATABASE_URL
-        value: postgresql://hermes_user:GyxI3gudu78nfDOha18KR3cZmtZGUJE9@dpg-d74fnrp4tr6s73coe66g-a.oregon-postgres.render.com/vendeu_db?sslmode=require
       - key: SECRET_KEY
         generateValue: true
       - key: JWT_SECRET_KEY
         generateValue: true
-      - key: CORS_ORIGINS
-        value: ""
       - key: UPLOAD_FOLDER
         value: /tmp/careexchange/uploads

@@ -1,61 +1,16 @@
-# render.yaml — Care Exchange deployment blueprint
-#
-# Deploy with:
-#   1. Push this file to GitHub
-#   2. Go to https://dashboard.render.com/blueprints
-#   3. Connect your GitHub repo → auto-deploys on push
-#
-# Or use the Render CLI:
-#   render blueprint apply render.yaml
-
 services:
-  # Web App (Docker)
   - name: care-exchange
-    plan: free
-    runtime: docker
     dockerfilePath: ./Dockerfile
-    healthCheckPath: /health
-    # Pull port from Dockerfile EXPOSE (10000)
-
     envVars:
       - key: FLASK_ENV
         value: production
-
       - key: DATABASE_URL
         value: postgresql://hermes_user:GyxI3gudu78nfDOha18KR3cZmtZGUJE9@dpg-d74fnrp4tr6s73coe66g-a.oregon-postgres.render.com/vendeu_db?sslmode=require
-
       - key: SECRET_KEY
         generateValue: true
-
       - key: JWT_SECRET_KEY
         generateValue: true
-
       - key: CORS_ORIGINS
-        # Same origin — nginx proxies /api internally, no CORS needed
         value: ""
-
       - key: UPLOAD_FOLDER
         value: /tmp/careexchange/uploads
-
-    # Environment variables from a group (optional: use Render dashboard to edit)
-    # envVars:
-    #   - sync: false
-    #     name: CARE_EXCHANGE_ADMIN_EMAIL
-    #     value: admin@example.com
-
-  # Optional: Background Worker for async tasks
-  # Uncomment if you add Celery or similar later:
-  #
-  # - name: care-exchange-worker
-  #   plan: free
-  #   dockerfilePath: ./Dockerfile.worker
-  #   envVars:
-  #     - key: DATABASE_URL
-  #       fromDatabase:
-  #         name: care-exchange-db
-  #         property: connectionString
-  #     - key: REDIS_URL
-  #       fromService:
-  #         type: redis
-  #         name: care-exchange-redis
-  #         property: connectionString

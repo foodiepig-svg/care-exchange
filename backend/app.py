@@ -123,4 +123,76 @@ def create_app():
             print(f"ERROR reading asset {filename}: {e}", flush=True)
             return f"Error: {e}", 500
 
+    @app.route('/api/debug/create_missing_tables', methods=['POST'])
+    def create_missing_tables():
+        """Directly create missing tables without alembic migrations"""
+        from sqlalchemy import text
+        try:
+            db.session.execute(text("""
+                CREATE TABLE IF NOT EXISTS goals (
+                    id SERIAL PRIMARY KEY,
+                    participant_id INTEGER NOT NULL REFERENCES participants(id),
+                    title VARCHAR(255) NOT NULL,
+                    description TEXT,
+                    category VARCHAR(50),
+                    target_date DATE,
+                    status VARCHAR(20) NOT NULL DEFAULT 'active',
+                    progress INTEGER DEFAULT 0,
+                    created_by_id INTEGER REFERENCES users(id),
+                    created_at TIMESTAMP,
+                    updated_at TIMESTAMP
+                )
+            """))
+            db.session.execute(text("""
+                CREATE TABLE IF NOT EXISTS care_plans (
+                    id SERIAL PRIMARY KEY,
+                    participant_id INTEGER NOT NULL REFERENCES participants(id),
+                    title VARCHAR(255) NOT NULL,
+                    description TEXT,
+                    start_date DATE,
+                    end_date DATE,
+                    status VARCHAR(20) NOT NULL DEFAULT 'active',
+                    supports TEXT,
+                    review_notes TEXT,
+                    created_by_id INTEGER REFERENCES users(id),
+                    created_at TIMESTAMP,
+                    updated_at TIMESTAMP
+                )
+            """))
+            db.session.execute(text("""
+                CREATE TABLE IF NOT EXISTS documents (
+                    id SERIAL PRIMARY KEY,
+                    participant_id INTEGER NOT NULL REFERENCES participants(id),
+                    uploaded_by_id INTEGER NOT NULL REFERENCES users(id),
+                    title VARCHAR(255) NOT NULL,
+                    filename VARCHAR(255) NOT NULL,
+                    original_filename VARCHAR(255) NOT NULL,
+                    file_type VARCHAR(50) NOT NULL,
+                    file_size INTEGER,
+                    category VARCHAR(50) DEFAULT 'general',
+                    description TEXT,
+                    created_at TIMESTAMP
+                )
+            """))
+            db.session.execute(text("""
+                CREATE TABLE IF NOT EXISTS notifications (
+                    id SERIAL PRIMARY KEY,
+                    user_id INTEGER NOT NULL REFERENCES users(id),
+                    type VARCHAR(50) NOT NULL,
+                    title VARCHAR(255) NOT NULL,
+                    body TEXT,
+                    read BOOLEAN NOT NULL DEFAULT false,
+                    link VARCHAR(255),
+                    created_at TIMESTAMP
+                )
+            """))
+            db.session.execute(text("CREATE INDEX IF NOT EXISTS ix_documents_participant_id ON documents(participant_id)"))
+            db.session.execute(text("CREATE INDEX IF NOT EXISTS ix_notifications_user_id ON notifications(user_id)"))
+            db.session.commit()
+            return {'status': 'tables created'}
+        except Exception as e:
+            db.session.rollback()
+            import traceback
+            return {'error': str(e), 'tb': traceback.format_exc()[-500:]}, 500
+
     return app

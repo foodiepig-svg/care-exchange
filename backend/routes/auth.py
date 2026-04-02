@@ -189,3 +189,28 @@ def debug_provider_create():
         import traceback
         db.session.rollback()
         return {'error': str(e), 'tb': traceback.format_exc()}, 500
+
+
+@auth_bp.route('/debug/test_provider', methods=['POST'])
+def debug_test_provider():
+    from models import User, Provider
+    from app import db
+    import traceback
+    data = request.get_json()
+    email = data.get('email', 'test@test.com')
+    org = data.get('organisation_name', 'Test Org')
+    try:
+        # Create user directly
+        u = User(email=email, full_name='Test', role='provider')
+        u.set_password('Test@123')
+        db.session.add(u)
+        db.session.flush()
+        # Create provider
+        p = Provider(user_id=u.id, organisation_name=org)
+        db.session.add(p)
+        db.session.flush()
+        db.session.commit()
+        return {'ok': True, 'user_id': u.id, 'provider_id': p.id}
+    except Exception as e:
+        db.session.rollback()
+        return {'error': str(e), 'type': type(e).__name__, 'tb': traceback.format_exc()}, 500

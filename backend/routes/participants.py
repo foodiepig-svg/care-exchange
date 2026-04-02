@@ -86,6 +86,30 @@ def care_team():
 
         return jsonify({'care_team': team})
 
+    elif user.role in ('coordinator', 'provider'):
+        # Get participants who granted consent TO this user
+        consents = Consent.query.filter_by(granted_to_id=user_id).filter(
+            Consent.granted_at.isnot(None),
+            Consent.revoked_at.is_(None)
+        ).all()
+
+        team = []
+        for c in consents:
+            participant = Participant.query.get(c.participant_id)
+            if participant:
+                p_user = User.query.get(participant.user_id)
+                entry = {
+                    'participant_id': participant.id,
+                    'full_name': p_user.full_name if p_user else None,
+                    'role': 'participant',
+                    'data_categories': c.data_categories,
+                    'ndis_number': participant.ndis_number,
+                    'consent_id': c.id,
+                }
+                team.append(entry)
+
+        return jsonify({'care_team': team})
+
     return jsonify({'care_team': []})
 
 

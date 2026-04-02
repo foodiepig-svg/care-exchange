@@ -22,7 +22,7 @@ ENV PYTHONPATH=/app
 ENV PYTHONUNBUFFERED=1
 ENV FLASK_ENV=production
 ENV STATIC_ROOT=/app/dist
-ENV DATABASE_URL=postgresql://vendue_db_user:***@dpg-d74fnrp4tr6s73coe66g-a.oregon-postgres.render.com/vendu_db?sslmode=require
+ENV DATABASE_URL=postgresql://vendue_db_user:***@dpg-d74fnrp4tr6s73coe66g-a.oregon-postgres.render.com/vendeu_db?sslmode=require
 
 EXPOSE 8000
 

@@ -13,10 +13,10 @@ services:
   - name: care-exchange
     plan: free
     type: web
-    dockerfile: ./Dockerfile
+    dockerfilePath: ./Dockerfile
     healthCheckPath: /health
     # Pull port from Dockerfile EXPOSE (10000)
-    servicePort: 10000
+    port: 10000
 
     envVars:
       - key: FLASK_ENV
@@ -49,7 +49,7 @@ services:
   #
   # - name: care-exchange-worker
   #   plan: free
-  #   dockerfile: ./Dockerfile.worker
+  #   dockerfilePath: ./Dockerfile.worker
   #   envVars:
   #     - key: DATABASE_URL
   #       fromDatabase:

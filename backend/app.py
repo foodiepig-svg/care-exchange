@@ -97,7 +97,7 @@ def create_app():
     @app.route('/<path:path>')
     def serve_spa(path):
         # Don't intercept API routes — let them 404 so the API handlers work
-        if path.startswith('api/'):
+        if path.startswith('api/') or path.startswith('debug'):
             return {'error': 'Not found'}, 404
         print(f"CATCH-ALL HIT: {path}", flush=True)
         # Read and return index.html directly instead of using send_from_directory

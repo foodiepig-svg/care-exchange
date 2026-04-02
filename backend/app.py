@@ -68,6 +68,14 @@ def create_app():
         except Exception as e:
             return {'db': 'error', 'message': str(e)}, 500
 
+    @app.route('/api/debug/tables')
+    def debug_tables():
+        try:
+            result = db.session.execute(db.text("SELECT tablename FROM pg_tables WHERE schemaname='public'")).fetchall()
+            return {'tables': [r[0] for r in result]}
+        except Exception as e:
+            return {'tables': 'error', 'message': str(e)}, 500
+
     # Render health check hits /health (not /api/health)
     @app.route('/health')
     def render_health():

@@ -38,4 +38,4 @@ RUN npm run build
 COPY workspace/public/content/ /app/content/
 
 # Run migrations then start gunicorn
-CMD ["sh", "-c", "flask db upgrade && gunicorn --bind 0.0.0.0:${PORT:-8000} --workers 1 --timeout 300 --log-level info --access-logfile - --error-logfile - wsgi:app"]
+CMD ["sh", "-c", "FLASK_APP=backend/app.py flask db upgrade && gunicorn --bind 0.0.0.0:${PORT:-8000} --workers 1 --timeout 300 --log-level info --access-logfile - --error-logfile - wsgi:app"]

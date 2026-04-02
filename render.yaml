@@ -12,6 +12,7 @@ services:
   # ── Web App (Docker) ───────────────────────────────────────────────────────
   - name: care-exchange
     plan: free
+    type: web
     dockerfilepath: ./Dockerfile
     healthCheckPath: /health
     # Pull port from Dockerfile EXPOSE (10000)

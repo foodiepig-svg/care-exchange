@@ -61,7 +61,7 @@ export default function ConsentSettings() {
 
   async function handleRevoke(id) {
     try {
-      await api.delete(`/api/v1/consents/${id}`)
+      await api.delete(`/consents/${id}`)
       setConsents(prev =>
         prev.map(c => c.id === id ? { ...c, active: false } : c)
       )

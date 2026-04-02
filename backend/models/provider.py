@@ -22,6 +22,10 @@ class Provider(db.Model):
 
     def to_dict(self):
         import json
+        try:
+            service_types = json.loads(self.service_types) if self.service_types else []
+        except (ValueError, TypeError):
+            service_types = []
         return {
             'id': self.id,
             'user_id': self.user_id,
@@ -30,7 +34,7 @@ class Provider(db.Model):
             'contact_name': self.contact_name,
             'contact_phone': self.contact_phone,
             'contact_email': self.contact_email,
-            'service_types': json.loads(self.service_types) if self.service_types else [],
+            'service_types': service_types,
             'location': self.location,
             'created_at': self.created_at.isoformat() if self.created_at else None,
         }

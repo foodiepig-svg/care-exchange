@@ -54,6 +54,7 @@ def create_app():
     app.register_blueprint(documents_bp, url_prefix='/api/v1/documents')
     app.register_blueprint(consents_bp, url_prefix='/api/v1/consents')
     app.register_blueprint(content_bp, url_prefix='/api/v1/content')
+    app.register_blueprint(providers_bp, url_prefix='/api/v1/providers')
 
     # Health check - must be before Whitenoise wraps wsgi_app
     @app.route('/api/health')

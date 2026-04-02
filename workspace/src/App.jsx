@@ -5,6 +5,7 @@ import Login from './pages/Login'
 import Register from './pages/Register'
 import Dashboard from './pages/Dashboard'
 import Referrals from './pages/Referrals'
+import ProviderDirectory from './pages/ProviderDirectory'
 import CareRecord from './pages/CareRecord'
 import CareTeam from './pages/CareTeam'
 import Messages from './pages/Messages'
@@ -45,6 +46,7 @@ function App() {
           >
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="referrals" element={<Referrals />} />
+            <Route path="providers" element={<ProviderDirectory />} />
             <Route path="care-record" element={<CareRecord />} />
             <Route path="care-team" element={<CareTeam />} />
             <Route path="messages" element={<Messages />} />

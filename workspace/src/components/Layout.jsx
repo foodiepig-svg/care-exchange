@@ -11,12 +11,14 @@ import {
   Menu,
   X,
   ShieldCheck,
-  Paperclip
+  Paperclip,
+  Search
 } from 'lucide-react'
 import { api } from '../services/api'
 
 const navItems = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+  { to: '/providers', icon: Search, label: 'Find Providers', roles: ['participant'] },
   { to: '/referrals', icon: FileText, label: 'Referrals', roles: ['participant', 'coordinator', 'provider'] },
   { to: '/care-record', icon: ShieldCheck, label: 'Care Record', roles: ['participant', 'family'] },
   { to: '/care-team', icon: Users, label: 'Care Team', roles: ['participant', 'family'] },

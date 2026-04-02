@@ -1,5 +1,6 @@
 services:
   - name: care-exchange
+    type: docker
     dockerfilePath: ./Dockerfile
     envVars:
       - key: FLASK_ENV

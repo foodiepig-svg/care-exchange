@@ -23,7 +23,7 @@ ENV PYTHONUNBUFFERED=1
 ENV FLASK_ENV=production
 ENV STATIC_ROOT=/app/dist
 ENV FLASK_APP=backend/app.py
-ENV DATABASE_URL=postgresql://vendue_db_user:xSC9skfpDz7KrNOlfOFfp632eLrfOJ5j@dpg-d74fnrp4tr6s73coe66g-a.oregon-postgres.render.com/vendue_db?sslmode=require
+ENV DATABASE_URL=postgresql://hermes_user:GyxI3gudu78nfDOha18KR3cZmtZGUJE9@dpg-d74fnrp4tr6s73coe66g-a.oregon-postgres.render.com/vendeu_db?sslmode=require
 
 EXPOSE 8000
 

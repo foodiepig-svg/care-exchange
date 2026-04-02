@@ -94,7 +94,21 @@ def create_app():
             print(f"ERROR reading index.html: {e}", flush=True)
             return f"Error: {e}", 500
 
-    @app.route('/<path:path>')
+    
+
+    @app.route('/api/debug/import_test', methods=['POST'])
+    def debug_import_test():
+        try:
+            # Step 1: imports
+            from routes.auth import auth_bp
+            from models import User, Participant
+            return {'step': 'imports_ok'}
+        except Exception as e:
+            import traceback
+            return {'step': 'imports_fail', 'error': str(e), 'tb': traceback.format_exc()[-500:]}, 500
+
+
+@app.route('/<path:path>')
     def serve_spa(path):
         # Don't intercept API routes — let them 404 so the API handlers work
         if path.startswith('api/') or path.startswith('debug'):

@@ -171,3 +171,15 @@ def debug_insert():
             import traceback
             return {"step": "error", "message": str(e), "tb": traceback.format_exc()[-500:]}, 500
 
+
+
+# Global error handler to return JSON for 500 errors
+@app.errorhandler(500)
+def handle_500(e):
+    import traceback
+    return {'error': 'Internal server error', 'message': str(e), 'traceback': traceback.format_exc()[-1000:]}, 500
+
+@app.errorhandler(Exception)
+def handle_exception(e):
+    import traceback
+    return {'error': 'Unhandled exception', 'message': str(e), 'traceback': traceback.format_exc()[-1000:]}, 500

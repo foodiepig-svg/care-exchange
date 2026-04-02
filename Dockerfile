@@ -21,7 +21,7 @@ COPY backend/ .
 ENV PYTHONPATH=/app
 ENV PYTHONUNBUFFERED=1
 ENV FLASK_ENV=production
-ENV STATIC_ROOT=/app/dist
+ENV STATIC_ROOT=/app/workspace/dist
 ENV FLASK_APP=app.py
 
 EXPOSE 10000

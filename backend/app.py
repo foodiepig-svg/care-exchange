@@ -114,15 +114,14 @@ def create_app():
     @app.route('/assets/<path:filename>')
     def serve_assets(filename):
         import mimetypes
-        try:
-            filepath = os.path.join(_static_dir, 'assets', filename)
-            mime_type, _ = mimetypes.guess_type(filepath)
-            if not mime_type:
-                mime_type = 'application/octet-stream'
-            with open(filepath, 'r') as f:
-                return f.read(), 200, {'Content-Type': mime_type}
-        except Exception as e:
-            print(f"ERROR reading asset {filename}: {e}", flush=True)
-            return f"Error: {e}", 500
+        import os
+        filepath = os.path.join(_static_dir, 'assets', filename)
+        if not os.path.isfile(filepath):
+            return {'error': 'Not found'}, 404
+        mime_type, _ = mimetypes.guess_type(filepath)
+        if not mime_type:
+            mime_type = 'application/octet-stream'
+        with open(filepath, 'r') as f:
+            return f.read(), 200, {'Content-Type': mime_type}
 
     return app

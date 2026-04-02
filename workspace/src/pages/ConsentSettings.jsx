@@ -27,7 +27,7 @@ export default function ConsentSettings() {
 
   async function loadConsents() {
     try {
-      const res = await api.get('/api/v1/consents')
+      const res = await api.get('/consents')
       setConsents(res.data.consents || [])
     } catch (err) {
       console.error('Failed to load consents', err)
@@ -48,7 +48,7 @@ export default function ConsentSettings() {
       }
       if (form.expires_at) payload.expires_at = form.expires_at
 
-        const res = await api.post('/api/v1/consents', payload)
+        const res = await api.post('/consents', payload)
         setConsents(prev => [res.data.consent, ...prev])
       setShowForm(false)
       setForm({ granted_to_id: '', data_categories: [], expires_at: '' })

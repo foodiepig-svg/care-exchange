@@ -45,7 +45,7 @@ export default function Notifications() {
 
   async function loadNotifications() {
     try {
-      const res = await api.get('/api/v1/notifications')
+      const res = await api.get('/notifications')
       setNotifications(res.data.notifications || [])
       setUnreadCount(res.data.unread_count || 0)
     } catch (err) {
@@ -57,7 +57,7 @@ export default function Notifications() {
 
   async function markAsRead(id, link) {
     try {
-      await api.patch(`/api/v1/notifications/${id}/read`)
+      await api.patch(`/notifications/${id}/read`)
       setNotifications(prev =>
         prev.map(n => n.id === id ? { ...n, read: true } : n)
       )
@@ -70,7 +70,7 @@ export default function Notifications() {
 
   async function markAllRead() {
     try {
-      await api.post('/api/v1/notifications/read-all')
+      await api.post('/notifications/read-all')
       setNotifications(prev => prev.map(n => ({ ...n, read: true })))
       setUnreadCount(0)
     } catch (err) {

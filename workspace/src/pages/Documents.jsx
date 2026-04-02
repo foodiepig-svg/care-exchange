@@ -56,7 +56,7 @@ export default function Documents() {
 
   async function loadDocuments() {
     try {
-      const res = await api.get('/api/v1/documents')
+      const res = await api.get('/documents')
       setDocuments(res.data.documents || [])
     } catch (err) {
       console.error('Failed to load documents', err)
@@ -77,7 +77,7 @@ export default function Documents() {
     if (form.description) formData.append('description', form.description)
 
     try {
-      const res = await api.post('/api/v1/documents', formData, {
+      const res = await api.post('/documents', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       })
       setDocuments(prev => [res.data.document || { ...form, id: Date.now() }, ...prev])
@@ -92,7 +92,7 @@ export default function Documents() {
 
   async function handleDelete(id) {
     try {
-      await api.delete(`/api/v1/documents/${id}`)
+      await api.delete(`/documents/${id}`)
       setDocuments(prev => prev.filter(d => d.id !== id))
       setDeleteId(null)
     } catch (err) {

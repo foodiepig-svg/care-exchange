@@ -94,22 +94,7 @@ def create_app():
             print(f"ERROR reading index.html: {e}", flush=True)
             return f"Error: {e}", 500
 
-    
-
-    @app.route('/api/debug/fix_schema', methods=['POST'])
-    def fix_schema():
-        """Temporarily add missing columns to users table"""
-        try:
-            from sqlalchemy import text
-            db.session.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_token VARCHAR(255)"))
-            db.session.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_token_expires_at TIMESTAMP"))
-            db.session.commit()
-            return {'status': 'columns added'}
-        except Exception as e:
-            db.session.rollback()
-            return {'error': str(e)}, 500
-
-@app.route('/<path:path>')
+    @app.route('/<path:path>')
     def serve_spa(path):
         # Don't intercept API routes — let them 404 so the API handlers work
         if path.startswith('api/') or path.startswith('debug'):

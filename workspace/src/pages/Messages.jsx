@@ -58,7 +58,7 @@ export default function Messages() {
   const fetchThreads = async () => {
     try {
       const res = await api.get('/messages/threads')
-      setThreads(res.data || [])
+      setThreads(res.data?.threads || [])
     } catch (err) {
       console.error('Failed to fetch threads:', err)
     } finally {
@@ -86,8 +86,11 @@ export default function Messages() {
         participant_id: newThread.participant_id,
         content: newThread.content
       })
-      setThreads(prev => [res.data, ...prev])
-      setSelectedThread(res.data)
+      const newThreadObj = res.data?.thread
+      if (newThreadObj) {
+        setThreads(prev => [newThreadObj, ...prev])
+        setSelectedThread(newThreadObj)
+      }
       setShowNewThread(false)
       setNewThread({ topic: '', participant_id: '', content: '' })
       setShowMobileThread(true)
@@ -107,7 +110,10 @@ export default function Messages() {
       const res = await api.post(`/messages/threads/${selectedThread.id}`, {
         content: sendingMessage
       })
-      setThreadMessages(prev => [...prev, res.data])
+      const newMsg = res.data?.message
+      if (newMsg) {
+        setThreadMessages(prev => [...prev, newMsg])
+      }
       setSendingMessage('')
     } catch (err) {
       console.error('Failed to send message:', err)

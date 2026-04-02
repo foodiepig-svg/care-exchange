@@ -9,7 +9,7 @@
 #   render blueprint apply render.yaml
 
 services:
-  # ── Web App (Docker) ───────────────────────────────────────────────────────
+  # Web App (Docker)
   - name: care-exchange
     plan: free
     type: web
@@ -44,7 +44,7 @@ services:
     #     name: CARE_EXCHANGE_ADMIN_EMAIL
     #     value: admin@example.com
 
-  # ── (Optional) Background Worker for async tasks ──────────────────────────
+  # Optional: Background Worker for async tasks
   # Uncomment if you add Celery or similar later:
   #
   # - name: care-exchange-worker

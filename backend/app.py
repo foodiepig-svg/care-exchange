@@ -123,17 +123,4 @@ def create_app():
             print(f"ERROR reading asset {filename}: {e}", flush=True)
             return f"Error: {e}", 500
 
-    @app.route('/api/debug/fix_schema', methods=['POST'])
-    def fix_schema():
-        """Add missing columns to users table"""
-        try:
-            from sqlalchemy import text
-            db.session.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_token VARCHAR(255)"))
-            db.session.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_token_expires_at TIMESTAMP"))
-            db.session.commit()
-            return {'status': 'columns added'}
-        except Exception as e:
-            db.session.rollback()
-            return {'error': str(e)}, 500
-
     return app

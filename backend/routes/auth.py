@@ -171,3 +171,21 @@ def reset_password():
     db.session.commit()
 
     return jsonify({'message': 'Password has been reset successfully'}), 200
+
+
+# DEBUG
+@auth_bp.route('/debug/provider_create', methods=['POST'])
+@jwt_required()
+def debug_provider_create():
+    user_id = int(get_jwt_identity())
+    from models import Provider
+    from app import db
+    try:
+        p = Provider(user_id=user_id, organisation_name='Debug Org')
+        db.session.add(p)
+        db.session.commit()
+        return {'ok': True, 'provider_id': p.id}
+    except Exception as e:
+        import traceback
+        db.session.rollback()
+        return {'error': str(e), 'tb': traceback.format_exc()}, 500

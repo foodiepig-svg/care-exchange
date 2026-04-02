@@ -123,4 +123,19 @@ def create_app():
             print(f"ERROR reading asset {filename}: {e}", flush=True)
             return f"Error: {e}", 500
 
+    @app.route('/api/debug/tables2', methods=['GET'])
+    def debug_tables2():
+        try:
+            from sqlalchemy import text, inspect
+            inspector = inspect(db.engine)
+            tables = inspector.get_table_names()
+            result = {}
+            for t in tables:
+                cols = [c['name'] for c in inspector.get_columns(t)]
+                result[t] = cols
+            return result
+        except Exception as e:
+            import traceback
+            return {'error': str(e), 'tb': traceback.format_exc()[-500:]}, 500
+
     return app

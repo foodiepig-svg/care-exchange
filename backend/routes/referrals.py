@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify, abort
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app import db
-from models import User, Referral, Participant, Provider
+from models import User, Referral, Participant, Provider, Update, Message, Thread
 import secrets
 from datetime import datetime
 
@@ -113,3 +113,54 @@ def get_referral_by_token(token):
     if not referral:
         return jsonify({'error': 'Referral not found or link has expired'}), 404
     return jsonify({'referral': referral.to_dict()})
+
+
+@referrals_bp.route('/<int:referral_id>/timeline', methods=['GET'])
+@jwt_required()
+def get_referral_timeline(referral_id):
+    referral = db.session.get(Referral, referral_id) or abort(404)
+    user_id = int(get_jwt_identity())
+    user = db.session.get(User, user_id)
+
+    # Build timeline from status changes and updates
+    timeline = []
+    if referral.sent_at:
+        timeline.append({'type': 'status', 'status': 'sent', 'at': referral.sent_at.isoformat(), 'label': 'Referral sent'})
+    if referral.responded_at:
+        timeline.append({'type': 'status', 'status': referral.status, 'at': referral.responded_at.isoformat(), 'label': f'Responded ({referral.status})'})
+    if referral.completed_at:
+        timeline.append({'type': 'status', 'status': 'completed', 'at': referral.completed_at.isoformat(), 'label': 'Referral completed'})
+
+    # Add updates
+    updates = Update.query.filter_by(referral_id=referral_id).order_by(Update.created_at.asc()).all()
+    for u in updates:
+        timeline.append({'type': 'update', 'at': u.created_at.isoformat(), 'summary': u.summary, 'category': u.category})
+
+    # Add messages count
+    threads = Thread.query.filter_by(participant_id=referral.participant_id).all()
+    timeline.append({'type': 'messages', 'count': sum(len(t.messages) for t in threads)})
+
+    timeline.sort(key=lambda x: x.get('at', ''))
+    return jsonify({'timeline': timeline})
+
+
+@referrals_bp.route('/<int:referral_id>/messages', methods=['GET'])
+@jwt_required()
+def get_referral_messages(referral_id):
+    referral = db.session.get(Referral, referral_id) or abort(404)
+    threads = Thread.query.filter_by(participant_id=referral.participant_id).all()
+    result = []
+    for t in threads:
+        msgs = Message.query.filter_by(thread_id=t.id).order_by(Message.sent_at.asc()).all()
+        t_dict = t.to_dict()
+        t_dict['messages'] = [m.to_dict() for m in msgs]
+        result.append(t_dict)
+    return jsonify({'threads': result})
+
+
+@referrals_bp.route('/<int:referral_id>/updates', methods=['GET'])
+@jwt_required()
+def get_referral_updates(referral_id):
+    referral = db.session.get(Referral, referral_id) or abort(404)
+    updates = Update.query.filter_by(referral_id=referral_id).order_by(Update.created_at.desc()).all()
+    return jsonify({'updates': [u.to_dict() for u in updates]})

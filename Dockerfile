@@ -22,7 +22,8 @@ ENV PYTHONPATH=/app
 ENV PYTHONUNBUFFERED=1
 ENV FLASK_ENV=production
 ENV STATIC_ROOT=/app/dist
-ENV DATABASE_URL=postgresql://vendue_db_user:xSC9skfpDz7KrNOlfOFfp632eLrfOJ5j@dpg-d74fnrp4tr6s73coe66g-a.oregon-postgres.render.com/vendue_db?sslmode=require
+ENV FLASK_APP=backend/app.py
+ENV DATABASE_URL=postgresql://vendue_db_user:***@dpg-d74fnrp4tr6s73coe66g-a.oregon-postgres.render.com/vendue_db?sslmode=require
 
 EXPOSE 8000
 
@@ -36,5 +37,5 @@ RUN npm run build
 # Copy content files for the content API
 COPY workspace/public/content/ /app/content/
 
-# Single-process gunicorn: serves Flask API + static files via WhiteNoise
-CMD ["sh", "-c", "gunicorn --bind 0.0.0.0:${PORT:-8000} --workers 1 --timeout 300 --log-level info --access-logfile - --error-logfile - wsgi:app"]
+# Run migrations then start gunicorn
+CMD ["sh", "-c", "flask db upgrade && gunicorn --bind 0.0.0.0:${PORT:-8000} --workers 1 --timeout 300 --log-level info --access-logfile - --error-logfile - wsgi:app"]

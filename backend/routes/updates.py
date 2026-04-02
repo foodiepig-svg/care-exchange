@@ -53,10 +53,18 @@ def list_updates():
     if referral_id:
         updates = Update.query.filter_by(referral_id=referral_id).order_by(Update.created_at.desc()).all()
     else:
-        updates = Update.query.join(Referral).filter(
-            (Referral.participant_id == user.participant.id) |
-            (Referral.provider_id == user.provider.id if user.role == 'provider' else False)
-        ).order_by(Update.created_at.desc()).all() if user.role in ('participant', 'provider') else []
+        participant = Participant.query.filter_by(user_id=user_id).first()
+        provider = Provider.query.filter_by(user_id=user_id).first()
+        if user.role == 'participant' and participant:
+            updates = Update.query.join(Referral).filter(
+                Referral.participant_id == participant.id
+            ).order_by(Update.created_at.desc()).all()
+        elif user.role == 'provider' and provider:
+            updates = Update.query.join(Referral).filter(
+                Referral.provider_id == provider.id
+            ).order_by(Update.created_at.desc()).all()
+        else:
+            updates = []
 
     return jsonify({'updates': [u.to_dict() for u in updates]})
 

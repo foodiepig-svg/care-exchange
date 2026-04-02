@@ -21,11 +21,23 @@ def create_referral():
 
     participant_id = data.get('participant_id')
     provider_id = data.get('provider_id')
+    provider_email = data.get('provider_email')
     referral_reason = data.get('referral_reason', '')
     urgency = data.get('urgency', 'normal')
 
-    if not participant_id or not provider_id:
-        return jsonify({'error': 'participant_id and provider_id are required'}), 400
+    if not participant_id:
+        return jsonify({'error': 'participant_id is required'}), 400
+
+    if not provider_id and provider_email:
+        provider_user = User.query.filter_by(email=provider_email, role='provider').first()
+        if not provider_user:
+            return jsonify({'error': 'Provider not found'}), 404
+        provider = Provider.query.filter_by(user_id=provider_user.id).first()
+        if not provider:
+            return jsonify({'error': 'Provider profile not found'}), 404
+        provider_id = provider.id
+    elif not provider_id:
+        return jsonify({'error': 'provider_id or provider_email is required'}), 400
 
     referral = Referral(
         participant_id=participant_id,

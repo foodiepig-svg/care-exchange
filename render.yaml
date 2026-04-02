@@ -16,7 +16,6 @@ services:
     dockerfilePath: ./Dockerfile
     healthCheckPath: /health
     # Pull port from Dockerfile EXPOSE (10000)
-    internalPort: 10000
 
     envVars:
       - key: FLASK_ENV

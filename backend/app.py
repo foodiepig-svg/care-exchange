@@ -131,6 +131,23 @@ def create_app():
 def debug_test():
     return {'status': 'works'}
 
+
+
+@app.route('/api/debug/insert', methods=['POST'])
+def debug_insert():
+    from models.user import User
+    try:
+        # Try to create a simple user
+        u = User(email='inserter@test.com', full_name='Insert Test', role='participant')
+        u.set_password('testpass123')
+        db.session.add(u)
+        db.session.commit()
+        return {'success': True, 'id': u.id}
+    except Exception as e:
+        db.session.rollback()
+        import traceback
+        return {'error': str(e), 'tb': traceback.format_exc()[-1000:]}, 500
+
 @app.route('/api/debug/register', methods=['GET', 'POST'])
     def debug_register():
         from routes.auth import User

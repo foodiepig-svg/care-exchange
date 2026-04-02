@@ -125,7 +125,13 @@ def create_app():
 
     return app
 
-    @app.route('/api/debug/register', methods=['GET', 'POST'])
+    
+
+@app.route('/api/debug/test', methods=['GET', 'POST'])
+def debug_test():
+    return {'status': 'works'}
+
+@app.route('/api/debug/register', methods=['GET', 'POST'])
     def debug_register():
         from routes.auth import User
         from models import Participant

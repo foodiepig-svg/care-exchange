@@ -42,6 +42,7 @@ def create_app():
     from routes.documents import documents_bp
     from routes.consents import consents_bp
     from routes.content import content_bp
+    from routes.providers import providers_bp
 
     app.register_blueprint(auth_bp, url_prefix='/api/v1/auth')
     app.register_blueprint(participants_bp, url_prefix='/api/v1/participants')

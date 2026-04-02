@@ -1,5 +1,6 @@
-import { Outlet, NavLink } from 'react-router-dom'
+import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { useEffect, useState } from 'react'
 import {
   LayoutDashboard,
   Users,
@@ -9,9 +10,10 @@ import {
   LogOut,
   Menu,
   X,
-  ShieldCheck
+  ShieldCheck,
+  Paperclip
 } from 'lucide-react'
-import { useState } from 'react'
+import { api } from '../services/api'
 
 const navItems = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
@@ -20,11 +22,22 @@ const navItems = [
   { to: '/care-team', icon: Users, label: 'Care Team', roles: ['participant', 'family'] },
   { to: '/updates', icon: FileText, label: 'Updates', roles: ['provider', 'coordinator'] },
   { to: '/messages', icon: MessageSquare, label: 'Messages' },
+  { to: '/notifications', icon: Bell, label: 'Notifications' },
+  { to: '/documents', icon: Paperclip, label: 'Documents', roles: ['participant', 'family'] },
+  { to: '/consent', icon: ShieldCheck, label: 'Consent', roles: ['participant', 'family'] },
 ]
 
 export default function Layout() {
   const { user, logout } = useAuth()
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [notifCount, setNotifCount] = useState(0)
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    api.get('/api/v1/notifications/unread-count')
+      .then(res => setNotifCount(res.data.unread_count || 0))
+      .catch(() => {})
+  }, [])
 
   const filteredNav = navItems.filter(item =>
     !item.roles || item.roles.includes(user?.role)
@@ -106,9 +119,16 @@ export default function Layout() {
             </button>
             <div className="hidden lg:block" />
             <div className="flex items-center gap-3">
-              <button className="relative p-2 text-slate-500 hover:text-slate-700">
+              <button
+                onClick={() => navigate('/notifications')}
+                className="relative p-2 text-slate-500 hover:text-slate-700"
+              >
                 <Bell size={20} />
-                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" />
+                {notifCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
+                    {notifCount > 9 ? '9+' : notifCount}
+                  </span>
+                )}
               </button>
             </div>
           </div>

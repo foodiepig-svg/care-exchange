@@ -23,6 +23,8 @@ class Config:
 
 class DevelopmentConfig(Config):
     DEBUG = True
+    # Don't use Postgres-specific connect_args when running with SQLite
+    SQLALCHEMY_ENGINE_OPTIONS = {}
 
 
 class ProductionConfig(Config):

@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, abort
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app import db
 from models import Update, Referral, User
@@ -12,7 +12,7 @@ VALID_CATEGORIES = ['progress_note', 'incident', 'medication_change', 'goal_upda
 @jwt_required()
 def create_update():
     user_id = int(get_jwt_identity())
-    user = User.query.get(user_id)
+    user = db.session.get(User, user_id)
     data = request.get_json()
 
     referral_id = data.get('referral_id')
@@ -47,7 +47,7 @@ def create_update():
 @jwt_required()
 def list_updates():
     user_id = int(get_jwt_identity())
-    user = User.query.get(user_id)
+    user = db.session.get(User, user_id)
     referral_id = request.args.get('referral_id', type=int)
 
     if referral_id:
@@ -64,5 +64,5 @@ def list_updates():
 @updates_bp.route('/<int:update_id>', methods=['GET'])
 @jwt_required()
 def get_update(update_id):
-    update = Update.query.get_or_404(update_id)
+    update = db.session.get(Update, update_id) or abort(404)
     return jsonify({'update': update.to_dict()})

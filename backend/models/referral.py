@@ -29,6 +29,7 @@ class Referral(db.Model):
             'provider_id': self.provider_id,
             'coordinator_id': self.coordinator_id,
             'status': self.status,
+            'referral_link_token': self.referral_link_token,
             'referral_reason': self.referral_reason,
             'urgency': self.urgency,
             'notes': self.notes,

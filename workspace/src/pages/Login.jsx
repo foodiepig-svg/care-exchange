@@ -83,12 +83,14 @@ export default function Login() {
             </button>
           </form>
 
-          <p className="text-center text-sm text-slate-500 mt-6">
-            Don't have an account?{' '}
-            <Link to="/register" className="text-primary font-medium hover:underline">
-              Create one
+          <div className="flex items-center justify-between text-sm">
+            <Link to="/forgot-password" className="text-primary font-medium hover:underline">
+              Forgot password?
             </Link>
-          </p>
+            <Link to="/register" className="text-slate-500 hover:text-slate-700">
+              Create account
+            </Link>
+          </div>
         </div>
       </div>
     </div>

@@ -9,6 +9,11 @@ import CareRecord from './pages/CareRecord'
 import CareTeam from './pages/CareTeam'
 import Messages from './pages/Messages'
 import Updates from './pages/Updates'
+import Notifications from './pages/Notifications'
+import Documents from './pages/Documents'
+import ConsentSettings from './pages/ConsentSettings'
+import ForgotPassword from './pages/ForgotPassword'
+import ResetPassword from './pages/ResetPassword'
 import Layout from './components/Layout'
 
 function ProtectedRoute({ children }) {
@@ -25,6 +30,8 @@ function App() {
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/app/dashboard" element={<Navigate to="/dashboard" replace />} />
 
           {/* Protected routes — all under /app/* */}
@@ -42,6 +49,9 @@ function App() {
             <Route path="care-team" element={<CareTeam />} />
             <Route path="messages" element={<Messages />} />
             <Route path="updates" element={<Updates />} />
+            <Route path="notifications" element={<Notifications />} />
+            <Route path="documents" element={<Documents />} />
+            <Route path="consent" element={<ConsentSettings />} />
           </Route>
 
           {/* Fallback protected routes at root */}

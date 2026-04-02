@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, abort
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app import db
 from models import Thread, Message, User
@@ -40,14 +40,17 @@ def create_thread():
     db.session.add(msg)
     db.session.commit()
 
-    return jsonify({'thread': thread.to_dict()}), 201
+    msgs = Message.query.filter_by(thread_id=thread.id).order_by(Message.sent_at).all()
+    thread_dict = thread.to_dict()
+    thread_dict['messages'] = [m.to_dict() for m in msgs]
+    return jsonify({'thread': thread_dict}), 201
 
 
 @messages_bp.route('/threads/<int:thread_id>', methods=['GET'])
 @jwt_required()
 def get_thread(thread_id):
-    thread = Thread.query.get_or_404(thread_id)
-    messages = Message.query.filter_by(thread_id=thread_id).order_by(Message.created_at).all()
+    thread = db.session.get(Thread, thread_id) or abort(404)
+    messages = Message.query.filter_by(thread_id=thread_id).order_by(Message.sent_at).all()
     return jsonify({
         'thread': thread.to_dict(),
         'messages': [m.to_dict() for m in messages]

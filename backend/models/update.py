@@ -15,6 +15,9 @@ class Update(db.Model):
     time_spent_minutes = db.Column(db.Integer, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+    # Relationships
+    author = db.relationship('User', backref='updates', lazy=True)
+
     def to_dict(self):
         return {
             'id': self.id,

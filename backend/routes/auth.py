@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity
 from app import db
@@ -107,7 +108,61 @@ def refresh():
 @jwt_required()
 def me():
     user_id = int(get_jwt_identity())
-    user = User.query.get(user_id)
+    user = db.session.get(User, user_id)
     if not user:
         return jsonify({'error': 'User not found'}), 404
     return jsonify({'user': user.to_dict()})
+
+
+@auth_bp.route('/forgot-password', methods=['POST'])
+def forgot_password():
+    """Request a password reset email."""
+    data = request.get_json()
+    email = data.get('email', '').strip().lower()
+    if not email:
+        return jsonify({'error': 'Email is required'}), 400
+
+    user = User.query.filter_by(email=email).first()
+    if user:
+        # Generate a secure reset token (in production, send email)
+        import secrets, hashlib
+        token = secrets.token_urlsafe(32)
+        user.reset_token = hashlib.sha256(token.encode()).hexdigest()
+        user.reset_token_expires_at = datetime.utcnow() + timedelta(hours=1)
+        db.session.commit()
+        # In production: send email with reset link
+        # For now, we return the token in the response for testing
+        print(f"[DEV] Password reset token for {email}: {token}", flush=True)
+
+    # Always return 200 to prevent email enumeration
+    return jsonify({'message': 'If that email exists, a reset link has been sent'}), 200
+
+
+@auth_bp.route('/reset-password', methods=['POST'])
+def reset_password():
+    """Reset password using a token."""
+    data = request.get_json()
+    token = data.get('token', '').strip()
+    new_password = data.get('new_password', '')
+
+    if not token or not new_password:
+        return jsonify({'error': 'token and new_password are required'}), 400
+
+    if len(new_password) < 8:
+        return jsonify({'error': 'Password must be at least 8 characters'}), 400
+
+    import hashlib
+    token_hash = hashlib.sha256(token.encode()).hexdigest()
+    user = User.query.filter_by(reset_token=token_hash).first()
+    if not user:
+        return jsonify({'error': 'Invalid or expired token'}), 400
+
+    if user.reset_token_expires_at and user.reset_token_expires_at < datetime.utcnow():
+        return jsonify({'error': 'Token has expired'}), 400
+
+    user.set_password(new_password)
+    user.reset_token = None
+    user.reset_token_expires_at = None
+    db.session.commit()
+
+    return jsonify({'message': 'Password has been reset successfully'}), 200

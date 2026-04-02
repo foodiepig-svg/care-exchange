@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, abort
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app import db
 from models import User, Referral, Participant, Provider
@@ -16,7 +16,7 @@ def generate_referral_token():
 @jwt_required()
 def create_referral():
     user_id = int(get_jwt_identity())
-    user = User.query.get(user_id)
+    user = db.session.get(User, user_id)
     data = request.get_json()
 
     participant_id = data.get('participant_id')
@@ -47,7 +47,7 @@ def create_referral():
 @jwt_required()
 def list_referrals():
     user_id = int(get_jwt_identity())
-    user = User.query.get(user_id)
+    user = db.session.get(User, user_id)
 
     if user.role == 'participant':
         participant = Participant.query.filter_by(user_id=user_id).first()
@@ -66,14 +66,14 @@ def list_referrals():
 @referrals_bp.route('/<int:referral_id>', methods=['GET'])
 @jwt_required()
 def get_referral(referral_id):
-    referral = Referral.query.get_or_404(referral_id)
+    referral = db.session.get(Referral, referral_id) or abort(404)
     return jsonify({'referral': referral.to_dict()})
 
 
 @referrals_bp.route('/<int:referral_id>/status', methods=['PUT'])
 @jwt_required()
 def update_status(referral_id):
-    referral = Referral.query.get_or_404(referral_id)
+    referral = db.session.get(Referral, referral_id) or abort(404)
     data = request.get_json()
     new_status = data.get('status')
 

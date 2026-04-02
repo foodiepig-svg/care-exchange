@@ -28,7 +28,13 @@ export function AuthProvider({ children }) {
   }
 
   const register = async (data) => {
-    const res = await api.post('/auth/register', data)
+    // Backend expects organisation_name for providers, not organisation
+    const payload = { ...data }
+    if (data.role === 'provider' && payload.organisation) {
+      payload.organisation_name = payload.organisation
+      delete payload.organisation
+    }
+    const res = await api.post('/auth/register', payload)
     localStorage.setItem('access_token', res.data.access_token)
     localStorage.setItem('refresh_token', res.data.refresh_token)
     setUser(res.data.user)

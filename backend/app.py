@@ -36,12 +36,24 @@ def create_app():
     from routes.referrals import referrals_bp
     from routes.updates import updates_bp
     from routes.messages import messages_bp
+    from routes.goals import goals_bp
+    from routes.care_plans import care_plans_bp
+    from routes.notifications import notifications_bp
+    from routes.documents import documents_bp
+    from routes.consents import consents_bp
+    from routes.content import content_bp
 
     app.register_blueprint(auth_bp, url_prefix='/api/v1/auth')
     app.register_blueprint(participants_bp, url_prefix='/api/v1/participants')
     app.register_blueprint(referrals_bp, url_prefix='/api/v1/referrals')
     app.register_blueprint(updates_bp, url_prefix='/api/v1/updates')
     app.register_blueprint(messages_bp, url_prefix='/api/v1/messages')
+    app.register_blueprint(goals_bp, url_prefix='/api/v1/goals')
+    app.register_blueprint(care_plans_bp, url_prefix='/api/v1/care-plans')
+    app.register_blueprint(notifications_bp, url_prefix='/api/v1/notifications')
+    app.register_blueprint(documents_bp, url_prefix='/api/v1/documents')
+    app.register_blueprint(consents_bp, url_prefix='/api/v1/consents')
+    app.register_blueprint(content_bp, url_prefix='/api/v1/content')
 
     # Health check - must be before Whitenoise wraps wsgi_app
     @app.route('/api/health')

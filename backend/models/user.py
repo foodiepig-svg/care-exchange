@@ -15,13 +15,16 @@ class User(db.Model):
     verified_at = db.Column(db.DateTime, nullable=True)
     is_active = db.Column(db.Boolean, default=True)
 
+    # Password reset fields
+    reset_token = db.Column(db.String(64), nullable=True, index=True)
+    reset_token_expires_at = db.Column(db.DateTime, nullable=True)
+
     # Relationships
     participant = db.relationship('Participant', backref='user', uselist=False, lazy=True)
     provider = db.relationship('Provider', backref='user', uselist=False, lazy=True)
     coordinator = db.relationship('Coordinator', backref='user', uselist=False, lazy=True)
 
     def set_password(self, password):
-        # Use pbkdf2:sha256 method for compatibility with Python 3.9 (no scrypt on macOS)
         self.password_hash = generate_password_hash(password, method='pbkdf2:sha256')
 
     def check_password(self, password):

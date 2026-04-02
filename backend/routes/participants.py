@@ -10,7 +10,7 @@ participants_bp = Blueprint('participants', __name__)
 @jwt_required()
 def get_me():
     user_id = int(get_jwt_identity())
-    user = User.query.get(user_id)
+    user = db.session.get(User, user_id)
 
     if not user:
         return jsonify({'error': 'User not found'}), 404
@@ -30,7 +30,7 @@ def get_me():
 def update_me():
     user_id = int(get_jwt_identity())
     data = request.get_json()
-    user = User.query.get(user_id)
+    user = db.session.get(User, user_id)
 
     if 'full_name' in data:
         user.full_name = data['full_name']
@@ -56,7 +56,7 @@ def update_me():
 @jwt_required()
 def care_team():
     user_id = int(get_jwt_identity())
-    user = User.query.get(user_id)
+    user = db.session.get(User, user_id)
 
     if user.role == 'participant':
         participant = Participant.query.filter_by(user_id=user_id).first()
@@ -93,7 +93,7 @@ def care_team():
 @jwt_required()
 def grant_consent():
     user_id = int(get_jwt_identity())
-    user = User.query.get(user_id)
+    user = db.session.get(User, user_id)
 
     if user.role != 'participant':
         return jsonify({'error': 'Only participants can grant consent'}), 403

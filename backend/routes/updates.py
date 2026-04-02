@@ -1,7 +1,8 @@
 from flask import Blueprint, request, jsonify, abort
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app import db
-from models import Update, Referral, User
+from models import Update, Referral, User, Participant, Provider
+from sqlalchemy.orm import joinedload
 
 updates_bp = Blueprint('updates', __name__)
 
@@ -51,16 +52,16 @@ def list_updates():
     referral_id = request.args.get('referral_id', type=int)
 
     if referral_id:
-        updates = Update.query.filter_by(referral_id=referral_id).order_by(Update.created_at.desc()).all()
+        updates = Update.query.options(joinedload(Update.author)).filter_by(referral_id=referral_id).order_by(Update.created_at.desc()).all()
     else:
         participant = Participant.query.filter_by(user_id=user_id).first()
         provider = Provider.query.filter_by(user_id=user_id).first()
         if user.role == 'participant' and participant:
-            updates = Update.query.join(Referral).filter(
+            updates = Update.query.options(joinedload(Update.author)).join(Referral).filter(
                 Referral.participant_id == participant.id
             ).order_by(Update.created_at.desc()).all()
         elif user.role == 'provider' and provider:
-            updates = Update.query.join(Referral).filter(
+            updates = Update.query.options(joinedload(Update.author)).join(Referral).filter(
                 Referral.provider_id == provider.id
             ).order_by(Update.created_at.desc()).all()
         else:

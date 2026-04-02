@@ -22,8 +22,8 @@ ENV PYTHONPATH=/app
 ENV PYTHONUNBUFFERED=1
 ENV FLASK_ENV=production
 ENV STATIC_ROOT=/app/dist
-ENV FLASK_APP=backend/app.py
-ENV DATABASE_URL=postgresql://hermes_user:GyxI3gudu78nfDOha18KR3cZmtZGUJE9@dpg-d74fnrp4tr6s73coe66g-a.oregon-postgres.render.com/vendue_db?sslmode=require
+ENV FLASK_APP=app.py
+ENV DATABASE_URL=postgresql://hermes_user:***@dpg-d74fnrp4tr6s73coe66g-a.oregon-postgres.render.com/vendue_db?sslmode=require
 
 EXPOSE 10000
 
@@ -37,5 +37,5 @@ RUN npm run build
 # Copy content files for the content API
 COPY workspace/public/content/ /app/content/
 
-# Run migrations then start gunicorn
-CMD ["sh", "-c", "FLASK_APP=backend/app.py flask db upgrade && gunicorn --bind 0.0.0.0:${PORT:-8000} --workers 1 --timeout 300 --log-level info --access-logfile - --error-logfile - wsgi:app"]
+# Clean pycache, run migrations, then start gunicorn
+CMD ["sh", "-c", "find /app -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null; find /app -name '*.pyc' -delete 2>/dev/null; FLASK_APP=app.py flask db upgrade && gunicorn --bind 0.0.0.0:${PORT:-8000} --workers 1 --timeout 300 --log-level info --access-logfile - --error-logfile - wsgi:app"]

@@ -9,12 +9,6 @@ auth_bp = Blueprint('auth', __name__)
 
 VALID_ROLES = ['participant', 'family', 'provider', 'coordinator']
 
-@auth_bp.errorhandler(Exception)
-def handle_auth_error(e):
-    import traceback
-    return {'error': 'Internal error', 'details': str(e), 'trace': traceback.format_exc()[-800:]}, 500
-
-
 
 def validate_email(email):
     return bool(re.match(r'^[\w\.-]+@[\w\.-]+\.\w+$', email))
@@ -49,26 +43,26 @@ def register():
         user.set_password(password)
         db.session.add(user)
         db.session.flush()
-
-        # Create role-specific profile
-        if role == 'participant':
-            p = Participant(user_id=user.id)
-            db.session.add(p)
-        elif role == 'provider':
-            org_name = data.get('organisation_name', '')
-            abn = data.get('abn', '')
-            p = Provider(user_id=user.id, organisation_name=org_name or full_name, abn=abn)
-            db.session.add(p)
-        elif role == 'coordinator':
-            org = data.get('organisation', '')
-            c = Coordinator(user_id=user.id, full_name=full_name, organisation=org)
-            db.session.add(c)
-
-        db.session.commit()
     except Exception as e:
         import traceback
         db.session.rollback()
-        return {'error': f'DB error: {str(e)}', 'tb': traceback.format_exc()[-1000:]}, 500
+        return {'error': f'DB error creating user: {str(e)}', 'tb': traceback.format_exc()[-500:]}, 500
+
+    # Create role-specific profile
+    if role == 'participant':
+        p = Participant(user_id=user.id)
+        db.session.add(p)
+    elif role == 'provider':
+        org_name = data.get('organisation_name', '')
+        abn = data.get('abn', '')
+        p = Provider(user_id=user.id, organisation_name=org_name or full_name, abn=abn)
+        db.session.add(p)
+    elif role == 'coordinator':
+        org = data.get('organisation', '')
+        c = Coordinator(user_id=user.id, full_name=full_name, organisation=org)
+        db.session.add(c)
+
+    db.session.commit()
 
     access_token = create_access_token(identity=str(user.id))
     refresh_token = create_refresh_token(identity=str(user.id))

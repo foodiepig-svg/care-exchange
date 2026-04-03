@@ -172,36 +172,47 @@ def create_app():
 
     @app.route('/api/debug/email', methods=['POST'])
     def debug_email():
-        """Check Resend email configuration and test sending."""
+        """Test Elastic Email send and return diagnostics."""
         from flask import request
-        from services.email_service import EmailService, _get_resend_client
-        resend_client = _get_resend_client()
-        resend_key_set = bool(os.environ.get('RESEND_API_KEY', ''))
+        from services.email_service import _get_elasticemail_api_key, EmailService
+        import urllib.request
+        import urllib.parse
         email = (request.get_json() or {}).get('email', 'sunjay.soma@gmail.com')
-        import resend as resend_lib
+        api_key = _get_elasticemail_api_key()
+        key_set = bool(api_key)
 
-        # Try different sender addresses to find one that works
-        senders = [
-            "onboarding@resend.workers.dev",
-            "verify@resend.workers.dev",
-            "no-reply@resend.dev",
-        ]
-        results = {}
-        for sender in senders:
+        # Direct Elastic Email API test
+        direct_result = None
+        direct_error = None
+        if api_key:
+            test_html = f"<p>Test email at {__import__('datetime').datetime.utcnow()}</p>"
+            data = urllib.parse.urlencode({
+                "apikey": api_key,
+                "from": "noreply@careexchange.com.au",
+                "fromName": "Care Exchange",
+                "to": email,
+                "subject": "Elastic Email Direct Test",
+                "bodyhtml": test_html,
+                "isTransactional": "true",
+            }).encode("utf-8")
+            req = urllib.request.Request(
+                "https://api.elasticemail.com/v2/email/send",
+                data=data,
+                headers={"Content-Type": "application/x-www-form-urlencoded"},
+            )
             try:
-                result = resend_lib.Emails.send({
-                    "from": sender,
-                    "to": email,
-                    "subject": f"Test from {sender}",
-                    "html": f"<p>Testing sender: {sender}</p>"
-                })
-                results[sender] = {'success': True, 'result': str(result)}
+                with urllib.request.urlopen(req, timeout=15) as resp:
+                    direct_result = resp.read().decode("utf-8")
+            except urllib.error.HTTPError as e:
+                direct_error = f"HTTP {e.code}: {e.read().decode('utf-8')}"
             except Exception as e:
-                results[sender] = {'success': False, 'error': str(e)}
+                direct_error = str(e)
+
         return {
-            'resend_client': resend_client is not None,
-            'resend_key_in_env': resend_key_set,
-            'sender_results': results,
+            'elasticemail_key_set': key_set,
+            'from_email': 'noreply@careexchange.com.au',
+            'direct_result': direct_result,
+            'direct_error': direct_error,
             'test_email': email,
         }
 

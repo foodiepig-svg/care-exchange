@@ -26,12 +26,17 @@ ENV FLASK_APP=app.py
 
 EXPOSE 10000
 
-# Build React frontend in the same container
-COPY workspace/package.json workspace/package-lock.json* ./
-RUN npm ci --silent 2>/dev/null || npm install --silent 2>/dev/null
+# Build React frontend
+COPY workspace/package.json workspace/package-lock.json ./workspace/
+WORKDIR /app/workspace
+RUN npm ci
 
-COPY workspace/ ./
+WORKDIR /app
+COPY workspace/ ./workspace/
+WORKDIR /app/workspace
 RUN npm run build
+
+WORKDIR /app
 
 # Copy content files for the content API
 COPY workspace/public/content/ /app/content/

@@ -45,7 +45,7 @@ def _resolve_participant_id(user_id, data):
 def list_care_plans():
     user_id = int(get_jwt_identity())
     user = db.session.get(User, user_id)
-    data = request.get_json() or {}
+    data = request.get_json(silent=True) or {}
     participant_id = _resolve_participant_id(user_id, data)
 
     if not participant_id:

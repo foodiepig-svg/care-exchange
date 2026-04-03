@@ -307,7 +307,7 @@ def debug_verify_email():
         return {'error': 'Not available in production'}, 403
     from models import User
     from app import db
-    data = request.get_json()
+    data = request.get_json(silent=True) or {}
     email = data.get('email')
     if not email:
         return {'error': 'email required'}, 400

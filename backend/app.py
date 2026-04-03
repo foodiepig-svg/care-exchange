@@ -113,6 +113,31 @@ def create_app():
         except Exception as e:
             return {'migrated': False, 'error': str(e)}, 500
 
+    @app.route('/api/debug/add_email_cols', methods=['POST'])
+    def debug_add_email_cols():
+        """Add email_verified and related columns to users table."""
+        from sqlalchemy import text
+        try:
+            conn = db.engine.connect()
+            # Check which columns exist
+            inspector = db.inspect(db.engine)
+            user_cols = {c['name'] for c in inspector.get_columns('users')}
+            added = []
+            if 'email_verified' not in user_cols:
+                conn.execute(text('ALTER TABLE users ADD COLUMN email_verified BOOLEAN DEFAULT FALSE'))
+                added.append('email_verified')
+            if 'verification_token' not in user_cols:
+                conn.execute(text('ALTER TABLE users ADD COLUMN verification_token VARCHAR(64)'))
+                added.append('verification_token')
+            if 'verification_token_expires' not in user_cols:
+                conn.execute(text('ALTER TABLE users ADD COLUMN verification_token_expires TIMESTAMP'))
+                added.append('verification_token_expires')
+            conn.commit()
+            return {'ok': True, 'added': added}
+        except Exception as e:
+            import traceback
+            return {'error': str(e), 'trace': traceback.format_exc()}, 500
+
     @app.route('/api/debug/provider_create', methods=['POST'])
     def debug_create_provider():
         from models import User, Provider

@@ -168,6 +168,18 @@ def create_app():
             db.session.rollback()
             return {'ok': False, 'error': str(e)}, 500
 
+    @app.route('/api/debug/users_columns')
+    def debug_users_columns():
+        try:
+            result = db.session.execute(db.text("""
+                SELECT column_name FROM information_schema.columns
+                WHERE table_name='users' AND table_schema='public'
+                ORDER BY ordinal_position
+            """)).fetchall()
+            return {'columns': [r[0] for r in result]}
+        except Exception as e:
+            return {'error': str(e)}, 500
+
     @app.route('/api/debug/tables')
     def debug_tables():
         try:

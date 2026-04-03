@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { ShieldCheck, Mail, Lock, User } from 'lucide-react'
+import { ShieldCheck, Mail, Lock, User, CheckCircle } from 'lucide-react'
 
 const ROLES = [
   { value: 'participant', label: 'Participant', desc: 'I have an NDIS plan' },
@@ -13,6 +13,8 @@ export default function Register() {
   const [form, setForm] = useState({ full_name: '', email: '', password: '', role: '', organisation: '', abn: '' })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [registered, setRegistered] = useState(false)
+  const [registeredEmail, setRegisteredEmail] = useState('')
   const { register } = useAuth()
   const navigate = useNavigate()
 
@@ -25,12 +27,75 @@ export default function Register() {
     setLoading(true)
     try {
       await register(form)
-      navigate('/dashboard')
+      // After successful registration, show verification message
+      // Don't auto-login - user must verify email first
+      setRegisteredEmail(form.email)
+      setRegistered(true)
     } catch (err) {
       setError(err.response?.data?.error || 'Registration failed')
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleResendVerification = async () => {
+    setError('')
+    setLoading(true)
+    try {
+      const { api } = await import('../services/api')
+      await api.post('/auth/resend-verification', { email: registeredEmail })
+      setError('')
+      alert('Verification email sent! Please check your inbox.')
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to resend verification email')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Show success state after registration
+  if (registered) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <div className="w-full max-w-md">
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-green-100 mb-4">
+              <CheckCircle size={28} className="text-green-600" />
+            </div>
+            <h1 className="text-2xl font-bold text-slate-900">Check Your Email</h1>
+            <p className="text-slate-500 mt-1">We've sent a verification link to</p>
+            <p className="text-primary font-medium mt-1">{registeredEmail}</p>
+          </div>
+
+          <div className="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm">
+            <div className="text-center space-y-4">
+              <p className="text-sm text-slate-600">
+                Please click the link in your email to verify your account. The link expires in 24 hours.
+              </p>
+              
+              {error && (
+                <div className="bg-red-50 border border-red-100 text-red-700 text-sm rounded-lg px-4 py-3">
+                  {error}
+                </div>
+              )}
+
+              <button
+                onClick={handleResendVerification}
+                disabled={loading}
+                className="w-full py-2.5 bg-primary text-white rounded-lg font-medium text-sm hover:bg-primary-dark transition-colors disabled:opacity-50"
+              >
+                {loading ? 'Sending...' : 'Resend Verification Email'}
+              </button>
+
+              <p className="text-sm text-slate-500 pt-4">
+                Already verified?{' '}
+                <Link to="/login" className="text-primary font-medium hover:underline">Sign in</Link>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (

@@ -37,29 +37,37 @@ def client(app):
 
 @pytest.fixture
 def auth_headers(app, client):
-    """Register and login a test participant, return headers dict with Bearer token."""
-    res = client.post('/api/v1/auth/register', json={
-        'email': 'testuser@example.com',
-        'password': 'password123',
-        'full_name': 'Test User',
-        'role': 'participant'
-    })
-    data = res.get_json()
-    token = data.get('access_token', '')
-    return {'Authorization': f'Bearer {token}', '_cv_app': app}
+    """Create a verified test participant directly in DB, return headers dict with Bearer token."""
+    with app.app_context():
+        from models import User, Participant
+        from flask_jwt_extended import create_access_token
+        user = User(email='testuser@example.com', full_name='Test User', role='participant')
+        user.set_password('password123')
+        user.email_verified = True  # Mark as verified for testing
+        user.verified_at = db.func.now()
+        db.session.add(user)
+        db.session.flush()
+        p = Participant(user_id=user.id)
+        db.session.add(p)
+        db.session.commit()
+        token = create_access_token(identity=str(user.id))
+        return {'Authorization': f'Bearer {token}', '_cv_app': app}
 
 
 @pytest.fixture
 def auth_headers_provider(app, client):
-    """Register and login a test provider, return headers dict with Bearer token."""
-    res = client.post('/api/v1/auth/register', json={
-        'email': 'provider@example.com',
-        'password': 'password123',
-        'full_name': 'Test Provider',
-        'role': 'provider',
-        'organisation_name': 'Test Org',
-        'abn': '12345678901'
-    })
-    data = res.get_json()
-    token = data.get('access_token', '')
-    return {'Authorization': f'Bearer {token}'}
+    """Create a verified test provider directly in DB, return headers dict with Bearer token."""
+    with app.app_context():
+        from models import User, Provider
+        from flask_jwt_extended import create_access_token
+        user = User(email='provider@example.com', full_name='Test Provider', role='provider')
+        user.set_password('password123')
+        user.email_verified = True  # Mark as verified for testing
+        user.verified_at = db.func.now()
+        db.session.add(user)
+        db.session.flush()
+        p = Provider(user_id=user.id, organisation_name='Test Org', abn='12345678901')
+        db.session.add(p)
+        db.session.commit()
+        token = create_access_token(identity=str(user.id))
+        return {'Authorization': f'Bearer {token}', '_cv_app': app}

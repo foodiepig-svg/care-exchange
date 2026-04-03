@@ -23,10 +23,10 @@ def test_register_valid(client):
     })
     assert res.status_code == 201
     data = res.get_json()
-    assert 'access_token' in data
-    assert 'refresh_token' in data
-    assert data['user']['email'] == 'newuser@example.com'
-    assert data['user']['role'] == 'participant'
+    # Registration no longer returns tokens - user must verify email first
+    assert 'message' in data
+    assert data['requires_verification'] == True
+    assert data['email'] == 'newuser@example.com'
 
 def test_register_invalid_email(client):
     res = client.post(f'{BASE_URL}/auth/register', json={
@@ -81,7 +81,9 @@ def test_register_all_roles(client):
             'role': role
         })
         assert res.status_code == 201, f'Role {role} failed: {res.get_json()}'
-        assert res.get_json()['user']['role'] == role
+        data = res.get_json()
+        # Registration no longer returns user object - just confirmation
+        assert data['requires_verification'] == True
 
 def test_register_invalid_role(client):
     res = client.post(f'{BASE_URL}/auth/register', json={
@@ -95,7 +97,7 @@ def test_register_invalid_role(client):
 # -----------------------------------------------------------------
 # Auth: Login
 # -----------------------------------------------------------------
-def test_login_valid_credentials(client):
+def test_login_valid_credentials(client, app):
     # Register first
     client.post(f'{BASE_URL}/auth/register', json={
         'email': 'login@example.com',
@@ -103,6 +105,14 @@ def test_login_valid_credentials(client):
         'full_name': 'Login User',
         'role': 'participant'
     })
+    # Verify the user's email
+    with app.app_context():
+        from models import User
+        user = User.query.filter_by(email='login@example.com').first()
+        user.email_verified = True
+        user.verified_at = db.func.now()
+        db.session.commit()
+    # Now login should work
     res = client.post(f'{BASE_URL}/auth/login', json={
         'email': 'login@example.com',
         'password': 'password123'

@@ -16,8 +16,13 @@ class User(db.Model):
     is_active = db.Column(db.Boolean, default=True)
 
     # Password reset fields
-    reset_token = db.Column(db.String(64), nullable=True, index=True)
-    reset_token_expires_at = db.Column(db.DateTime, nullable=True)
+    reset_token=db.Column(db.String(64), nullable=True, index=True)
+    reset_token_expires_at=db.Column(db.DateTime, nullable=True)
+
+    # Email verification fields
+    email_verified = db.Column(db.Boolean, default=False)
+    verification_token = db.Column(db.String(64), nullable=True, index=True)
+    verification_token_expires = db.Column(db.DateTime, nullable=True)
 
     # Relationships
     participant = db.relationship('Participant', backref='user', uselist=False, lazy=True)

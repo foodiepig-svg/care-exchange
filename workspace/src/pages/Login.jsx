@@ -1,25 +1,48 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { ShieldCheck, Mail, Lock } from 'lucide-react'
+import { ShieldCheck, Mail, Lock, AlertCircle } from 'lucide-react'
 
 export default function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [showResend, setShowResend] = useState(false)
   const { login } = useAuth()
   const navigate = useNavigate()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
+    setShowResend(false)
     setLoading(true)
     try {
       await login(email, password)
       navigate('/dashboard')
     } catch (err) {
-      setError(err.response?.data?.error || 'Login failed')
+      const data = err.response?.data
+      if (data?.email_not_verified) {
+        setError('Email not verified. Please check your inbox for the verification link.')
+        setShowResend(true)
+      } else {
+        setError(data?.error || 'Login failed')
+      }
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleResendVerification = async () => {
+    setError('')
+    setLoading(true)
+    try {
+      const { api } = await import('../services/api')
+      await api.post('/auth/resend-verification', { email })
+      alert('Verification email sent! Please check your inbox.')
+      setShowResend(false)
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to resend verification email')
     } finally {
       setLoading(false)
     }
@@ -39,9 +62,21 @@ export default function Login() {
         <div className="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm">
           <form onSubmit={handleSubmit} className="space-y-5">
             {error && (
-              <div className="bg-red-50 border border-red-100 text-red-700 text-sm rounded-lg px-4 py-3">
-                {error}
+              <div className="bg-red-50 border border-red-100 text-red-700 text-sm rounded-lg px-4 py-3 flex items-start gap-2">
+                <AlertCircle size={16} className="mt-0.5 flex-shrink-0" />
+                <span>{error}</span>
               </div>
+            )}
+
+            {showResend && (
+              <button
+                type="button"
+                onClick={handleResendVerification}
+                disabled={loading}
+                className="w-full py-2.5 bg-blue-50 border border-blue-100 text-blue-700 rounded-lg font-medium text-sm hover:bg-blue-100 transition-colors disabled:opacity-50"
+              >
+                Resend Verification Email
+              </button>
             )}
 
             <div>

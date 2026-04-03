@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app import db
 from models import Notification
+from services.notification_service import NotificationService
 
 notifications_bp = Blueprint('notifications', __name__)
 
@@ -59,3 +60,24 @@ def delete_notification(notification_id):
     db.session.delete(n)
     db.session.commit()
     return jsonify({'message': 'Notification deleted'})
+
+
+@notifications_bp.route('/send_test', methods=['POST'])
+def send_test_email():
+    """Test endpoint for sending an email notification.
+
+    Expects JSON: {"to_email": "...", "subject": "...", "body": "..."}
+    """
+    data = request.get_json() or {}
+    to_email = data.get('to_email')
+    subject = data.get('subject', 'Test Email from Care Exchange')
+    body = data.get('body', 'This is a test email from Care Exchange.')
+
+    if not to_email:
+        return jsonify({'error': 'to_email is required'}), 400
+
+    success = NotificationService.send_email_notification(to_email, subject, body)
+    return jsonify({
+        'success': success,
+        'message': f'Test email sent to {to_email}' if success else 'Failed to send email'
+    })

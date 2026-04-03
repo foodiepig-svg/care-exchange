@@ -4,6 +4,7 @@ from flask_jwt_extended import create_access_token, create_refresh_token, jwt_re
 from app import db
 from models import User, Participant, Provider, Coordinator
 import re
+import secrets
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -41,6 +42,12 @@ def register():
     try:
         user = User(email=email, full_name=full_name, role=role)
         user.set_password(password)
+        
+        # Generate email verification token (24 hour expiry)
+        user.verification_token = secrets.token_urlsafe(32)
+        user.verification_token_expires = datetime.utcnow() + timedelta(hours=24)
+        user.email_verified = False
+        
         db.session.add(user)
         db.session.flush()
     except Exception as e:
@@ -64,14 +71,81 @@ def register():
 
     db.session.commit()
 
-    access_token = create_access_token(identity=str(user.id))
-    refresh_token = create_refresh_token(identity=str(user.id))
+    # Send verification email
+    try:
+        from services.email_service import EmailService
+        EmailService.send_verification_email(user)
+    except Exception as e:
+        print(f"[WARN] Failed to send verification email: {e}", flush=True)
+        # Don't fail registration if email fails
 
+    # NOTE: We do NOT auto-login unverified users
+    # Frontend should show "Check your email to verify your account" message
     return jsonify({
-        'user': user.to_dict(),
-        'access_token': access_token,
-        'refresh_token': refresh_token
+        'message': 'Registration successful. Please check your email to verify your account.',
+        'email': user.email,
+        'requires_verification': True
     }), 201
+
+
+@auth_bp.route('/verify/<token>', methods=['GET'])
+def verify_email(token):
+    """Verify email address using token from verification email."""
+    user = User.query.filter_by(verification_token=token).first()
+    
+    if not user:
+        return jsonify({'error': 'Invalid verification token'}), 400
+    
+    if user.email_verified:
+        return jsonify({'message': 'Email already verified. You can log in.'}), 200
+    
+    if user.verification_token_expires and user.verification_token_expires < datetime.utcnow():
+        return jsonify({'error': 'Verification token has expired. Please request a new one.'}), 400
+    
+    # Mark email as verified
+    user.email_verified = True
+    user.verified_at = datetime.utcnow()
+    user.verification_token = None
+    user.verification_token_expires = None
+    db.session.commit()
+    
+    return jsonify({
+        'message': 'Email verified successfully! You can now log in.',
+        'email_verified': True
+    }), 200
+
+
+@auth_bp.route('/resend-verification', methods=['POST'])
+def resend_verification():
+    """Resend verification email for unverified users."""
+    data = request.get_json()
+    email = data.get('email', '').strip().lower()
+    
+    if not email:
+        return jsonify({'error': 'Email is required'}), 400
+    
+    user = User.query.filter_by(email=email).first()
+    
+    if not user:
+        # Always return success to prevent email enumeration
+        return jsonify({'message': 'If that email exists and is unverified, a verification email has been sent'}), 200
+    
+    if user.email_verified:
+        return jsonify({'message': 'This email is already verified. You can log in.'}), 200
+    
+    # Generate new verification token
+    user.verification_token = secrets.token_urlsafe(32)
+    user.verification_token_expires = datetime.utcnow() + timedelta(hours=24)
+    db.session.commit()
+    
+    try:
+        from services.email_service import EmailService
+        EmailService.send_verification_email(user)
+    except Exception as e:
+        print(f"[WARN] Failed to resend verification email: {e}", flush=True)
+        return jsonify({'error': 'Failed to send verification email. Please try again.'}), 500
+    
+    return jsonify({'message': 'Verification email sent. Please check your inbox.'}), 200
 
 
 @auth_bp.route('/login', methods=['POST'])
@@ -90,6 +164,13 @@ def login():
 
     if not user.is_active:
         return jsonify({'error': 'Account is deactivated'}), 403
+
+    # Check if email is verified
+    if not user.email_verified:
+        return jsonify({
+            'error': 'Email not verified. Please check your inbox for the verification link, or request a new one.',
+            'email_not_verified': True
+        }), 403
 
     access_token = create_access_token(identity=str(user.id))
     refresh_token = create_refresh_token(identity=str(user.id))
@@ -116,6 +197,9 @@ def me():
     user = db.session.get(User, user_id)
     if not user:
         return jsonify({'error': 'User not found'}), 404
+    # NOTE: For sensitive endpoints, you may want to require email verification:
+    # if not user.email_verified:
+    #     return jsonify({'error': 'Email not verified', 'email_verified': False}), 403
     return jsonify({'user': user.to_dict()})
 
 
@@ -130,7 +214,7 @@ def forgot_password():
     user = User.query.filter_by(email=email).first()
     if user:
         # Generate a secure reset token (in production, send email)
-        import secrets, hashlib
+        import hashlib
         token = secrets.token_urlsafe(32)
         user.reset_token = hashlib.sha256(token.encode()).hexdigest()
         user.reset_token_expires_at = datetime.utcnow() + timedelta(hours=1)
@@ -214,3 +298,24 @@ def debug_test_provider():
     except Exception as e:
         db.session.rollback()
         return {'error': str(e), 'type': type(e).__name__, 'tb': traceback.format_exc()}, 500
+
+
+@auth_bp.route('/debug/verify_email', methods=['POST'])
+def debug_verify_email():
+    """Test-only: mark a user's email as verified without clicking the link."""
+    if os.environ.get('FLASK_ENV') == 'production':
+        return {'error': 'Not available in production'}, 403
+    from models import User
+    from app import db
+    data = request.get_json()
+    email = data.get('email')
+    if not email:
+        return {'error': 'email required'}, 400
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        return {'error': 'User not found'}, 404
+    user.email_verified = True
+    user.verification_token = None
+    user.verification_token_expires = None
+    db.session.commit()
+    return {'ok': True, 'email': email}

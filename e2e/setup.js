@@ -25,6 +25,11 @@ async function main() {
   await api('POST', '/v1/auth/register', { email: COORD_EMAIL, password: PASS, full_name: 'Casey E2E', role: 'coordinator' })
   await api('POST', '/v1/auth/register', { email: PROVIDER_EMAIL, password: PASS, full_name: 'Pat E2E', role: 'provider' })
 
+  // Verify all users' emails (required since email verification was added)
+  await api('POST', '/v1/auth/debug/verify_email', { email: PART_EMAIL })
+  await api('POST', '/v1/auth/debug/verify_email', { email: COORD_EMAIL })
+  await api('POST', '/v1/auth/debug/verify_email', { email: PROVIDER_EMAIL })
+
   const p_token = await getToken(PART_EMAIL)
   const c_token = await getToken(COORD_EMAIL)
   const pr_token = await getToken(PROVIDER_EMAIL)

@@ -2,14 +2,10 @@ from flask import Blueprint, request, jsonify, abort
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app import db
 from models import User, Referral, Participant, Provider, Update, Message, Thread
-import secrets
+from services.referral_service import ReferralService
 from datetime import datetime
 
 referrals_bp = Blueprint('referrals', __name__)
-
-
-def generate_referral_token():
-    return secrets.token_urlsafe(32)
 
 
 @referrals_bp.route('', methods=['POST'])
@@ -45,12 +41,16 @@ def create_referral():
         coordinator_id=user.coordinator.id if user.role == 'coordinator' and user.coordinator else None,
         referral_reason=referral_reason,
         urgency=urgency,
-        referral_link_token=generate_referral_token(),
         status='sent',
         sent_at=datetime.utcnow()
     )
     db.session.add(referral)
+    db.session.flush()  # Get the referral ID before generating link
+    referral.referral_link_token = ReferralService.generate_referral_link(referral.id) or ''
     db.session.commit()
+
+    # Send notification to provider
+    ReferralService.send_referral_notification(referral)
 
     return jsonify({'referral': referral.to_dict()}), 201
 
@@ -109,9 +109,10 @@ def update_status(referral_id):
 
 @referrals_bp.route('/link/<token>', methods=['GET'])
 def get_referral_by_token(token):
-    referral = Referral.query.filter_by(referral_link_token=token).first()
-    if not referral:
-        return jsonify({'error': 'Referral not found or link has expired'}), 404
+    is_valid, result = ReferralService.validate_referral_token(token)
+    if not is_valid:
+        return jsonify({'error': result}), 404
+    referral = result
     return jsonify({'referral': referral.to_dict()})
 
 

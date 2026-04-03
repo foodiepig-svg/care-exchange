@@ -5,6 +5,7 @@ import Login from './pages/Login'
 import Register from './pages/Register'
 import Dashboard from './pages/Dashboard'
 import CoordinatorDashboard from './pages/CoordinatorDashboard'
+import CoordinatorReferrals from './pages/CoordinatorReferrals'
 import Referrals from './pages/Referrals'
 import ProviderDirectory from './pages/ProviderDirectory'
 import ProviderReceivedReferrals from './pages/ProviderReceivedReferrals'
@@ -17,6 +18,7 @@ import Notifications from './pages/Notifications'
 import Documents from './pages/Documents'
 import ConsentSettings from './pages/ConsentSettings'
 import ProviderSendUpdates from './pages/ProviderSendUpdates'
+import ProviderDashboard from './pages/ProviderDashboard'
 import CoordinatorParticipants from './pages/CoordinatorParticipants'
 import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
@@ -54,6 +56,7 @@ function App() {
             <Route path="referrals" element={<Referrals />} />
             <Route path="providers" element={<ProviderDirectory />} />
             <Route path="provider/referrals/received" element={<ProviderReceivedReferrals />} />
+            <Route path="provider" element={<ProviderDashboard />} />
             <Route path="care-record" element={<CareRecord />} />
             <Route path="care-team" element={<CareTeam />} />
             <Route path="messages" element={<Messages />} />
@@ -62,6 +65,7 @@ function App() {
             <Route path="documents" element={<Documents />} />
             <Route path="consent" element={<ConsentSettings />} />
             <Route path="coordinator/participants" element={<CoordinatorParticipants />} />
+            <Route path="coordinator/referrals" element={<CoordinatorReferrals />} />
           </Route>
 
           {/* Root-level routes — all protected, all use Layout */}

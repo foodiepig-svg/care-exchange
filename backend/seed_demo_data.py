@@ -90,8 +90,8 @@ def create_demo_data(app, db):
                 email=acct["email"],
                 full_name=acct["full_name"],
                 role=acct["role"],
-                phone=acct.get("phone"),
-                verified=True,
+                email_verified=True,
+                verified_at=datetime.utcnow(),
                 verification_token=None,
             )
             user.set_password(acct["password"])

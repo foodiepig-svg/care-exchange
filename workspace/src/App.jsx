@@ -23,6 +23,10 @@ import CoordinatorParticipants from './pages/CoordinatorParticipants'
 import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
 import AdminDashboard from './pages/AdminDashboard'
+import ParticipantLanding from './pages/ParticipantLanding'
+import ProviderLanding from './pages/ProviderLanding'
+import CoordinatorLanding from './pages/CoordinatorLanding'
+import FamilyLanding from './pages/FamilyLanding'
 import AdminUsers from './pages/AdminUsers'
 import AdminSettings from './pages/AdminSettings'
 import Layout from './components/Layout'
@@ -52,6 +56,12 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/app/dashboard" element={<Navigate to="/dashboard" replace />} />
+
+          {/* Role-specific landing pages */}
+          <Route path="/participant" element={<ParticipantLanding />} />
+          <Route path="/provider" element={<ProviderLanding />} />
+          <Route path="/coordinator" element={<CoordinatorLanding />} />
+          <Route path="/family" element={<FamilyLanding />} />
 
           {/* Protected routes — all under /app/* */}
           <Route

@@ -87,6 +87,7 @@ const roles = [
     desc: 'People with disabilities who control their own care record, grants consent, sends referrals, and tracks goals.',
     cta: 'Create your account',
     href: '/register',
+    learnMoreHref: '/participant',
     highlight: true,
   },
   {
@@ -95,6 +96,7 @@ const roles = [
     desc: 'Family members with delegated access to view updates, track progress, and stay connected with the care team.',
     cta: 'Join a participant',
     href: '/register',
+    learnMoreHref: '/family',
     highlight: false,
   },
   {
@@ -103,6 +105,7 @@ const roles = [
     desc: 'Service providers who receive referrals, submit structured updates, and coordinate with the care team.',
     cta: 'Register your organisation',
     href: '/register',
+    learnMoreHref: '/provider',
     highlight: false,
   },
   {
@@ -111,6 +114,7 @@ const roles = [
     desc: 'Support Coordinators managing multiple participants — track referrals, monitor progress, and coordinate care.',
     cta: 'Create coordinator account',
     href: '/register',
+    learnMoreHref: '/coordinator',
     highlight: false,
   },
 ]
@@ -509,16 +513,24 @@ export default function LandingPage() {
                     )}
                   </div>
                   <p className="text-slate-500 text-sm leading-relaxed mb-5">{desc}</p>
-                  <Link
-                    to={href}
-                    className={`inline-flex items-center gap-1.5 text-sm font-semibold transition-colors ${
-                      highlight
-                        ? 'text-teal-700 hover:text-teal-900'
-                        : 'text-slate-600 hover:text-teal-600'
-                    }`}
-                  >
-                    {cta} <ArrowUpRight size={14} />
-                  </Link>
+                  <div className="flex flex-wrap gap-4">
+                    <Link
+                      to={href}
+                      className={`inline-flex items-center gap-1.5 text-sm font-semibold transition-colors ${
+                        highlight
+                          ? 'text-teal-700 hover:text-teal-900'
+                          : 'text-slate-600 hover:text-teal-600'
+                      }`}
+                    >
+                      {cta} <ArrowUpRight size={14} />
+                    </Link>
+                    <Link
+                      to={learnMoreHref}
+                      className="inline-flex items-center gap-1 text-sm text-slate-400 hover:text-slate-600 transition-colors"
+                    >
+                      Learn more →
+                    </Link>
+                  </div>
                 </div>
               ))}
             </div>

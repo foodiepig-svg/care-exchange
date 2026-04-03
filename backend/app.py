@@ -358,6 +358,34 @@ def create_app():
         except Exception as e:
             return {'error': str(e), 'trace': traceback.format_exc()}, 500
 
+    @app.route('/api/debug/create-admin', methods=['POST'])
+    def debug_create_admin():
+        """Create an admin account directly. For testing. Remove after use."""
+        import traceback
+        try:
+            from models.user import User
+            from werkzeug.security import generate_password_hash
+            data = request.get_json() or {}
+            email = data.get('email', '').strip().lower()
+            password = data.get('password', 'admin123')
+            full_name = data.get('name', 'Admin')
+            if not email:
+                return {'error': 'email required'}, 400
+            if User.query.filter_by(email=email).first():
+                return {'error': 'User already exists'}, 409
+            user = User(
+                email=email,
+                password_hash=generate_password_hash(password),
+                full_name=full_name,
+                role='admin',
+                email_verified=True,
+            )
+            db.session.add(user)
+            db.session.commit()
+            return {'success': True, 'user': user.to_dict()}
+        except Exception as e:
+            return {'error': str(e), 'trace': traceback.format_exc()}, 500
+
     @app.route('/api/debug/tables')
     def debug_tables():
         try:

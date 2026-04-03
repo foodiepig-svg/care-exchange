@@ -388,18 +388,60 @@ export default function Messages() {
                               {msg.content && <p className="text-sm whitespace-pre-wrap">{msg.content}</p>}
                               {attachments.length > 0 && (
                                 <div className={`mt-2 space-y-2 ${msg.content ? 'border-t' : ''} ${isOwn ? 'border-primary-300' : 'border-slate-200'} pt-2`}>
-                                  {attachments.map((att, ai) => (
-                                    <div key={ai} className={`flex items-center gap-2 text-xs ${isOwn ? 'text-primary-100' : 'text-slate-600'}`}>
-                                      {att.file_type?.startsWith('image/') ? (
-                                        <img src={att.url} alt={att.filename} className="max-w-[200px] max-h-[200px] rounded" />
-                                      ) : (
-                                        <div className="flex items-center gap-1">
-                                          <FileText size={14} />
-                                          <span>{att.filename}</span>
-                                        </div>
-                                      )}
-                                    </div>
-                                  ))}
+                                  {attachments.map((att, ai) => {
+                                    const isImage = att.file_type?.startsWith('image/')
+                                    const isPdf = att.file_type === 'application/pdf'
+                                    const sizeKB = att.size_bytes ? Math.round(att.size_bytes / 1024) : null
+                                    return (
+                                      <div key={ai} className={`rounded border ${isOwn ? 'bg-primary-700 border-primary-600' : 'bg-white border-slate-200'} shadow-sm overflow-hidden`}>
+                                        {isImage ? (
+                                          <div>
+                                            <a href={att.url} target="_blank" rel="noreferrer" className="block">
+                                              <img src={att.url} alt={att.filename} className="max-w-[240px] max-h-[200px] object-cover hover:opacity-90 transition-opacity" />
+                                            </a>
+                                            <div className={`px-2 py-1 flex items-center justify-between ${isOwn ? 'bg-primary-800' : 'bg-slate-50'}`}>
+                                              <span className={`text-xs truncate max-w-[160px] ${isOwn ? 'text-primary-200' : 'text-slate-500'}`}>{att.filename}</span>
+                                              {sizeKB && <span className={`text-xs ${isOwn ? 'text-primary-300' : 'text-slate-400'}`}>{sizeKB}KB</span>}
+                                            </div>
+                                          </div>
+                                        ) : isPdf ? (
+                                          <div className="flex items-center gap-3 px-3 py-2">
+                                            <div className={`w-10 h-10 rounded flex items-center justify-center flex-shrink-0 ${isOwn ? 'bg-primary-600' : 'bg-red-50'}`}>
+                                              <FileText size={20} className={isOwn ? 'text-white' : 'text-red-500'} />
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                              <p className={`text-sm font-medium truncate ${isOwn ? 'text-white' : 'text-slate-800'}`}>{att.filename}</p>
+                                              {sizeKB && <p className={`text-xs ${isOwn ? 'text-primary-300' : 'text-slate-400'}`}>{sizeKB} KB</p>}
+                                            </div>
+                                            <a
+                                              href={att.url}
+                                              download={att.filename}
+                                              className={`flex-shrink-0 px-3 py-1.5 rounded text-xs font-medium ${isOwn ? 'bg-primary-500 text-white hover:bg-primary-400' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'} transition-colors`}
+                                            >
+                                              Download
+                                            </a>
+                                          </div>
+                                        ) : (
+                                          <div className="flex items-center gap-3 px-3 py-2">
+                                            <div className={`w-10 h-10 rounded flex items-center justify-center flex-shrink-0 ${isOwn ? 'bg-primary-600' : 'bg-slate-100'}`}>
+                                              <FileText size={20} className={isOwn ? 'text-white' : 'text-slate-500'} />
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                              <p className={`text-sm font-medium truncate ${isOwn ? 'text-white' : 'text-slate-800'}`}>{att.filename}</p>
+                                              {sizeKB && <p className={`text-xs ${isOwn ? 'text-primary-300' : 'text-slate-400'}`}>{sizeKB} KB</p>}
+                                            </div>
+                                            <a
+                                              href={att.url}
+                                              download={att.filename}
+                                              className={`flex-shrink-0 px-3 py-1.5 rounded text-xs font-medium ${isOwn ? 'bg-primary-500 text-white hover:bg-primary-400' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'} transition-colors`}
+                                            >
+                                              Download
+                                            </a>
+                                          </div>
+                                        )}
+                                      </div>
+                                    )
+                                  })}
                                 </div>
                               )}
                               <p className={`text-xs mt-1 ${isOwn ? 'text-primary-200' : 'text-slate-400'}`}>
@@ -425,19 +467,24 @@ export default function Messages() {
                     {pendingAttachments.length > 0 && (
                       <div className="flex flex-wrap gap-2 mb-2">
                         {pendingAttachments.map((att, idx) => (
-                          <div key={idx} className="relative flex items-center gap-1 bg-slate-100 rounded px-2 py-1 text-xs">
+                          <div key={idx} className={`relative flex items-center gap-2 rounded border px-2 py-1.5 text-xs max-w-[200px] ${att.preview ? 'bg-slate-50 border-slate-200' : 'bg-slate-50 border-slate-200'}`}>
                             {att.preview ? (
-                              <img src={att.preview} alt={att.filename} className="w-8 h-8 object-cover rounded" />
+                              <img src={att.preview} alt={att.filename} className="w-8 h-8 object-cover rounded flex-shrink-0" />
                             ) : (
-                              <FileText size={12} className="text-slate-500" />
+                              <div className="w-8 h-8 rounded bg-red-50 flex items-center justify-center flex-shrink-0">
+                                <FileText size={14} className="text-red-400" />
+                              </div>
                             )}
-                            <span className="truncate max-w-[100px]">{att.filename}</span>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium text-slate-700 truncate text-xs">{att.filename}</p>
+                              <p className="text-slate-400 text-[10px]">{att.mime_type.split('/')[1]?.toUpperCase() || 'FILE'}</p>
+                            </div>
                             <button
                               type="button"
                               onClick={() => removeAttachment(idx)}
-                              className="ml-1 text-slate-400 hover:text-red-500"
+                              className="flex-shrink-0 text-slate-400 hover:text-red-500 p-0.5 rounded hover:bg-red-50 transition-colors"
                             >
-                              <X size={12} />
+                              <X size={14} />
                             </button>
                           </div>
                         ))}

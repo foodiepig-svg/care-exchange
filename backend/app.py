@@ -183,7 +183,7 @@ def create_app():
         direct_result = None
         direct_error = None
         try:
-            direct_result = resend_lib.emails.send({
+            direct_result = resend_lib.Emails.send({
                 "from": "Care Exchange <onboarding@resend.workers.dev>",
                 "to": email,
                 "subject": "Direct Resend Test",

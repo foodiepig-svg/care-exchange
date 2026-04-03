@@ -1,5 +1,5 @@
 import os
-from flask import Flask, send_from_directory
+from flask import Flask, request, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
@@ -57,7 +57,7 @@ def create_app():
     app.register_blueprint(content_bp, url_prefix='/api/v1/content')
     app.register_blueprint(providers_bp, url_prefix='/api/v1/providers')
 
-    # Health check - must be before Whitenoise wraps wsgi_app
+    # Debug endpoints
     @app.route('/api/debug/migrate', methods=['POST'])
     def debug_migrate():
         from flask_migrate import upgrade
@@ -67,6 +67,49 @@ def create_app():
         except Exception as e:
             return {'migrated': False, 'error': str(e)}, 500
 
+    @app.route('/api/debug/provider_create', methods=['POST'])
+    def debug_create_provider():
+        from models import User, Provider
+        try:
+            data = request.get_json() or {}
+            email = data.get('email', 'test@test.com')
+            org = data.get('organisation_name', 'Test Org')
+            u = User(email=email, full_name='Test', role='provider')
+            u.set_password('Test@123')
+            db.session.add(u)
+            db.session.flush()
+            p = Provider(user_id=u.id, organisation_name=org)
+            db.session.add(p)
+            db.session.flush()
+            db.session.commit()
+            return {'ok': True, 'user_id': u.id, 'provider_id': p.id}
+        except Exception as e:
+            db.session.rollback()
+            import traceback
+            return {'error': str(e), 'type': type(e).__name__, 'tb': traceback.format_exc()}, 500
+
+    @app.route('/api/debug/test_provider', methods=['POST'])
+    def debug_test_provider():
+        from models import User, Provider
+        try:
+            data = request.get_json() or {}
+            email = data.get('email', 'test@test.com')
+            org = data.get('organisation_name', 'Test Org')
+            u = User(email=email, full_name='Test', role='provider')
+            u.set_password('Test@123')
+            db.session.add(u)
+            db.session.flush()
+            p = Provider(user_id=u.id, organisation_name=org)
+            db.session.add(p)
+            db.session.flush()
+            db.session.commit()
+            return {'ok': True, 'user_id': u.id, 'provider_id': p.id}
+        except Exception as e:
+            db.session.rollback()
+            import traceback
+            return {'error': str(e), 'type': type(e).__name__, 'tb': traceback.format_exc()}, 500
+
+    # Health check - must be before Whitenoise wraps wsgi_app
     @app.route('/api/health')
     def health():
         return {'status': 'healthy'}
@@ -92,8 +135,7 @@ def create_app():
     def render_health():
         return {'status': 'healthy'}
 
-    # Serve index.html for SPA fallback - catch-all for React Router routes
-    # All static serving uses STATIC_ROOT env var (set to /app/workspace/dist in Dockerfile)
+    # Serve index.html for SPA fallback
     _static_dir = os.environ.get('STATIC_ROOT', '/app/workspace/dist')
 
     @app.route('/')
@@ -107,11 +149,8 @@ def create_app():
 
     @app.route('/<path:path>')
     def serve_spa(path):
-        # Don't intercept API routes — let them 404 so the API handlers work
         if path.startswith('api/') or path.startswith('debug'):
             return {'error': 'Not found'}, 404
-        print(f"CATCH-ALL HIT: {path}", flush=True)
-        # Read and return index.html directly instead of using send_from_directory
         try:
             with open(os.path.join(_static_dir, 'index.html'), 'r') as f:
                 return f.read(), 200, {'Content-Type': 'text/html'}
@@ -119,11 +158,9 @@ def create_app():
             print(f"ERROR reading index.html: {e}", flush=True)
             return f"Error: {e}", 500
 
-    # Serve static assets via Flask directly
     @app.route('/assets/<path:filename>')
     def serve_assets(filename):
         import mimetypes
-        import os
         filepath = os.path.join(_static_dir, 'assets', filename)
         if not os.path.isfile(filepath):
             return {'error': 'Not found'}, 404
@@ -134,13 +171,3 @@ def create_app():
             return f.read(), 200, {'Content-Type': mime_type}
 
     return app
-
-
-    @app.route('/api/debug/migrate', methods=['POST'])
-    def debug_migrate():
-        from flask_migrate import upgrade
-        try:
-            upgrade()
-            return {'migrated': True}
-        except Exception as e:
-            return {'migrated': False, 'error': str(e)}, 500

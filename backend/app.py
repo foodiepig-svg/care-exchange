@@ -178,15 +178,25 @@ def create_app():
         resend_client = _get_resend_client()
         resend_key_set = bool(os.environ.get('RESEND_API_KEY', ''))
         email = (request.get_json() or {}).get('email', 'sunjay.soma@gmail.com')
-        result = EmailService.send_email(
-            email,
-            "Debug Test",
-            f"<p>Resend client: {resend_client is not None}<br>RESEND_API_KEY env: {resend_key_set}</p>"
-        )
+        # Send via Resend directly to confirm API key works
+        import resend as resend_lib
+        direct_result = None
+        direct_error = None
+        try:
+            direct_result = resend_lib.emails.send({
+                "from": "Care Exchange <onboarding@resend.workers.dev>",
+                "to": email,
+                "subject": "Direct Resend Test",
+                "html": f"<p>Test email from Resend API. Time: {__import__('datetime').datetime.utcnow()}</p>"
+            })
+        except Exception as e:
+            import traceback
+            direct_error = {'error': str(e), 'trace': traceback.format_exc()}
         return {
-            'resend_client_initialized': resend_client is not None,
+            'resend_client': resend_client is not None,
             'resend_key_in_env': resend_key_set,
-            'send_result': result,
+            'direct_send_result': direct_result,
+            'direct_send_error': direct_error,
             'test_email': email,
         }
 

@@ -20,7 +20,7 @@ export default function ProviderParticipantLookup() {
         ? `/participants/me/care-team?search=${encodeURIComponent(query)}`
         : '/participants/me/care-team'
       const res = await api.get(endpoint)
-      setParticipants(res.data?.participants || res.data || [])
+      setParticipants(res.data?.participants || [])
       setError(null)
     } catch (err) {
       setError('Failed to load participants')

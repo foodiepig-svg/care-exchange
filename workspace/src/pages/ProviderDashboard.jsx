@@ -43,9 +43,9 @@ export default function ProviderDashboard() {
           api.get('/messages/threads')
         ])
 
-        const referralsData = referralsRes.data || []
-        const updatesData = updatesRes.data || []
-        const threadsData = threadsRes.data || []
+        const referralsData = referralsRes.data?.referrals || []
+        const updatesData = updatesRes.data?.updates || []
+        const threadsData = threadsRes.data?.threads || []
 
         setReferrals(referralsData)
         setUpdates(updatesData)

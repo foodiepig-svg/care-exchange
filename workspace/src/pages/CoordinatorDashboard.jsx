@@ -36,10 +36,10 @@ export default function CoordinatorDashboard() {
           api.get('/updates'),
           api.get('/messages/threads')
         ])
-        setParticipants(participantsRes.data || [])
-        setReferrals(referralsRes.data || [])
-        setUpdates(updatesRes.data || [])
-        setThreads(threadsRes.data || [])
+        setParticipants(participantsRes.data?.participants || [])
+        setReferrals(referralsRes.data?.referrals || [])
+        setUpdates(updatesRes.data?.updates || [])
+        setThreads(threadsRes.data?.threads || [])
       } catch (err) {
         console.error('Failed to fetch coordinator dashboard data:', err)
       } finally {

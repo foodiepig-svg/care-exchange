@@ -15,7 +15,7 @@ export default function CareTeam() {
   const fetchReferrals = async () => {
     try {
       const res = await api.get('/referrals')
-      setReferrals(res.data || [])
+      setReferrals(res.data?.referrals || [])
     } catch (err) {
       console.error('Failed to fetch referrals:', err)
     } finally {

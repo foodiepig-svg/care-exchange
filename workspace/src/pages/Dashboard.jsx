@@ -32,8 +32,8 @@ export default function Dashboard() {
           api.get('/referrals'),
           api.get('/updates')
         ])
-        setReferrals(referralsRes.data || [])
-        setUpdates(updatesRes.data || [])
+        setReferrals(referralsRes.data?.referrals || [])
+        setUpdates(updatesRes.data?.updates || [])
       } catch (err) {
         console.error('Failed to fetch dashboard data:', err)
       } finally {

@@ -170,6 +170,26 @@ def create_app():
         except Exception as e:
             return {'error': str(e), 'step': 'unknown', 'trace': traceback.format_exc()}, 500
 
+    @app.route('/api/debug/email', methods=['POST'])
+    def debug_email():
+        """Check Resend email configuration and test sending."""
+        from flask import request
+        from services.email_service import EmailService, _get_resend_client
+        resend_client = _get_resend_client()
+        resend_key_set = bool(os.environ.get('RESEND_API_KEY', ''))
+        email = (request.get_json() or {}).get('email', 'sunjay.soma@gmail.com')
+        result = EmailService.send_email(
+            email,
+            "Debug Test",
+            f"<p>Resend client: {resend_client is not None}<br>RESEND_API_KEY env: {resend_key_set}</p>"
+        )
+        return {
+            'resend_client_initialized': resend_client is not None,
+            'resend_key_in_env': resend_key_set,
+            'send_result': result,
+            'test_email': email,
+        }
+
     @app.route('/api/debug/provider_create', methods=['POST'])
     def debug_create_provider():
         from models import User, Provider

@@ -9,6 +9,10 @@ db = SQLAlchemy()
 jwt = JWTManager()
 migrate = Migrate()
 
+# Optional: Resend email API key (used by EmailService)
+# Set RESEND_API_KEY in environment to enable real email delivery
+_resend_api_key = os.environ.get('RESEND_API_KEY')
+
 
 def create_app():
     app = Flask(__name__)

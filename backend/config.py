@@ -19,6 +19,8 @@ class Config:
     JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=7)
     UPLOAD_FOLDER = os.environ.get('UPLOAD_FOLDER', '/tmp/careexchange/uploads')
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB
+    # Resend email API key (optional - emails print to console if not set)
+    RESEND_API_KEY = os.environ.get('RESEND_API_KEY')
 
 
 class DevelopmentConfig(Config):

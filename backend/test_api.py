@@ -235,6 +235,52 @@ def test_messages_create_thread_missing_fields(client, auth_headers):
     assert 'participant_id' in res.get_json()['error'] or 'required' in res.get_json()['error'].lower()
 
 
+def test_messages_create_group_thread(client, auth_headers, auth_headers_provider):
+    """Can create a group thread with multiple participants."""
+    import time
+    # Get participant
+    res = client.get(f'{BASE_URL}/participants/me', headers=auth_headers)
+    participant_id = res.get_json()['participant']['id']
+
+    # Create group thread with provider as additional participant
+    res = client.post(f'{BASE_URL}/messages/threads', headers=auth_headers, json={
+        'topic': 'Group Discussion',
+        'participant_id': participant_id,
+        'thread_type': 'group',
+        'participant_ids': [auth_headers_provider['_cv_participant_id']] if '_cv_participant_id' in auth_headers_provider else [],
+        'content': 'Hello group'
+    })
+    assert res.status_code == 201
+    data = res.get_json()
+    assert data['thread']['topic'] == 'Group Discussion'
+    assert data['thread']['thread_type'] == 'group'
+    assert 'participant_ids' in data['thread']
+
+
+def test_messages_list_group_thread_with_participants(client, auth_headers, auth_headers_provider):
+    """Group threads list includes participant_ids."""
+    import time
+    # Create a group thread
+    res = client.get(f'{BASE_URL}/participants/me', headers=auth_headers)
+    participant_id = res.get_json()['participant']['id']
+
+    client.post(f'{BASE_URL}/messages/threads', headers=auth_headers, json={
+        'topic': 'Team Sync',
+        'participant_id': participant_id,
+        'thread_type': 'group',
+        'participant_ids': [],
+        'content': 'Planning session'
+    })
+
+    # List threads
+    res = client.get(f'{BASE_URL}/messages/threads', headers=auth_headers)
+    assert res.status_code == 200
+    threads = res.get_json()['threads']
+    group_threads = [t for t in threads if t.get('thread_type') == 'group']
+    assert len(group_threads) > 0
+    assert 'participant_ids' in group_threads[0]
+
+
 # -------------------------------------------------------------------
 # 4. Referrals
 # -------------------------------------------------------------------

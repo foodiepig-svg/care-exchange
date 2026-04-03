@@ -10,9 +10,11 @@ messages_bp = Blueprint('messages', __name__)
 @jwt_required()
 def list_threads():
     user_id = int(get_jwt_identity())
+    from models import User
     threads = Thread.query.filter(
         Thread.messages.any(Message.sender_id == user_id) |
-        (Thread.created_by_id == user_id)
+        (Thread.created_by_id == user_id) |
+        Thread.participants.any(User.id == user_id)
     ).all()
     return jsonify({'threads': [t.to_dict() for t in threads]})
 
@@ -24,6 +26,8 @@ def create_thread():
     data = request.get_json()
     topic = data.get('topic', '')
     participant_id = data.get('participant_id')
+    thread_type = data.get('thread_type', 'direct')
+    participant_ids = data.get('participant_ids', [])
 
     if not topic or not participant_id:
         return jsonify({'error': 'topic and participant_id are required'}), 400
@@ -31,10 +35,17 @@ def create_thread():
     thread = Thread(
         topic=topic,
         participant_id=participant_id,
-        created_by_id=user_id
+        created_by_id=user_id,
+        thread_type=thread_type
     )
     db.session.add(thread)
     db.session.flush()
+
+    # Add all participants (including creator) to group threads
+    if thread_type == 'group' and participant_ids:
+        from models import User
+        users = User.query.filter(User.id.in_(participant_ids + [user_id])).all()
+        thread.participants = users
 
     msg = Message(thread_id=thread.id, sender_id=user_id, content=data.get('content', ''))
     db.session.add(msg)

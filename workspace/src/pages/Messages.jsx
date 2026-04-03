@@ -26,9 +26,10 @@ export default function Messages() {
   const [threadMessages, setThreadMessages] = useState([])
   const [loading, setLoading] = useState(true)
   const [showNewThread, setShowNewThread] = useState(false)
-  const [newThread, setNewThread] = useState({ topic: '', participant_id: '', content: '' })
+  const [newThread, setNewThread] = useState({ topic: '', participant_id: '', content: '', is_group: false, participant_ids: [] })
   const [sending, setSending] = useState(false)
   const [sendingMessage, setSendingMessage] = useState('')
+  const [careTeam, setCareTeam] = useState([])
   const messagesEndRef = useRef(null)
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
   const [showMobileThread, setShowMobileThread] = useState(false)
@@ -43,6 +44,7 @@ export default function Messages() {
 
   useEffect(() => {
     fetchThreads()
+    fetchCareTeam()
   }, [])
 
   useEffect(() => {
@@ -66,6 +68,15 @@ export default function Messages() {
     }
   }
 
+  const fetchCareTeam = async () => {
+    try {
+      const res = await api.get('/participants/me/care-team')
+      setCareTeam(res.data?.care_team || [])
+    } catch (err) {
+      console.error('Failed to fetch care team:', err)
+    }
+  }
+
   const fetchThreadMessages = async (threadId) => {
     try {
       const res = await api.get(`/messages/threads/${threadId}`)
@@ -81,18 +92,21 @@ export default function Messages() {
 
     setSending(true)
     try {
-      const res = await api.post('/messages/threads', {
+      const payload = {
         topic: newThread.topic,
         participant_id: newThread.participant_id,
-        content: newThread.content
-      })
+        content: newThread.content,
+        thread_type: newThread.is_group ? 'group' : 'direct',
+        participant_ids: newThread.is_group ? newThread.participant_ids : []
+      }
+      const res = await api.post('/messages/threads', payload)
       const newThreadObj = res.data?.thread
       if (newThreadObj) {
         setThreads(prev => [newThreadObj, ...prev])
         setSelectedThread(newThreadObj)
       }
       setShowNewThread(false)
-      setNewThread({ topic: '', participant_id: '', content: '' })
+      setNewThread({ topic: '', participant_id: '', content: '', is_group: false, participant_ids: [] })
       setShowMobileThread(true)
     } catch (err) {
       console.error('Failed to create thread:', err)
@@ -134,6 +148,13 @@ export default function Messages() {
   }
 
   const getOtherParticipant = (thread) => {
+    if (thread.thread_type === 'group') {
+      const ids = thread.participant_ids || []
+      if (ids.length > 0) {
+        return `${ids.length} participants`
+      }
+      return 'Group thread'
+    }
     if (user?.role === 'participant') {
       return thread.provider_name || 'Unknown Provider'
     }
@@ -196,6 +217,36 @@ export default function Messages() {
                       onChange={e => setNewThread(prev => ({ ...prev, participant_id: e.target.value }))}
                       className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
                     />
+                    <label className="flex items-center gap-2 text-sm text-slate-600">
+                      <input
+                        type="checkbox"
+                        checked={newThread.is_group}
+                        onChange={e => setNewThread(prev => ({ ...prev, is_group: e.target.checked, participant_ids: [] }))}
+                        className="rounded border-slate-300"
+                      />
+                      Group Thread
+                    </label>
+                    {newThread.is_group && (
+                      <div className="space-y-1">
+                        <p className="text-xs text-slate-500">Select participants:</p>
+                        {careTeam.map(member => (
+                          <label key={member.user_id} className="flex items-center gap-2 text-sm text-slate-600">
+                            <input
+                              type="checkbox"
+                              checked={newThread.participant_ids.includes(member.user_id)}
+                              onChange={e => {
+                                const ids = e.target.checked
+                                  ? [...newThread.participant_ids, member.user_id]
+                                  : newThread.participant_ids.filter(id => id !== member.user_id)
+                                setNewThread(prev => ({ ...prev, participant_ids: ids }))
+                              }}
+                              className="rounded border-slate-300"
+                            />
+                            {member.full_name || member.email}
+                          </label>
+                        ))}
+                      </div>
+                    )}
                     <textarea
                       placeholder="Initial message"
                       value={newThread.content}

@@ -141,12 +141,26 @@ def create_app():
     @app.route('/api/debug/login', methods=['POST'])
     def debug_login():
         """Simulate login to find the exact error."""
-        from routes.auth import handle_login
         from flask import request
+        from models.user import User
         try:
             data = request.get_json() or {}
-            result = handle_login(data)
-            return result
+            email = data.get('email', '').strip().lower()
+            password = data.get('password', '')
+            user = User.query.filter_by(email=email).first()
+            if not user:
+                return {'error': 'User not found'}
+            if not user.check_password(password):
+                return {'error': 'Invalid password'}
+            return {
+                'user_id': user.id,
+                'email': user.email,
+                'email_verified': user.email_verified,
+                'is_active': user.is_active,
+                'user_dict': user.to_dict(),
+                'verified_at': user.verified_at,
+                'FLASK_ENV': os.environ.get('FLASK_ENV', 'NOT SET'),
+            }
         except Exception as e:
             import traceback
             return {'error': str(e), 'trace': traceback.format_exc()}, 500

@@ -323,6 +323,22 @@ def create_app():
         except Exception as e:
             return {'error': str(e)}, 500
 
+    @app.route('/api/debug/fix-role-constraint', methods=['POST'])
+    def debug_fix_role_constraint():
+        """Add 'admin' to check_user_role constraint. One-time fix."""
+        try:
+            db.session.execute(db.text(
+                "ALTER TABLE users DROP CONSTRAINT IF EXISTS check_user_role"
+            ))
+            db.session.execute(db.text(
+                "ALTER TABLE users ADD CONSTRAINT check_user_role "
+                "CHECK (role IN ('participant','family','provider','coordinator','admin'))"
+            ))
+            db.session.commit()
+            return {'success': True, 'message': 'constraint updated'}
+        except Exception as e:
+            return {'error': str(e)}, 500
+
     @app.route('/api/debug/make-admin', methods=['POST'])
     def debug_make_admin():
         """Promote a user to admin role by email. Remove after use."""

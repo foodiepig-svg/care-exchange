@@ -12,7 +12,9 @@ import {
   X,
   ShieldCheck,
   Paperclip,
-  Search
+  Search,
+  Settings,
+  BarChart3,
 } from 'lucide-react'
 import { api } from '../services/api'
 
@@ -27,6 +29,12 @@ const navItems = [
   { to: '/notifications', icon: Bell, label: 'Notifications' },
   { to: '/documents', icon: Paperclip, label: 'Documents', roles: ['participant', 'family'] },
   { to: '/consent', icon: ShieldCheck, label: 'Consent', roles: ['participant', 'family'] },
+]
+
+const adminNavItems = [
+  { to: '/admin', icon: BarChart3, label: 'Overview', adminOnly: true },
+  { to: '/admin/users', icon: Users, label: 'Users', adminOnly: true },
+  { to: '/admin/settings', icon: Settings, label: 'Settings', adminOnly: true },
 ]
 
 export default function Layout() {
@@ -44,6 +52,9 @@ export default function Layout() {
   const filteredNav = navItems.filter(item =>
     !item.roles || item.roles.includes(user?.role)
   )
+
+  const isAdmin = user?.role === 'admin'
+  const allAdminNav = isAdmin ? [...adminNavItems] : []
 
   return (
     <div className="min-h-screen flex">
@@ -91,6 +102,30 @@ export default function Layout() {
                 {label}
               </NavLink>
             ))}
+            {isAdmin && (
+              <>
+                <div className="pt-4 pb-1 px-3">
+                  <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Admin</span>
+                </div>
+                {allAdminNav.map(({ to, icon: Icon, label }) => (
+                  <NavLink
+                    key={to}
+                    to={to}
+                    end={to === '/admin'}
+                    className={({ isActive }) =>
+                      `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                        isActive
+                          ? 'bg-primary/10 text-primary'
+                          : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                      }`
+                    }
+                  >
+                    <Icon size={18} />
+                    {label}
+                  </NavLink>
+                ))}
+              </>
+            )}
           </nav>
 
           {/* User */}

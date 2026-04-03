@@ -22,11 +22,21 @@ import ProviderDashboard from './pages/ProviderDashboard'
 import CoordinatorParticipants from './pages/CoordinatorParticipants'
 import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
+import AdminDashboard from './pages/AdminDashboard'
+import AdminUsers from './pages/AdminUsers'
+import AdminSettings from './pages/AdminSettings'
 import Layout from './components/Layout'
 
 function ProtectedRoute({ children }) {
   const { user } = useAuth()
   return user ? children : <Navigate to="/login" replace />
+}
+
+function AdminRoute({ children }) {
+  const { user } = useAuth()
+  if (!user) return <Navigate to="/login" replace />
+  if (user.role !== 'admin') return <Navigate to="/dashboard" replace />
+  return children
 }
 
 function App() {
@@ -66,6 +76,9 @@ function App() {
             <Route path="consent" element={<ConsentSettings />} />
             <Route path="coordinator/participants" element={<CoordinatorParticipants />} />
             <Route path="coordinator/referrals" element={<CoordinatorReferrals />} />
+            <Route path="admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+            <Route path="admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
+            <Route path="admin/settings" element={<AdminRoute><AdminSettings /></AdminRoute>} />
           </Route>
 
           {/* Root-level routes — all protected, all use Layout */}

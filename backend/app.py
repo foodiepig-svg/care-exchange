@@ -36,7 +36,7 @@ def create_app():
     db.init_app(app)
     jwt.init_app(app)
     migrate.init_app(app, db)
-    CORS(app, origins=['http://localhost:5173', 'http://localhost:3000'], supports_credentials=True)
+    CORS(app, origins=['http://localhost:5173', 'http://localhost:3000', 'https://care-exchange.onrender.com'], supports_credentials=True)
 
     # Ensure upload folder exists
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
@@ -54,6 +54,7 @@ def create_app():
     from routes.consents import consents_bp
     from routes.content import content_bp
     from routes.providers import providers_bp
+    from routes.admin import admin_bp
 
     app.register_blueprint(auth_bp, url_prefix='/api/v1/auth')
     app.register_blueprint(participants_bp, url_prefix='/api/v1/participants')
@@ -67,6 +68,7 @@ def create_app():
     app.register_blueprint(consents_bp, url_prefix='/api/v1/consents')
     app.register_blueprint(content_bp, url_prefix='/api/v1/content')
     app.register_blueprint(providers_bp, url_prefix='/api/v1/providers')
+    app.register_blueprint(admin_bp, url_prefix='/api/v1/admin')
 
     # Auto-migrate: add any columns that exist in model but not in DB (failsafe)
     with app.app_context():
@@ -320,6 +322,21 @@ def create_app():
             return {'columns': [r[0] for r in result]}
         except Exception as e:
             return {'error': str(e)}, 500
+
+    @app.route('/api/debug/make-admin', methods=['POST'])
+    def debug_make_admin():
+        """Promote a user to admin role by email. Remove after use."""
+        from models.user import User
+        data = request.get_json() or {}
+        email = data.get('email', '').strip().lower()
+        if not email:
+            return {'error': 'email required'}, 400
+        user = User.query.filter_by(email=email).first()
+        if not user:
+            return {'error': 'User not found'}, 404
+        user.role = 'admin'
+        db.session.commit()
+        return {'success': True, 'user': user.to_dict()}
 
     @app.route('/api/debug/tables')
     def debug_tables():

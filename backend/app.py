@@ -25,6 +25,13 @@ def create_app():
         from config import DevelopmentConfig
         app.config.from_object(DevelopmentConfig)
 
+    # Verify key modules can be imported
+    try:
+        import resend
+        print(f"[STARTUP] resend module loaded, api_key set: {bool(os.environ.get('RESEND_API_KEY'))}")
+    except ImportError:
+        print("[STARTUP] resend not installed (pip install resend)")
+
     # Initialize extensions
     db.init_app(app)
     jwt.init_app(app)
@@ -82,6 +89,21 @@ def create_app():
             print(f"[WARN] Could not add missing columns: {e}", flush=True)
 
     # Debug endpoints
+    @app.route('/api/debug/test_email', methods=['POST'])
+    def debug_test_email():
+        """Test email sending."""
+        import traceback
+        try:
+            from services.email_service import EmailService
+            result = EmailService.send_email(
+                "test@test.com",
+                "Test email from Care Exchange",
+                "<h2>Test</h2><p>This is a test email.</p>"
+            )
+            return {'ok': True, 'result': result}
+        except Exception as e:
+            return {'error': str(e), 'trace': traceback.format_exc()}, 500
+
     @app.route('/api/debug/migrate', methods=['POST'])
     def debug_migrate():
         from flask_migrate import upgrade

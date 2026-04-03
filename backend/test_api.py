@@ -1104,3 +1104,151 @@ def test_reset_password_success(client, auth_headers):
 def test_reset_password_too_short(client):
     res = client.post(f'{BASE_URL}/auth/reset-password', json={'token': 'some-token', 'new_password': 'short'})
     assert res.status_code == 400
+
+
+# -----------------------------------------------------------------
+# Auth: Password Reset Full Flow
+# -----------------------------------------------------------------
+def test_password_reset_flow(client, app):
+    """Full flow: register → forgot-password → get token from DB → reset → login with new password."""
+    import hashlib, secrets
+    from datetime import datetime, timedelta
+
+    # 1. Register a user
+    register_res = client.post(f'{BASE_URL}/auth/register', json={
+        'email': 'resetflow@example.com',
+        'password': 'oldpassword123',
+        'full_name': 'Reset Flow User',
+        'role': 'participant'
+    })
+    assert register_res.status_code == 201
+
+    # 2. Mark email as verified (skip email verification for test)
+    with app.app_context():
+        from models import User
+        user = User.query.filter_by(email='resetflow@example.com').first()
+        assert user is not None
+        user.email_verified = True
+        user.verified_at = datetime.utcnow()
+        db.session.commit()
+
+    # 3. Verify old password works
+    login_old = client.post(f'{BASE_URL}/auth/login', json={
+        'email': 'resetflow@example.com',
+        'password': 'oldpassword123'
+    })
+    assert login_old.status_code == 200
+
+    # 4. Request password reset
+    forgot_res = client.post(f'{BASE_URL}/auth/forgot-password', json={
+        'email': 'resetflow@example.com'
+    })
+    assert forgot_res.status_code == 200
+    assert 'message' in forgot_res.get_json()
+
+    # 5. Get the token from DB
+    with app.app_context():
+        from models import User
+        user = User.query.filter_by(email='resetflow@example.com').first()
+        assert user.reset_token is not None, "reset_token should be set"
+        assert user.reset_token_expires_at is not None, "reset_token_expires_at should be set"
+        # The token stored is a hash - we need the original token to pass
+        # Since we can't reverse the hash, test this differently:
+        # Generate a known token and set it directly (simulating what forgot-password does)
+        test_token = secrets.token_hex(32)
+        user.reset_token = hashlib.sha256(test_token.encode()).hexdigest()
+        user.reset_token_expires_at = datetime.utcnow() + timedelta(hours=1)
+        db.session.commit()
+        token = test_token
+
+    # 6. Reset password using the token
+    reset_res = client.post(f'{BASE_URL}/auth/reset-password', json={
+        'token': token,
+        'new_password': 'newpassword456'
+    })
+    assert reset_res.status_code == 200
+    assert 'message' in reset_res.get_json()
+
+    # 7. Verify old password no longer works
+    login_old2 = client.post(f'{BASE_URL}/auth/login', json={
+        'email': 'resetflow@example.com',
+        'password': 'oldpassword123'
+    })
+    assert login_old2.status_code == 401
+
+    # 8. Verify new password works
+    login_new = client.post(f'{BASE_URL}/auth/login', json={
+        'email': 'resetflow@example.com',
+        'password': 'newpassword456'
+    })
+    assert login_new.status_code == 200
+    assert 'access_token' in login_new.get_json()
+
+
+def test_forgot_password_nonexistent_email(client):
+    """forgot-password should return 200 even for non-existent emails (security)."""
+    res = client.post(f'{BASE_URL}/auth/forgot-password', json={
+        'email': 'nobody@example.com'
+    })
+    assert res.status_code == 200
+    assert 'message' in res.get_json()
+
+
+def test_forgot_password_sets_token_in_db(client, app):
+    """forgot-password should set reset_token and reset_token_expires_at on the user."""
+    import hashlib, secrets
+    from datetime import datetime, timedelta
+
+    # Register and verify a user
+    client.post(f'{BASE_URL}/auth/register', json={
+        'email': 'tokencheck@example.com',
+        'password': 'password123',
+        'full_name': 'Token Check User',
+        'role': 'participant'
+    })
+    with app.app_context():
+        from models import User
+        user = User.query.filter_by(email='tokencheck@example.com').first()
+        user.email_verified = True
+        user.verified_at = datetime.utcnow()
+        db.session.commit()
+
+    # Request password reset
+    client.post(f'{BASE_URL}/auth/forgot-password', json={
+        'email': 'tokencheck@example.com'
+    })
+
+    # Check token was set in DB
+    with app.app_context():
+        from models import User
+        user = User.query.filter_by(email='tokencheck@example.com').first()
+        assert user.reset_token is not None
+        assert user.reset_token_expires_at is not None
+        assert user.reset_token_expires_at > datetime.utcnow()
+
+
+def test_reset_password_expired_token(client, app):
+    """reset-password should fail with expired token."""
+    import hashlib, secrets
+    from datetime import datetime, timedelta
+
+    # Create user and set an expired token
+    with app.app_context():
+        from models import User
+        user = User(email='expiredtoken@example.com', full_name='Expired Token User', role='participant')
+        user.set_password('password123')
+        user.email_verified = True
+        user.verified_at = datetime.utcnow()
+        # Set an already-expired token
+        token = secrets.token_hex(32)
+        user.reset_token = hashlib.sha256(token.encode()).hexdigest()
+        user.reset_token_expires_at = datetime.utcnow() - timedelta(hours=1)  # expired
+        db.session.add(user)
+        db.session.commit()
+
+    res = client.post(f'{BASE_URL}/auth/reset-password', json={
+        'token': token,
+        'new_password': 'newpassword123'
+    })
+    assert res.status_code == 400
+    assert 'expired' in res.get_json().get('error', '').lower()

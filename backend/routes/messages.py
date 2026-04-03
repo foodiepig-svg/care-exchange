@@ -1,4 +1,8 @@
-from flask import Blueprint, request, jsonify, abort
+import os
+import uuid
+import base64
+
+from flask import Blueprint, request, jsonify, abort, current_app
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app import db
 from models import Thread, Message, User
@@ -74,11 +78,62 @@ def send_message(thread_id):
     user_id = int(get_jwt_identity())
     data = request.get_json()
     content = data.get('content', '')
+    attachments_data = data.get('attachments', [])
 
-    if not content:
-        return jsonify({'error': 'content is required'}), 400
+    if not content and not attachments_data:
+        return jsonify({'error': 'content or attachments are required'}), 400
 
-    msg = Message(thread_id=thread_id, sender_id=user_id, content=content)
+    # Process inline base64 attachments
+    saved_attachments = []
+    for att in attachments_data:
+        filename = att.get('filename', 'unnamed')
+        data_base64 = att.get('data_base64')
+        mime_type = att.get('mime_type', 'application/octet-stream')
+
+        if not data_base64:
+            continue
+
+        try:
+            file_data = base64.b64decode(data_base64)
+        except Exception:
+            continue
+
+        # Determine extension from mime_type
+        ext_map = {
+            'image/jpeg': '.jpg',
+            'image/png': '.png',
+            'image/gif': '.gif',
+            'image/webp': '.webp',
+            'application/pdf': '.pdf',
+        }
+        ext = ext_map.get(mime_type, '')
+        unique_name = f"{uuid.uuid4().hex}{ext}"
+
+        # Save to workspace/public/attachments/<thread_id>/
+        attach_dir = os.path.join(
+            current_app.config.get('WORKSPACE_DIR', '/Users/WORK/projects/care-exchange/workspace/public'),
+            'attachments',
+            str(thread_id)
+        )
+        os.makedirs(attach_dir, exist_ok=True)
+        file_path = os.path.join(attach_dir, unique_name)
+        with open(file_path, 'wb') as f:
+            f.write(file_data)
+
+        saved_attachments.append({
+            'id': uuid.uuid4().hex,
+            'filename': filename,
+            'url': f"/attachments/{thread_id}/{unique_name}",
+            'file_type': mime_type,
+            'size_bytes': len(file_data),
+        })
+
+    msg = Message(
+        thread_id=thread_id,
+        sender_id=user_id,
+        content=content,
+        attachments=saved_attachments if saved_attachments else None
+    )
     db.session.add(msg)
     db.session.commit()
 

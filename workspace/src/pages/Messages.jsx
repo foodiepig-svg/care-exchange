@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { api } from '../services/api'
-import { MessageSquare, Send, Plus, X, ChevronLeft } from 'lucide-react'
+import { MessageSquare, Send, Plus, X, ChevronLeft, Paperclip, FileText, Image as ImageIcon } from 'lucide-react'
 
 function formatRelativeTime(dateString) {
   if (!dateString) return ''
@@ -29,10 +29,12 @@ export default function Messages() {
   const [newThread, setNewThread] = useState({ topic: '', participant_id: '', content: '', is_group: false, participant_ids: [] })
   const [sending, setSending] = useState(false)
   const [sendingMessage, setSendingMessage] = useState('')
+  const [pendingAttachments, setPendingAttachments] = useState([])
   const [careTeam, setCareTeam] = useState([])
   const messagesEndRef = useRef(null)
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
   const [showMobileThread, setShowMobileThread] = useState(false)
+  const fileInputRef = useRef(null)
 
   useEffect(() => {
     const handleResize = () => {
@@ -117,18 +119,23 @@ export default function Messages() {
 
   const handleSendMessage = async (e) => {
     e.preventDefault()
-    if (!sendingMessage.trim() || !selectedThread) return
+    if ((!sendingMessage.trim() && pendingAttachments.length === 0) || !selectedThread) return
 
     setSending(true)
     try {
-      const res = await api.post(`/messages/threads/${selectedThread.id}`, {
-        content: sendingMessage
-      })
+      const payload = {
+        content: sendingMessage,
+        attachments: pendingAttachments.map(({ filename, mime_type, data_base64 }) => ({
+          filename, mime_type, data_base64
+        }))
+      }
+      const res = await api.post(`/messages/threads/${selectedThread.id}`, payload)
       const newMsg = res.data?.message
       if (newMsg) {
         setThreadMessages(prev => [...prev, newMsg])
       }
       setSendingMessage('')
+      setPendingAttachments([])
     } catch (err) {
       console.error('Failed to send message:', err)
     } finally {
@@ -146,6 +153,35 @@ export default function Messages() {
     setSelectedThread(null)
     fetchThreads()
   }
+
+  const handleAttachmentClick = () => {
+    fileInputRef.current?.click()
+  }
+
+  const handleFileChange = (e) => {
+    const files = Array.from(e.target.files || [])
+    files.forEach(file => {
+      const reader = new FileReader()
+      reader.onload = (ev) => {
+        const base64 = ev.target.result.split(',')[1]
+        setPendingAttachments(prev => [...prev, {
+          filename: file.name,
+          mime_type: file.type,
+          data_base64: base64,
+          preview: file.type.startsWith('image/') ? ev.target.result : null
+        }])
+      }
+      reader.readAsDataURL(file)
+    })
+    e.target.value = ''
+  }
+
+  const removeAttachment = (idx) => {
+    setPendingAttachments(prev => prev.filter((_, i) => i !== idx))
+  }
+
+  const isPdf = (mime_type) => mime_type === 'application/pdf'
+  const isImage = (mime_type) => mime_type.startsWith('image/')
 
   const getOtherParticipant = (thread) => {
     if (thread.thread_type === 'group') {
@@ -336,6 +372,7 @@ export default function Messages() {
                     ) : (
                       threadMessages.map((msg, idx) => {
                         const isOwn = msg.sender_id === user?.id || msg.sender_email === user?.email
+                        const attachments = msg.attachments || []
                         return (
                           <div
                             key={msg.id || idx}
@@ -348,7 +385,23 @@ export default function Messages() {
                                   : 'bg-slate-100 text-slate-900'
                               }`}
                             >
-                              <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                              {msg.content && <p className="text-sm whitespace-pre-wrap">{msg.content}</p>}
+                              {attachments.length > 0 && (
+                                <div className={`mt-2 space-y-2 ${msg.content ? 'border-t' : ''} ${isOwn ? 'border-primary-300' : 'border-slate-200'} pt-2`}>
+                                  {attachments.map((att, ai) => (
+                                    <div key={ai} className={`flex items-center gap-2 text-xs ${isOwn ? 'text-primary-100' : 'text-slate-600'}`}>
+                                      {att.file_type?.startsWith('image/') ? (
+                                        <img src={att.url} alt={att.filename} className="max-w-[200px] max-h-[200px] rounded" />
+                                      ) : (
+                                        <div className="flex items-center gap-1">
+                                          <FileText size={14} />
+                                          <span>{att.filename}</span>
+                                        </div>
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
                               <p className={`text-xs mt-1 ${isOwn ? 'text-primary-200' : 'text-slate-400'}`}>
                                 {formatRelativeTime(msg.sent_at)}
                               </p>
@@ -361,7 +414,43 @@ export default function Messages() {
                   </div>
 
                   <form onSubmit={handleSendMessage} className="p-4 border-t border-slate-200">
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      onChange={handleFileChange}
+                      accept="image/*,.pdf"
+                      multiple
+                      className="hidden"
+                    />
+                    {pendingAttachments.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mb-2">
+                        {pendingAttachments.map((att, idx) => (
+                          <div key={idx} className="relative flex items-center gap-1 bg-slate-100 rounded px-2 py-1 text-xs">
+                            {att.preview ? (
+                              <img src={att.preview} alt={att.filename} className="w-8 h-8 object-cover rounded" />
+                            ) : (
+                              <FileText size={12} className="text-slate-500" />
+                            )}
+                            <span className="truncate max-w-[100px]">{att.filename}</span>
+                            <button
+                              type="button"
+                              onClick={() => removeAttachment(idx)}
+                              className="ml-1 text-slate-400 hover:text-red-500"
+                            >
+                              <X size={12} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                     <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={handleAttachmentClick}
+                        className="text-slate-400 hover:text-primary p-2 rounded-lg hover:bg-slate-100 transition-colors"
+                      >
+                        <Paperclip size={18} />
+                      </button>
                       <textarea
                         value={sendingMessage}
                         onChange={e => setSendingMessage(e.target.value)}
@@ -377,7 +466,7 @@ export default function Messages() {
                       />
                       <button
                         type="submit"
-                        disabled={sending || !sendingMessage.trim()}
+                        disabled={sending || (!sendingMessage.trim() && pendingAttachments.length === 0)}
                         className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
                       >
                         <Send size={18} />

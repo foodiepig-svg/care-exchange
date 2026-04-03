@@ -635,7 +635,7 @@ def test_messages_send_message(client, auth_headers):
 
 
 def test_messages_send_empty_content(client, auth_headers):
-    """Sending message with empty content returns 400."""
+    """Sending message with empty content and no attachments returns 400."""
     me = client.get(f'{BASE_URL}/participants/me', headers=auth_headers)
     participant_id = me.get_json()['participant']['id']
 
@@ -650,6 +650,39 @@ def test_messages_send_empty_content(client, auth_headers):
         'content': ''
     })
     assert res.status_code == 400
+
+
+def test_messages_create_with_attachment(client, auth_headers):
+    """Can send a message with an inline base64 attachment."""
+    import base64
+    me = client.get(f'{BASE_URL}/participants/me', headers=auth_headers)
+    participant_id = me.get_json()['participant']['id']
+
+    create = client.post(f'{BASE_URL}/messages/threads', headers=auth_headers, json={
+        'topic': 'Attachment test',
+        'participant_id': participant_id,
+        'content': 'Sending a file'
+    })
+    thread_id = create.get_json()['thread']['id']
+
+    # Create a small test image (1x1 transparent PNG)
+    png_data = base64.b64encode(b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15\xc4\x89\x00\x00\x00\nIDATx\x9cc\x00\x01\x00\x00\x05\x00\x01\r\n-\xb4\x00\x00\x00\x00IEND\xaeB`\x82').decode()
+    res = client.post(f'{BASE_URL}/messages/threads/{thread_id}', headers=auth_headers, json={
+        'content': 'Check this out',
+        'attachments': [{
+            'filename': 'test.png',
+            'mime_type': 'image/png',
+            'data_base64': png_data
+        }]
+    })
+    assert res.status_code == 201
+    data = res.get_json()
+    assert data['message']['content'] == 'Check this out'
+    assert len(data['message']['attachments']) == 1
+    att = data['message']['attachments'][0]
+    assert att['filename'] == 'test.png'
+    assert att['file_type'] == 'image/png'
+    assert att['url'].startswith(f'/attachments/{thread_id}/')
 
 
 def test_messages_unauthenticated(client):

@@ -46,6 +46,7 @@ class Message(db.Model):
     content = db.Column(db.Text, nullable=False)
     sent_at = db.Column(db.DateTime, default=datetime.utcnow)
     read_at = db.Column(db.DateTime, nullable=True)
+    attachments = db.Column(db.JSON, nullable=True, default=list)
 
     sender = db.relationship('User', foreign_keys=[sender_id])
 
@@ -58,4 +59,5 @@ class Message(db.Model):
             'content': self.content,
             'sent_at': self.sent_at.isoformat() if self.sent_at else None,
             'read_at': self.read_at.isoformat() if self.read_at else None,
+            'attachments': self.attachments or [],
         }

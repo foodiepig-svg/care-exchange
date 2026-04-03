@@ -326,17 +326,21 @@ def create_app():
     @app.route('/api/debug/make-admin', methods=['POST'])
     def debug_make_admin():
         """Promote a user to admin role by email. Remove after use."""
-        from models.user import User
-        data = request.get_json() or {}
-        email = data.get('email', '').strip().lower()
-        if not email:
-            return {'error': 'email required'}, 400
-        user = User.query.filter_by(email=email).first()
-        if not user:
-            return {'error': 'User not found'}, 404
-        user.role = 'admin'
-        db.session.commit()
-        return {'success': True, 'user': user.to_dict()}
+        import traceback
+        try:
+            from models.user import User
+            data = request.get_json() or {}
+            email = data.get('email', '').strip().lower()
+            if not email:
+                return {'error': 'email required'}, 400
+            user = User.query.filter_by(email=email).first()
+            if not user:
+                return {'error': 'User not found'}, 404
+            user.role = 'admin'
+            db.session.commit()
+            return {'success': True, 'user': user.to_dict()}
+        except Exception as e:
+            return {'error': str(e), 'trace': traceback.format_exc()}, 500
 
     @app.route('/api/debug/tables')
     def debug_tables():

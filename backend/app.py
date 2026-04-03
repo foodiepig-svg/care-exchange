@@ -155,22 +155,20 @@ def create_app():
             if not user.check_password(password):
                 return {'error': 'Invalid password'}
             # Try creating tokens
+            access_token = create_access_token(identity=user.id)
+            refresh_token = create_refresh_token(identity=user.id)
+            # Try user.to_dict()
             try:
-                access_token = create_access_token(identity=user.id)
-                refresh_token = create_refresh_token(identity=user.id)
-                return {
-                    'tokens_created': True,
-                    'access_token': access_token[:20] + '...',
-                    'user': user.to_dict(),
-                }
-            except Exception as token_err:
-                return {
-                    'token_error': str(token_err),
-                    'token_trace': traceback.format_exc(),
-                    'user': user.to_dict(),
-                }
+                user_dict = user.to_dict()
+            except Exception as dict_err:
+                return {'step': 'to_dict_failed', 'error': str(dict_err), 'trace': traceback.format_exc()}
+            return {
+                'step': 'all_ok',
+                'access_token': access_token[:20] + '...',
+                'user': user_dict,
+            }
         except Exception as e:
-            return {'error': str(e), 'trace': traceback.format_exc()}, 500
+            return {'error': str(e), 'step': 'unknown', 'trace': traceback.format_exc()}, 500
 
     @app.route('/api/debug/provider_create', methods=['POST'])
     def debug_create_provider():

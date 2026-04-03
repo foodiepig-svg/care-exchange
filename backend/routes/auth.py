@@ -150,38 +150,42 @@ def resend_verification():
 
 @auth_bp.route('/login', methods=['POST'])
 def login():
-    data = request.get_json()
-    email = data.get('email', '').strip().lower()
-    password = data.get('password', '')
+    try:
+        data = request.get_json()
+        email = data.get('email', '').strip().lower()
+        password = data.get('password', '')
 
-    if not all([email, password]):
-        return jsonify({'error': 'Email and password are required'}), 400
+        if not all([email, password]):
+            return jsonify({'error': 'Email and password are required'}), 400
 
-    user = User.query.filter_by(email=email).first()
+        user = User.query.filter_by(email=email).first()
 
-    if not user or not user.check_password(password):
-        return jsonify({'error': 'Invalid email or password'}), 401
+        if not user or not user.check_password(password):
+            return jsonify({'error': 'Invalid email or password'}), 401
 
-    if not user.is_active:
-        return jsonify({'error': 'Account is deactivated'}), 403
+        if not user.is_active:
+            return jsonify({'error': 'Account is deactivated'}), 403
 
-    # Check if email is verified
-    if not user.email_verified:
-        # Skip verification check in test/development environments (e2e tests)
-        if os.environ.get('FLASK_ENV') not in ('test', 'development'):
-            return jsonify({
-                'error': 'Email not verified. Please check your inbox for the verification link, or request a new one.',
-                'email_not_verified': True
-            }), 403
+        # Check if email is verified
+        if not user.email_verified:
+            # Skip verification check in test/development environments (e2e tests)
+            if os.environ.get('FLASK_ENV') not in ('test', 'development'):
+                return jsonify({
+                    'error': 'Email not verified. Please check your inbox for the verification link, or request a new one.',
+                    'email_not_verified': True
+                }), 403
 
-    access_token=create_access_token(identity=user.id)
-    refresh_token = create_refresh_token(identity=str(user.id))
+        access_token = create_access_token(identity=user.id)
+        refresh_token = create_refresh_token(identity=user.id)
 
-    return jsonify({
-        'user': user.to_dict(),
-        'access_token': access_token,
-        'refresh_token': refresh_token
-    })
+        return jsonify({
+            'user': user.to_dict(),
+            'access_token': access_token,
+            'refresh_token': refresh_token
+        })
+    except Exception as e:
+        import traceback
+        return jsonify({'login_error': str(e), 'trace': traceback.format_exc()}), 500
 
 
 @auth_bp.route('/refresh', methods=['POST'])

@@ -143,6 +143,8 @@ def create_app():
         """Simulate login to find the exact error."""
         from flask import request
         from models.user import User
+        from flask_jwt_extended import create_access_token, create_refresh_token
+        import traceback
         try:
             data = request.get_json() or {}
             email = data.get('email', '').strip().lower()
@@ -152,17 +154,22 @@ def create_app():
                 return {'error': 'User not found'}
             if not user.check_password(password):
                 return {'error': 'Invalid password'}
-            return {
-                'user_id': user.id,
-                'email': user.email,
-                'email_verified': user.email_verified,
-                'is_active': user.is_active,
-                'user_dict': user.to_dict(),
-                'verified_at': user.verified_at,
-                'FLASK_ENV': os.environ.get('FLASK_ENV', 'NOT SET'),
-            }
+            # Try creating tokens
+            try:
+                access_token = create_access_token(identity=user.id)
+                refresh_token = create_refresh_token(identity=user.id)
+                return {
+                    'tokens_created': True,
+                    'access_token': access_token[:20] + '...',
+                    'user': user.to_dict(),
+                }
+            except Exception as token_err:
+                return {
+                    'token_error': str(token_err),
+                    'token_trace': traceback.format_exc(),
+                    'user': user.to_dict(),
+                }
         except Exception as e:
-            import traceback
             return {'error': str(e), 'trace': traceback.format_exc()}, 500
 
     @app.route('/api/debug/provider_create', methods=['POST'])

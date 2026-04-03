@@ -115,7 +115,7 @@ class EmailService:
         resend = _get_resend_client()
         if resend:
             try:
-                result = resend.emails.send({
+                result = resend.Emails.send({
                     "from": cls.FROM_ADDRESS,
                     "to": to_email,
                     "subject": subject,
@@ -141,7 +141,7 @@ class EmailService:
         Returns:
             True if email was sent
         """
-        verify_url = f"https://careexchange.com/auth/verify/{user.verification_token}"
+        verify_url = f"https://care-exchange.onrender.com/auth/verify/{user.verification_token}"
         subject = "Verify your Care Exchange account"
         html_content = cls.VERIFICATION_CONTENT.format(verify_url=verify_url)
         return cls.send_email(user.email, subject, html_content)
@@ -157,7 +157,7 @@ class EmailService:
         Returns:
             True if email was sent
         """
-        reset_url = f"https://careexchange.com/auth/reset-password?token={reset_token}"
+        reset_url = f"https://care-exchange.onrender.com/auth/reset-password?token={reset_token}"
         subject = "Reset your Care Exchange password"
         html_content = cls.PASSWORD_RESET_CONTENT.format(reset_url=reset_url)
         return cls.send_email(user.email, subject, html_content)

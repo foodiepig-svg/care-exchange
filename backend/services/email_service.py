@@ -3,7 +3,7 @@ from datetime import datetime
 from app import db
 from models import Notification
 
-# Resend client (initialized in app.py, available here for import)
+# Resend client (initialized lazily)
 _resend_client = None
 
 
@@ -11,7 +11,7 @@ def _get_resend_client():
     """Get or initialize the Resend client lazily."""
     global _resend_client
     if _resend_client is None:
-        api_key = os.environ.get('RESEND_API_KEY')
+        api_key = os.environ.get('RESEND_API_KEY', '')
         if api_key:
             try:
                 import resend
@@ -41,14 +41,14 @@ class EmailService:
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Care Exchange</title>
         <style>
-            body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }}
-            .header {{ background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }}
-            .header h1 {{ margin: 0; font-size: 24px; font-weight: 600; }}
-            .content {{ background: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px; }}
-            .button {{ display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white !important; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-weight: 600; margin: 20px 0; }}
-            .button:hover {{ opacity: 0.9; }}
-            .footer {{ text-align: center; padding: 20px; color: #6b7280; font-size: 12px; }}
-            .warning {{ background: #fef3cd; border: 1px solid #ffc107; border-radius: 6px; padding: 12px; margin: 20px 0; font-size: 14px; }}
+            body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+            .header h1 { margin: 0; font-size: 24px; font-weight: 600; }
+            .content { background: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px; }
+            .button { display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white !important; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-weight: 600; margin: 20px 0; }
+            .button:hover { opacity: 0.9; }
+            .footer { text-align: center; padding: 20px; color: #6b7280; font-size: 12px; }
+            .warning { background: #fef3cd; border: 1px solid #ffc107; border-radius: 6px; padding: 12px; margin: 20px 0; font-size: 14px; }
         </style>
     </head>
     <body>
@@ -74,7 +74,7 @@ class EmailService:
     <p style="text-align: center; color: #6b7280; font-size: 14px;">Or copy and paste this link into your browser:</p>
     <p style="text-align: center; font-size: 12px; word-break: break-all; color: #667eea;">{verify_url}</p>
     <div class="warning">
-        <strong>⚠️ Important:</strong> This verification link will expire in <strong>24 hours</strong>.
+        <strong>Important:</strong> This verification link will expire in <strong>24 hours</strong>.
     </div>
     <p>If you didn't create an account with Care Exchange, you can safely ignore this email.</p>
     """
@@ -88,7 +88,7 @@ class EmailService:
     <p style="text-align: center; color: #6b7280; font-size: 14px;">Or copy and paste this link into your browser:</p>
     <p style="text-align: center; font-size: 12px; word-break: break-all; color: #667eea;">{reset_url}</p>
     <div class="warning">
-        <strong>⚠️ Important:</strong> This reset link will expire in <strong>1 hour</strong>.
+        <strong>Important:</strong> This reset link will expire in <strong>1 hour</strong>.
     </div>
     <p>If you didn't request a password reset, you can safely ignore this email — your password will not be changed.</p>
     """

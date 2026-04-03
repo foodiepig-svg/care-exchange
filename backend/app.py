@@ -142,6 +142,32 @@ def create_app():
         except Exception as e:
             return {'db': 'error', 'message': str(e)}, 500
 
+    @app.route('/api/debug/fix_email_columns', methods=['POST'])
+    def debug_fix_email_columns():
+        """One-time fix: add email_verification columns to users table if missing."""
+        try:
+            from flask_migrate import upgrade
+            upgrade()
+            return {'ok': True, 'msg': 'migration attempted'}
+        except Exception as me:
+            pass
+        # Fallback: raw SQL
+        try:
+            from alembic import op
+            op.add_column('users', op.Column('email_verified', sa.Boolean(), nullable=True))
+            return {'ok': True, 'msg': 'alembic op attempted'}
+        except Exception as e:
+            pass
+        try:
+            db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verified BOOLEAN DEFAULT FALSE"))
+            db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS verification_token VARCHAR(64)"))
+            db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS verification_token_expires TIMESTAMP"))
+            db.session.commit()
+            return {'ok': True}
+        except Exception as e:
+            db.session.rollback()
+            return {'ok': False, 'error': str(e)}, 500
+
     @app.route('/api/debug/tables')
     def debug_tables():
         try:

@@ -4,8 +4,11 @@ import LandingPage from './pages/LandingPage'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import Dashboard from './pages/Dashboard'
+import CoordinatorDashboard from './pages/CoordinatorDashboard'
 import Referrals from './pages/Referrals'
 import ProviderDirectory from './pages/ProviderDirectory'
+import ProviderReceivedReferrals from './pages/ProviderReceivedReferrals'
+import ProviderParticipantLookup from './pages/ProviderParticipantLookup'
 import CareRecord from './pages/CareRecord'
 import CareTeam from './pages/CareTeam'
 import Messages from './pages/Messages'
@@ -13,6 +16,8 @@ import Updates from './pages/Updates'
 import Notifications from './pages/Notifications'
 import Documents from './pages/Documents'
 import ConsentSettings from './pages/ConsentSettings'
+import ProviderSendUpdates from './pages/ProviderSendUpdates'
+import CoordinatorParticipants from './pages/CoordinatorParticipants'
 import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
 import Layout from './components/Layout'
@@ -45,8 +50,10 @@ function App() {
             }
           >
             <Route path="dashboard" element={<Dashboard />} />
+            <Route path="coordinator" element={<CoordinatorDashboard />} />
             <Route path="referrals" element={<Referrals />} />
             <Route path="providers" element={<ProviderDirectory />} />
+            <Route path="provider/referrals/received" element={<ProviderReceivedReferrals />} />
             <Route path="care-record" element={<CareRecord />} />
             <Route path="care-team" element={<CareTeam />} />
             <Route path="messages" element={<Messages />} />
@@ -54,6 +61,7 @@ function App() {
             <Route path="notifications" element={<Notifications />} />
             <Route path="documents" element={<Documents />} />
             <Route path="consent" element={<ConsentSettings />} />
+            <Route path="coordinator/participants" element={<CoordinatorParticipants />} />
           </Route>
 
           {/* Root-level routes — all protected, all use Layout */}
@@ -146,6 +154,16 @@ function App() {
             }
           >
             <Route index element={<ConsentSettings />} />
+          </Route>
+          <Route
+            path="/provider-send-updates"
+            element={
+              <ProtectedRoute>
+                <Layout />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<ProviderSendUpdates />} />
           </Route>
         </Routes>
       </BrowserRouter>

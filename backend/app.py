@@ -138,6 +138,19 @@ def create_app():
             import traceback
             return {'error': str(e), 'trace': traceback.format_exc()}, 500
 
+    @app.route('/api/debug/login', methods=['POST'])
+    def debug_login():
+        """Simulate login to find the exact error."""
+        from routes.auth import handle_login
+        from flask import request
+        try:
+            data = request.get_json() or {}
+            result = handle_login(data)
+            return result
+        except Exception as e:
+            import traceback
+            return {'error': str(e), 'trace': traceback.format_exc()}, 500
+
     @app.route('/api/debug/provider_create', methods=['POST'])
     def debug_create_provider():
         from models import User, Provider

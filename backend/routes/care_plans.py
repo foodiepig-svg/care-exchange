@@ -2,11 +2,12 @@ from datetime import datetime
 from flask import Blueprint, request, jsonify, abort
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app import db
-from models import CarePlan, Participant, User
+from models import CarePlan, Participant, Coordinator, User
 
 care_plans_bp = Blueprint('care_plans', __name__)
 
 VALID_STATUSES = {'draft', 'active', 'completed', 'on_hold'}
+
 
 def _parse_date(val):
     if val is None:
@@ -16,16 +17,48 @@ def _parse_date(val):
     return val
 
 
+def _get_participant_for_user(user_id):
+    """Return Participant row for a participant user, or None for coordinator/provider."""
+    return Participant.query.filter_by(user_id=user_id).first()
+
+
+def _resolve_participant_id(user_id, data):
+    """
+    Participants always use their own participant_id.
+    Coordinators/providers must pass participant_id in request body or query.
+    """
+    participant = _get_participant_for_user(user_id)
+    if participant:
+        return participant.id
+
+    # Coordinator or provider: look for participant_id in body or query
+    participant_id = data.get('participant_id') if data else None
+    if not participant_id:
+        participant_id = request.args.get('participant_id', type=int)
+    if not participant_id:
+        return None
+    return participant_id
+
+
 @care_plans_bp.route('', methods=['GET'])
 @jwt_required()
 def list_care_plans():
     user_id = int(get_jwt_identity())
-    participant = Participant.query.filter_by(user_id=user_id).first()
-    if not participant:
-        return jsonify({'error': 'Participant not found'}), 404
+    user = db.session.get(User, user_id)
+    data = request.get_json() or {}
+    participant_id = _resolve_participant_id(user_id, data)
+
+    if not participant_id:
+        return jsonify({'error': 'participant_id required for coordinators/providers'}), 400
+
+    # Participants can only list their own
+    if user.role == 'participant':
+        participant = _get_participant_for_user(user_id)
+        if not participant or participant.id != participant_id:
+            return jsonify({'error': 'Forbidden'}), 403
 
     status_filter = request.args.get('status')
-    query = CarePlan.query.filter_by(participant_id=participant.id)
+    query = CarePlan.query.filter_by(participant_id=participant_id)
     if status_filter and status_filter in VALID_STATUSES:
         query = query.filter_by(status=status_filter)
     plans = query.order_by(CarePlan.created_at.desc()).all()
@@ -36,13 +69,20 @@ def list_care_plans():
 @jwt_required()
 def create_care_plan():
     user_id = int(get_jwt_identity())
-    participant = Participant.query.filter_by(user_id=user_id).first()
-    if not participant:
-        return jsonify({'error': 'Participant not found'}), 404
-
+    user = db.session.get(User, user_id)
     data = request.get_json()
     if not data.get('title'):
         return jsonify({'error': 'title is required'}), 400
+
+    participant_id = _resolve_participant_id(user_id, data)
+    if not participant_id:
+        return jsonify({'error': 'participant_id required'}), 400
+
+    # Participants can only create for themselves
+    if user.role == 'participant':
+        participant = _get_participant_for_user(user_id)
+        if not participant or participant.id != participant_id:
+            return jsonify({'error': 'Forbidden'}), 403
 
     import json
     supports = None
@@ -50,7 +90,7 @@ def create_care_plan():
         supports = json.dumps(data['supports'])
 
     care_plan = CarePlan(
-        participant_id=participant.id,
+        participant_id=participant_id,
         title=data['title'],
         description=data.get('description'),
         start_date=_parse_date(data.get('start_date')),
@@ -70,13 +110,16 @@ def create_care_plan():
 @jwt_required()
 def get_care_plan(plan_id):
     user_id = int(get_jwt_identity())
+    user = db.session.get(User, user_id)
     plan = db.session.get(CarePlan, plan_id)
     if not plan:
         return jsonify({'error': 'Care plan not found'}), 404
 
-    participant = Participant.query.filter_by(user_id=user_id).first()
-    if not participant or plan.participant_id != participant.id:
-        return jsonify({'error': 'Forbidden'}), 403
+    # Participants: own plan only
+    if user.role == 'participant':
+        participant = _get_participant_for_user(user_id)
+        if not participant or plan.participant_id != participant.id:
+            return jsonify({'error': 'Forbidden'}), 403
 
     return jsonify({'care_plan': plan.to_dict()})
 
@@ -85,13 +128,15 @@ def get_care_plan(plan_id):
 @jwt_required()
 def update_care_plan(plan_id):
     user_id = int(get_jwt_identity())
+    user = db.session.get(User, user_id)
     plan = db.session.get(CarePlan, plan_id)
     if not plan:
         return jsonify({'error': 'Care plan not found'}), 404
 
-    participant = Participant.query.filter_by(user_id=user_id).first()
-    if not participant or plan.participant_id != participant.id:
-        return jsonify({'error': 'Forbidden'}), 403
+    if user.role == 'participant':
+        participant = _get_participant_for_user(user_id)
+        if not participant or plan.participant_id != participant.id:
+            return jsonify({'error': 'Forbidden'}), 403
 
     data = request.get_json()
     import json
@@ -118,13 +163,15 @@ def update_care_plan(plan_id):
 @jwt_required()
 def delete_care_plan(plan_id):
     user_id = int(get_jwt_identity())
+    user = db.session.get(User, user_id)
     plan = db.session.get(CarePlan, plan_id)
     if not plan:
         return jsonify({'error': 'Care plan not found'}), 404
 
-    participant = Participant.query.filter_by(user_id=user_id).first()
-    if not participant or plan.participant_id != participant.id:
-        return jsonify({'error': 'Forbidden'}), 403
+    if user.role == 'participant':
+        participant = _get_participant_for_user(user_id)
+        if not participant or plan.participant_id != participant.id:
+            return jsonify({'error': 'Forbidden'}), 403
 
     db.session.delete(plan)
     db.session.commit()

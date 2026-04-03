@@ -69,10 +69,10 @@ class EmailService:
     <h2>Welcome to Care Exchange!</h2>
     <p>Thank you for registering. Please verify your email address by clicking the button below:</p>
     <p style="text-align: center;">
-        <a href="{verify_url}" class="button">Verify Email Address</a>
+        <a href="$verify_url" class="button">Verify Email Address</a>
     </p>
     <p style="text-align: center; color: #6b7280; font-size: 14px;">Or copy and paste this link into your browser:</p>
-    <p style="text-align: center; font-size: 12px; word-break: break-all; color: #667eea;">{verify_url}</p>
+    <p style="text-align: center; font-size: 12px; word-break: break-all; color: #667eea;">$verify_url</p>
     <div class="warning">
         <strong>Important:</strong> This verification link will expire in <strong>24 hours</strong>.
     </div>
@@ -83,10 +83,10 @@ class EmailService:
     <h2>Password Reset Request</h2>
     <p>We received a request to reset your password. Click the button below to set a new password:</p>
     <p style="text-align: center;">
-        <a href="{reset_url}" class="button">Reset Password</a>
+        <a href="$reset_url" class="button">Reset Password</a>
     </p>
     <p style="text-align: center; color: #6b7280; font-size: 14px;">Or copy and paste this link into your browser:</p>
-    <p style="text-align: center; font-size: 12px; word-break: break-all; color: #667eea;">{reset_url}</p>
+    <p style="text-align: center; font-size: 12px; word-break: break-all; color: #667eea;">$reset_url</p>
     <div class="warning">
         <strong>Important:</strong> This reset link will expire in <strong>1 hour</strong>.
     </div>
@@ -107,7 +107,9 @@ class EmailService:
         Returns:
             True if email was sent successfully (or printed in stub mode)
         """
-        full_html = cls.HTML_TEMPLATE.format(content=html_content)
+        import string
+        template = string.Template(cls.HTML_TEMPLATE)
+        full_html = template.substitute(content=html_content)
 
         # Try to send via Resend if configured
         resend = _get_resend_client()

@@ -39,3 +39,4 @@ Thumbs.db
 # Vite build output (rebuilt inside Docker / on deploy)
 workspace/dist
 workspace/node_modules
+test-results/

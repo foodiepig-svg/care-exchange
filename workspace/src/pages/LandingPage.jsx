@@ -481,7 +481,7 @@ export default function LandingPage() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              {roles.map(({ emoji, name, desc, cta, href, highlight }) => (
+              {roles.map(({ emoji, name, desc, cta, href, highlight, learnMoreHref }) => (
                 <div
                   key={name}
                   className={`rounded-2xl p-7 border-2 transition-all ${

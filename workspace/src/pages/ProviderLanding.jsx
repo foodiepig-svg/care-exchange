@@ -342,7 +342,7 @@ export default function ProviderLanding() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               {[
-                { num: '01', title: 'Register your organisation', desc: 'Create a provider account. Add your service categories, ABN, andOrganisation contact details.' },
+                { num: '01', title: 'Register your organisation', desc: 'Create a provider account. Add your service categories, ABN, and Organisation contact details.' },
                 { num: '02', title: 'Receive your first referral', desc: 'A participant sends you a secure referral link. Review their summary and consent scope.' },
                 { num: '03', title: 'Accept and start delivering', desc: 'Accept the referral. The participant\'s care record opens with your update templates ready.' },
                 { num: '04', title: 'Submit structured updates', desc: 'Log updates using templates. The participant sees them instantly in their care record.' },
@@ -406,7 +406,7 @@ export default function ProviderLanding() {
                 { q: 'What NDIS support categories are supported?', a: 'We support all NDIS Core, Capacity Building, and Capital support categories. Updates can be tagged to specific categories to help with plan budget tracking.' },
                 { q: 'Can I message the participant\'s support coordinator?', a: 'Yes. Care team messaging lets you communicate with both the participant and their support coordinator in the same thread, without needing to CC external email addresses.' },
                 { q: 'How do plan reviews work?', a: 'You can export a structured care summary for any participant — all updates, goals, and provider notes in one document. Participants can download this for their NDIS plan review.' },
-                { q: 'Is there a cost for providers?', a: 'Free during the beta period. Pricing for largerOrganisation organisations will be announced at launch.' },
+                { q: 'Is there a cost for providers?', a: 'Free during the beta period. Pricing for larger organisations will be announced at launch.' },
               ].map(faq => <FaqItem key={faq.q} {...faq} />)}
             </div>
           </div>

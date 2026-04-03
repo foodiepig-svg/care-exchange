@@ -170,6 +170,18 @@ def create_app():
         except Exception as e:
             return {'error': str(e), 'step': 'unknown', 'trace': traceback.format_exc()}, 500
 
+    @app.route('/api/debug/seed', methods=['POST'])
+    def debug_seed():
+        """Create demo accounts for all user roles. Remove after use."""
+        from flask import request
+        from seed_demo_data import create_demo_data
+        try:
+            created, errors = create_demo_data(app, db)
+            return {'created': len(created), 'errors': errors}
+        except Exception as e:
+            import traceback
+            return {'error': str(e), 'trace': traceback.format_exc()}, 500
+
     @app.route('/api/debug/email', methods=['POST'])
     def debug_email():
         """Test Elastic Email send and return diagnostics."""

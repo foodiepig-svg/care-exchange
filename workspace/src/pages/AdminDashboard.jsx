@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import api from '../services/api'
+import { api } from '../services/api'
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState(null)
@@ -41,7 +41,7 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {cards.map(c => (
           <div key={c.label} className={`bg-white rounded-lg border-l-4 ${c.color} border border-slate-200 p-4 shadow-sm`}>
-            <div className="text-3xl font-bold text-slate-900">{stats[c.label.split(' ')[0].toLowerCase().replace('total ', 'total_').replace('new ', 'new_')] ?? c.value}</div>
+            <div className="text-3xl font-bold text-slate-900">{c.value}</div>
             <div className="text-sm text-slate-500 mt-1">{c.label}</div>
           </div>
         ))}

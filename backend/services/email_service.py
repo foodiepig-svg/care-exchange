@@ -1,36 +1,25 @@
 import os
+import urllib.request
+import urllib.parse
 from datetime import datetime
 from app import db
 from models import Notification
 
-# Resend client (initialized lazily)
-_resend_client = None
 
-
-def _get_resend_client():
-    """Get or initialize the Resend client lazily."""
-    global _resend_client
-    if _resend_client is None:
-        api_key = os.environ.get('RESEND_API_KEY', '')
-        if api_key:
-            try:
-                import resend
-                resend.api_key = api_key
-                _resend_client = resend
-            except Exception as e:
-                print(f"[EMAIL] Failed to initialize Resend: {e}")
-                _resend_client = None
-    return _resend_client
+def _get_elasticemail_api_key():
+    """Get the Elastic Email API key from environment."""
+    return os.environ.get('ELASTICEMAIL_API_KEY', '')
 
 
 class EmailService:
     """Business logic for sending emails.
 
-    Uses Resend for real email delivery when RESEND_API_KEY is configured,
+    Uses Elastic Email when ELASTICEMAIL_API_KEY is configured,
     otherwise falls back to printing emails to console (stub behavior).
     """
 
-    FROM_ADDRESS = "Care Exchange <onboarding@resend.workers.dev>"
+    FROM_NAME = "Care Exchange"
+    FROM_EMAIL = "noreply@careexchange.com.au"
 
     # HTML email template
     HTML_TEMPLATE = """
@@ -95,9 +84,9 @@ class EmailService:
 
     @classmethod
     def send_email(cls, to_email, subject, html_content):
-        """Sends an email.
+        """Sends an email via Elastic Email HTTP API.
 
-        Uses Resend when RESEND_API_KEY is set, otherwise falls back to print() stub.
+        Falls back to console print if ELASTICEMAIL_API_KEY is not set.
 
         Args:
             to_email: Recipient email address
@@ -107,29 +96,40 @@ class EmailService:
         Returns:
             True if email was sent successfully (or printed in stub mode)
         """
-        import string
-        template = string.Template(cls.HTML_TEMPLATE)
-        full_html = template.substitute(content=html_content)
+        api_key = _get_elasticemail_api_key()
+        if not api_key:
+            print(f"[EMAIL] No API key configured. Would send to: {to_email} | Subject: {subject}")
+            return False
 
-        # Try to send via Resend if configured
-        resend = _get_resend_client()
-        if resend:
-            try:
-                result = resend.Emails.send({
-                    "from": cls.FROM_ADDRESS,
-                    "to": to_email,
-                    "subject": subject,
-                    "html": full_html,
-                })
-                print(f"[EMAIL] Sent via Resend to {to_email} | Subject: {subject} | ID: {result.get('id', 'unknown')}")
+        # Wrap content in the site template
+        full_html = cls.HTML_TEMPLATE.replace("{content}", html_content)
+
+        # Build Elastic Email API request
+        # Elastic Email uses a simple HTTP GET/POST API
+        data = urllib.parse.urlencode({
+            "apikey": api_key,
+            "from": cls.FROM_EMAIL,
+            "fromName": cls.FROM_NAME,
+            "to": to_email,
+            "subject": subject,
+            "bodyhtml": full_html,
+            "isTransactional": "true",
+        }).encode("utf-8")
+
+        req = urllib.request.Request(
+            "https://api.elasticemail.com/v2/email/send",
+            data=data,
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+        )
+
+        try:
+            with urllib.request.urlopen(req, timeout=15) as response:
+                result = response.read().decode("utf-8")
+                print(f"[EMAIL] Elastic Email sent to {to_email} | Subject: {subject} | Result: {result}")
                 return True
-            except Exception as e:
-                print(f"[EMAIL] Resend failed, falling back to print: {e}")
-
-        # Fallback: print email to console
-        print(f"[EMAIL] To: {to_email} | Subject: {subject}")
-        print(f"[EMAIL] HTML Body: {html_content[:200]}..." if len(html_content) > 200 else f"[EMAIL] HTML Body: {html_content}")
-        return True
+        except Exception as e:
+            print(f"[EMAIL] Elastic Email failed for {to_email}: {e}")
+            return False
 
     @classmethod
     def send_verification_email(cls, user):
@@ -143,7 +143,7 @@ class EmailService:
         """
         verify_url = f"https://care-exchange.onrender.com/auth/verify/{user.verification_token}"
         subject = "Verify your Care Exchange account"
-        html_content = cls.VERIFICATION_CONTENT.format(verify_url=verify_url)
+        html_content = cls.VERIFICATION_CONTENT.replace("$verify_url", verify_url)
         return cls.send_email(user.email, subject, html_content)
 
     @classmethod
@@ -159,5 +159,5 @@ class EmailService:
         """
         reset_url = f"https://care-exchange.onrender.com/auth/reset-password?token={reset_token}"
         subject = "Reset your Care Exchange password"
-        html_content = cls.PASSWORD_RESET_CONTENT.format(reset_url=reset_url)
+        html_content = cls.PASSWORD_RESET_CONTENT.replace("$reset_url", reset_url)
         return cls.send_email(user.email, subject, html_content)

@@ -1,5 +1,5 @@
 import os
-from flask import Flask, request, send_from_directory
+from flask import Flask, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
@@ -57,6 +57,26 @@ def create_app():
     app.register_blueprint(content_bp, url_prefix='/api/v1/content')
     app.register_blueprint(providers_bp, url_prefix='/api/v1/providers')
 
+    # Auto-migrate: add any columns that exist in model but not in DB (failsafe)
+    with app.app_context():
+        try:
+            db.session.execute(db.text("""
+                DO $$
+                BEGIN
+                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='providers' AND column_name='contact_email') THEN
+                        ALTER TABLE providers ADD COLUMN contact_email VARCHAR(255);
+                    END IF;
+                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='providers' AND column_name='location') THEN
+                        ALTER TABLE providers ADD COLUMN location VARCHAR(255);
+                    END IF;
+                END
+                $$;
+            """))
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            print(f"[WARN] Could not add missing columns: {e}", flush=True)
+
     # Debug endpoints
     @app.route('/api/debug/migrate', methods=['POST'])
     def debug_migrate():
@@ -109,7 +129,7 @@ def create_app():
             import traceback
             return {'error': str(e), 'type': type(e).__name__, 'tb': traceback.format_exc()}, 500
 
-    # Health check - must be before Whitenoise wraps wsgi_app
+    # Health check
     @app.route('/api/health')
     def health():
         return {'status': 'healthy'}
@@ -135,7 +155,7 @@ def create_app():
     def render_health():
         return {'status': 'healthy'}
 
-    # Serve index.html for SPA fallback
+    # Serve SPA and static assets
     _static_dir = os.environ.get('STATIC_ROOT', '/app/workspace/dist')
 
     @app.route('/')

@@ -76,9 +76,22 @@ function App() {
             <Route path="consent" element={<ConsentSettings />} />
             <Route path="coordinator/participants" element={<CoordinatorParticipants />} />
             <Route path="coordinator/referrals" element={<CoordinatorReferrals />} />
-            <Route path="admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
-            <Route path="admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
-            <Route path="admin/settings" element={<AdminRoute><AdminSettings /></AdminRoute>} />
+          </Route>
+
+          {/* Admin routes — protected, with Layout */}
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute>
+                <AdminRoute>
+                  <Layout />
+                </AdminRoute>
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<AdminDashboard />} />
+            <Route path="users" element={<AdminUsers />} />
+            <Route path="settings" element={<AdminSettings />} />
           </Route>
 
           {/* Root-level routes — all protected, all use Layout */}

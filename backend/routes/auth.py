@@ -303,19 +303,24 @@ def debug_test_provider():
 @auth_bp.route('/debug/verify_email', methods=['POST'])
 def debug_verify_email():
     """Test-only: mark a user's email as verified without clicking the link."""
+    import traceback
     if os.environ.get('FLASK_ENV') == 'production':
         return {'error': 'Not available in production'}, 403
     from models import User
     from app import db
-    data = request.get_json(silent=True) or {}
-    email = data.get('email')
-    if not email:
-        return {'error': 'email required'}, 400
-    user = User.query.filter_by(email=email).first()
-    if not user:
-        return {'error': 'User not found'}, 404
-    user.email_verified = True
-    user.verification_token = None
-    user.verification_token_expires = None
-    db.session.commit()
-    return {'ok': True, 'email': email}
+    try:
+        data = request.get_json(silent=True) or {}
+        email = data.get('email')
+        if not email:
+            return {'error': 'email required'}, 400
+        user = User.query.filter_by(email=email).first()
+        if not user:
+            return {'error': 'User not found'}, 404
+        user.email_verified = True
+        user.verification_token = None
+        user.verification_token_expires = None
+        db.session.commit()
+        return {'ok': True, 'email': email}
+    except Exception as e:
+        db.session.rollback()
+        return {'error': str(e), 'trace': traceback.format_exc()}, 500

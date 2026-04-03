@@ -47,7 +47,7 @@ DEMO_ACCOUNTS = [
         "role": "provider",
         "phone": "+61 455 333 003",
         "organisation_name": "BrightMind Allied Health",
-        "abn": "12 345 678 901",
+        "abn": "12345678901",
         "contact_name": "James Chen",
         "contact_email": "provider@demo.com",
         "contact_phone": "+61 455 333 003",

@@ -80,7 +80,7 @@ export default function AdminTickets() {
     if (statusFilter) params.append('status', statusFilter)
     if (priorityFilter) params.append('priority', priorityFilter)
 
-    api.get(`/tickets/admin/tickets?${params}`)
+    api.get(`/admin/tickets?${params}`)
       .then(res => {
         setTickets(res.data.tickets)
         setTotal(res.data.total)
@@ -100,7 +100,7 @@ export default function AdminTickets() {
     setDetailLoading(true)
     setSelected(ticket)
     setCommentText('')
-    api.get(`/tickets/admin/tickets/${ticket.id}`)
+    api.get(`/admin/tickets/${ticket.id}`)
       .then(res => {
         setSelected(res.data.ticket)
         setDetailLoading(false)
@@ -114,7 +114,7 @@ export default function AdminTickets() {
     if (!selected) return
     setPatchLoading(true)
     try {
-      const res = await api.patch(`/tickets/admin/tickets/${selected.id}`, { status: newStatus })
+      const res = await api.patch(`/admin/tickets/${selected.id}`, { status: newStatus })
       setSelected(prev => ({ ...prev, ...res.data.ticket }))
       // Update in list too
       setTickets(prev => prev.map(t => t.id === selected.id ? { ...t, ...res.data.ticket } : t))
@@ -129,7 +129,7 @@ export default function AdminTickets() {
     if (!selected) return
     setPatchLoading(true)
     try {
-      const res = await api.patch(`/tickets/admin/tickets/${selected.id}`, { priority: newPriority })
+      const res = await api.patch(`/admin/tickets/${selected.id}`, { priority: newPriority })
       setSelected(prev => ({ ...prev, ...res.data.ticket }))
       setTickets(prev => prev.map(t => t.id === selected.id ? { ...t, ...res.data.ticket } : t))
     } catch (err) {
@@ -143,7 +143,7 @@ export default function AdminTickets() {
     if (!commentText.trim() || !selected) return
     setSubmittingComment(true)
     try {
-      const res = await api.post(`/tickets/admin/tickets/${selected.id}/comments`, { comment: commentText })
+      const res = await api.post(`/admin/tickets/${selected.id}/comments`, { comment: commentText })
       setSelected(prev => ({
         ...prev,
         comments: [...(prev.comments || []), res.data.comment],

@@ -55,7 +55,7 @@ export default function Support() {
 
   const fetchTickets = () => {
     setLoading(true)
-    api.get('/tickets/tickets')
+    api.get('/tickets')
       .then(res => {
         setTickets(res.data.tickets || [])
         setLoading(false)
@@ -70,7 +70,7 @@ export default function Support() {
     setDetailLoading(true)
     setSelected(ticket)
     setCommentText('')
-    api.get(`/tickets/tickets/${ticket.id}`)
+    api.get(`/tickets/${ticket.id}`)
       .then(res => {
         setSelected(res.data.ticket)
         setDetailLoading(false)
@@ -87,7 +87,7 @@ export default function Support() {
     setSubmitting(true)
     setFormError(null)
     try {
-      const res = await api.post('/tickets/tickets', {
+      const res = await api.post('/tickets', {
         title: title.trim(),
         description: description.trim(),
         type,
@@ -112,7 +112,7 @@ export default function Support() {
     if (!commentText.trim() || !selected) return
     setSubmittingComment(true)
     try {
-      const res = await api.post(`/tickets/tickets/${selected.id}/comments`, { comment: commentText })
+      const res = await api.post(`/tickets/${selected.id}/comments`, { comment: commentText })
       setSelected(prev => ({
         ...prev,
         comments: [...(prev.comments || []), res.data.comment],

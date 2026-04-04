@@ -12,3 +12,5 @@ from .goal_history import GoalHistory
 from .care_plan import CarePlan
 from .notification import Notification
 from .document import Document
+from .ticket import Ticket, TicketComment
+from .feature_request import FeatureRequest, FeatureVote

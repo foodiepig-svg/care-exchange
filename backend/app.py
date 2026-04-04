@@ -56,6 +56,7 @@ def create_app():
     from routes.providers import providers_bp
     from routes.admin import admin_bp
     from routes.tickets import ticket_bp
+    from routes.feature_requests import feature_bp
 
     app.register_blueprint(auth_bp, url_prefix='/api/v1/auth')
     app.register_blueprint(participants_bp, url_prefix='/api/v1/participants')
@@ -71,6 +72,7 @@ def create_app():
     app.register_blueprint(providers_bp, url_prefix='/api/v1/providers')
     app.register_blueprint(admin_bp, url_prefix='/api/v1/admin')
     app.register_blueprint(ticket_bp, url_prefix='/api/v1')
+    app.register_blueprint(feature_bp, url_prefix='/api/v1/feature-requests')
 
     # Auto-migrate: add any columns that exist in model but not in DB (failsafe)
     with app.app_context():

@@ -18,6 +18,7 @@ import {
   HelpCircle,
   LifeBuoy,
   Target,
+  Lightbulb,
 } from 'lucide-react'
 import { api } from '../services/api'
 
@@ -31,6 +32,7 @@ const navItems = [
   { to: '/updates', icon: FileText, label: 'Updates', roles: ['provider', 'coordinator'] },
   { to: '/messages', icon: MessageSquare, label: 'Messages' },
   { to: '/notifications', icon: Bell, label: 'Notifications' },
+  { to: '/features', icon: Lightbulb, label: 'Feature Requests' },
   { to: '/documents', icon: Paperclip, label: 'Documents', roles: ['participant', 'family'] },
   { to: '/consent', icon: ShieldCheck, label: 'Consent', roles: ['participant', 'family'] },
   { to: '/goals', icon: Target, label: 'Goals', roles: ['participant'] },

@@ -40,6 +40,7 @@ import AdminSettings from './pages/AdminSettings'
 import AdminTickets from './pages/AdminTickets'
 import Layout from './components/Layout'
 import FamilyDashboard from './pages/FamilyDashboard'
+import Features from './pages/Features'
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth()
@@ -111,6 +112,7 @@ function App() {
 
             {/* Support */}
             <Route path="support" element={<Support />} />
+            <Route path="features" element={<Features />} />
           </Route>
 
           {/* Admin routes — protected, with Layout */}

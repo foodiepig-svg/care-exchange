@@ -83,7 +83,7 @@ export default function FamilyHelp() {
     <div className="min-h-screen bg-slate-50">
       <div className="max-w-5xl mx-auto px-6 py-8">
         <button onClick={() => navigate(-1)} className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-rose-600 mb-6 transition-colors">
-          <ArrowLeft size=14 /> Back
+          <ArrowLeft size={14} /> Back
         </button>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">

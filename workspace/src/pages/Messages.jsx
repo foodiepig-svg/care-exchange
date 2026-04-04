@@ -239,20 +239,28 @@ export default function Messages() {
               {showNewThread && (
                 <form onSubmit={handleCreateThread} className="p-4 border-b border-slate-200 bg-slate-50">
                   <div className="space-y-3">
-                    <input
-                      type="text"
-                      placeholder="Topic"
-                      value={newThread.topic}
-                      onChange={e => setNewThread(prev => ({ ...prev, topic: e.target.value }))}
-                      className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Participant ID"
-                      value={newThread.participant_id}
-                      onChange={e => setNewThread(prev => ({ ...prev, participant_id: e.target.value }))}
-                      className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
-                    />
+                    <div>
+                      <label htmlFor="thread-topic" className="sr-only">Topic</label>
+                      <input
+                        id="thread-topic"
+                        type="text"
+                        placeholder="Topic"
+                        value={newThread.topic}
+                        onChange={e => setNewThread(prev => ({ ...prev, topic: e.target.value }))}
+                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="thread-participant-id" className="sr-only">Participant ID</label>
+                      <input
+                        id="thread-participant-id"
+                        type="text"
+                        placeholder="Participant ID"
+                        value={newThread.participant_id}
+                        onChange={e => setNewThread(prev => ({ ...prev, participant_id: e.target.value }))}
+                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+                      />
+                    </div>
                     <label className="flex items-center gap-2 text-sm text-slate-600">
                       <input
                         type="checkbox"
@@ -263,8 +271,8 @@ export default function Messages() {
                       Group Thread
                     </label>
                     {newThread.is_group && (
-                      <div className="space-y-1">
-                        <p className="text-xs text-slate-500">Select participants:</p>
+                      <fieldset className="space-y-1">
+                        <legend className="text-xs text-slate-500 sr-only">Select participants</legend>
                         {careTeam.map(member => (
                           <label key={member.user_id} className="flex items-center gap-2 text-sm text-slate-600">
                             <input
@@ -281,9 +289,11 @@ export default function Messages() {
                             {member.full_name || member.email}
                           </label>
                         ))}
-                      </div>
+                      </fieldset>
                     )}
+                    <label htmlFor="thread-initial-message" className="sr-only">Initial message</label>
                     <textarea
+                      id="thread-initial-message"
                       placeholder="Initial message"
                       value={newThread.content}
                       onChange={e => setNewThread(prev => ({ ...prev, content: e.target.value }))}

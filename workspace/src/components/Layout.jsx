@@ -1,6 +1,6 @@
-import { Outlet, NavLink, useNavigate } from 'react-router-dom'
+import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import {
   LayoutDashboard,
   Users,
@@ -52,6 +52,19 @@ export default function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [notifCount, setNotifCount] = useState(0)
   const navigate = useNavigate()
+  const location = useLocation()
+  const mainContentRef = useRef(null)
+
+  // Focus management on route change — move focus to main content heading
+  useEffect(() => {
+    const heading = mainContentRef.current?.querySelector('h1')
+    if (heading) {
+      heading.setAttribute('tabindex', '-1')
+      heading.focus()
+    } else {
+      mainContentRef.current?.focus()
+    }
+  }, [location.pathname])
 
   useEffect(() => {
     api.get('/notifications/unread-count')
@@ -68,9 +81,14 @@ export default function Layout() {
 
   return (
     <div className="min-h-screen flex">
+      {/* Skip to main content link */}
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-primary focus:text-white focus:rounded-lg focus:font-medium">
+        Skip to main content
+      </a>
+
       {/* Mobile overlay */}
       {sidebarOpen && (
-        <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />
+        <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} aria-hidden="true" />
       )}
 
       {/* Sidebar */}
@@ -78,18 +96,18 @@ export default function Layout() {
         fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-200
         transform transition-transform duration-200
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-      `}>
+      `} aria-label="Main navigation">
         <div className="flex flex-col h-full">
           {/* Logo */}
           <div className="flex items-center gap-3 px-6 py-5 border-b border-slate-100">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center" aria-hidden="true">
               <ShieldCheck size={18} className="text-white" />
             </div>
             <div>
               <div className="font-semibold text-slate-900 text-sm">Care Exchange</div>
               <div className="text-xs text-slate-500 capitalize">{user?.role}</div>
             </div>
-            <button className="ml-auto lg:hidden" onClick={() => setSidebarOpen(false)}>
+            <button className="ml-auto lg:hidden" onClick={() => setSidebarOpen(false)} aria-label="Close navigation menu">
               <X size={20} className="text-slate-400" />
             </button>
           </div>
@@ -148,7 +166,7 @@ export default function Layout() {
                 <div className="text-sm font-medium text-slate-900 truncate">{user?.full_name}</div>
                 <div className="text-xs text-slate-500 truncate">{user?.email}</div>
               </div>
-              <button onClick={logout} className="p-1.5 text-slate-400 hover:text-slate-600">
+              <button onClick={logout} className="p-1.5 text-slate-400 hover:text-slate-600" aria-label="Log out">
                 <LogOut size={16} />
               </button>
             </div>
@@ -161,7 +179,7 @@ export default function Layout() {
         {/* Top bar */}
         <header className="sticky top-0 z-30 bg-white/80 backdrop-blur border-b border-slate-200 px-4 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <button className="lg:hidden p-2 text-slate-500" onClick={() => setSidebarOpen(true)}>
+            <button className="lg:hidden p-2 text-slate-500" onClick={() => setSidebarOpen(true)} aria-label="Open navigation menu">
               <Menu size={20} />
             </button>
             <div className="hidden lg:block" />
@@ -169,10 +187,11 @@ export default function Layout() {
               <button
                 onClick={() => navigate('/notifications')}
                 className="relative p-2 text-slate-500 hover:text-slate-700"
+                aria-label={`Notifications${notifCount > 0 ? `, ${notifCount} unread` : ''}`}
               >
                 <Bell size={20} />
                 {notifCount > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
+                  <span aria-hidden="true" className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
                     {notifCount > 9 ? '9+' : notifCount}
                   </span>
                 )}
@@ -182,7 +201,7 @@ export default function Layout() {
         </header>
 
         {/* Content */}
-        <main className="flex-1 p-4 lg:p-8">
+        <main id="main-content" ref={mainContentRef} className="flex-1 p-4 lg:p-8" tabIndex="-1">
           <Outlet />
         </main>
       </div>

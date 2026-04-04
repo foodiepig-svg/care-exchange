@@ -122,16 +122,17 @@ export default function ConsentSettings() {
                 required
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
+            <fieldset>
+              <legend className="block text-sm font-medium text-slate-700 mb-2">
                 Data Categories to Share
-              </label>
+              </legend>
               <div className="flex flex-wrap gap-2">
                 {dataCategories.map(cat => (
                   <button
                     key={cat.id}
                     type="button"
                     onClick={() => toggleCategory(cat.id)}
+                    aria-pressed={form.data_categories.includes(cat.id)}
                     className={`px-3 py-1.5 text-sm font-medium rounded-full border transition-colors ${
                       form.data_categories.includes(cat.id)
                         ? 'bg-primary text-white border-primary'
@@ -145,7 +146,7 @@ export default function ConsentSettings() {
               {form.data_categories.length === 0 && (
                 <p className="text-xs text-slate-500 mt-2">Select at least one category</p>
               )}
-            </div>
+            </fieldset>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">
                 Expires At (optional)

@@ -368,8 +368,12 @@ export default function Goals() {
                   <span className="text-sm font-medium text-slate-800">{goal.progress || 0}%</span>
                 </div>
                 <div
-                  onClick={() => setProgressUpdate({ ...progressUpdate, [goal.id]: !progressUpdate[goal.id] })}
-                  className="w-full bg-slate-100 rounded-full h-2.5 cursor-pointer"
+                  className="w-full bg-slate-100 rounded-full h-2.5"
+                  role="progressbar"
+                  aria-valuenow={goal.progress || 0}
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                  aria-label={`Goal progress: ${goal.progress || 0}%`}
                 >
                   <div
                     className="bg-green-500 rounded-full h-2.5 transition-all"

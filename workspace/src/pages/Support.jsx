@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { api } from '../services/api'
 import { useAuth } from '../context/AuthContext'
 import { useNavigate } from 'react-router-dom'
@@ -77,6 +77,16 @@ export default function Support() {
       })
       .catch(() => setDetailLoading(false))
   }
+
+  // Escape key closes ticket detail dialog
+  useEffect(() => {
+    if (!selected) return
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') setSelected(null)
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [selected])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -173,7 +183,7 @@ export default function Support() {
           </div>
 
           {formError && (
-            <div className="mb-4 bg-rose-50 text-rose-700 text-sm px-4 py-3 rounded-lg border border-rose-200">{formError}</div>
+            <div role="alert" className="mb-4 bg-rose-50 text-rose-700 text-sm px-4 py-3 rounded-lg border border-rose-200">{formError}</div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -299,8 +309,8 @@ export default function Support() {
 
       {/* Ticket detail slide-over */}
       {selected && (
-        <div className="fixed inset-0 z-50 flex">
-          <div className="fixed inset-0 bg-black/20" onClick={() => setSelected(null)} />
+        <div className="fixed inset-0 z-50 flex" role="dialog" aria-modal="true" aria-labelledby="ticket-detail-title">
+          <div className="fixed inset-0 bg-black/20" onClick={() => setSelected(null)} aria-hidden="true" />
           <div className="ml-auto w-full max-w-xl bg-white shadow-xl flex flex-col overflow-hidden">
             {/* Header */}
             <div className="flex items-start justify-between px-6 py-5 border-b border-slate-200">
@@ -314,9 +324,9 @@ export default function Support() {
                   </span>
                   <StatusBadge status={selected.status} />
                 </div>
-                <h2 className="text-lg font-semibold text-slate-800 leading-snug">{selected.title}</h2>
+                <h2 id="ticket-detail-title" className="text-lg font-semibold text-slate-800 leading-snug">{selected.title}</h2>
               </div>
-              <button onClick={() => setSelected(null)} className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400">
+              <button onClick={() => setSelected(null)} className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400" aria-label="Close ticket detail">
                 <X size={18} />
               </button>
             </div>

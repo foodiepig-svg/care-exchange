@@ -122,16 +122,17 @@ export default function Notifications() {
           </p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-3" role="list">
           {filtered.map(notif => {
             const { icon: Icon, color } = typeIcons[notif.type] || { icon: Bell, color: 'text-slate-600 bg-slate-50' }
             return (
-              <div
+              <button
                 key={notif.id}
                 onClick={() => !notif.read && markAsRead(notif.id, notif.link)}
-                className={`bg-white rounded-xl border border-slate-200 p-4 cursor-pointer transition-all hover:shadow-sm ${
+                className={`w-full text-left bg-white rounded-xl border border-slate-200 p-4 cursor-pointer transition-all hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/50 ${
                   !notif.read ? 'border-l-4 border-l-primary bg-primary/5' : ''
                 }`}
+                role="listitem"
               >
                 <div className="flex gap-3">
                   <div className={`p-2 rounded-lg ${color} flex-shrink-0`}>
@@ -154,7 +155,7 @@ export default function Notifications() {
                     )}
                   </div>
                 </div>
-              </div>
+              </button>
             )
           })}
         </div>

@@ -100,7 +100,7 @@ export default function Support() {
       setTimeout(() => {
         setShowForm(false)
         setSubmitted(false)
-      }, 2000)
+      }, 4000)
     } catch (err) {
       setFormError(err.response?.data?.error || 'Failed to submit ticket.')
     } finally {
@@ -155,6 +155,13 @@ export default function Support() {
         </div>
       </div>
 
+      {/* Success banner — outside the form block so it persists after close */}
+      {submitted && (
+        <div className="mb-4 bg-emerald-50 text-emerald-700 text-sm px-4 py-3 rounded-lg border border-emerald-200">
+          Ticket submitted! We'll get back to you soon.
+        </div>
+      )}
+
       {/* Submit form — inline, not a modal */}
       {showForm && (
         <div className="bg-white rounded-xl border border-slate-200 p-6 mb-8">
@@ -164,12 +171,6 @@ export default function Support() {
               <X size={18} />
             </button>
           </div>
-
-          {submitted && (
-            <div className="mb-4 bg-emerald-50 text-emerald-700 text-sm px-4 py-3 rounded-lg border border-emerald-200">
-              Ticket submitted! We'll get back to you soon.
-            </div>
-          )}
 
           {formError && (
             <div className="mb-4 bg-rose-50 text-rose-700 text-sm px-4 py-3 rounded-lg border border-rose-200">{formError}</div>

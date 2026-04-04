@@ -228,6 +228,7 @@ export default function ParticipantLanding() {
             <a href="#how-it-works" className="text-sm text-slate-600 hover:text-teal-600 transition-colors">How It Works</a>
             <a href="#problems" className="text-sm text-slate-600 hover:text-teal-600 transition-colors">Problems We Solve</a>
             <a href="#faq" className="text-sm text-slate-600 hover:text-teal-600 transition-colors">FAQ</a>
+            <Link to="/help/participant" className="text-sm text-slate-600 hover:text-teal-600 transition-colors">Help</Link>
           </div>
           <div className="hidden md:flex items-center gap-3">
             <Link to="/login" className="text-sm font-medium text-slate-600 hover:text-teal-600 transition-colors px-3 py-2">

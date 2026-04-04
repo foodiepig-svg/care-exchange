@@ -27,6 +27,10 @@ import ParticipantLanding from './pages/ParticipantLanding'
 import ProviderLanding from './pages/ProviderLanding'
 import CoordinatorLanding from './pages/CoordinatorLanding'
 import FamilyLanding from './pages/FamilyLanding'
+import ParticipantHelp from './pages/ParticipantHelp'
+import ProviderHelp from './pages/ProviderHelp'
+import CoordinatorHelp from './pages/CoordinatorHelp'
+import FamilyHelp from './pages/FamilyHelp'
 import AdminUsers from './pages/AdminUsers'
 import AdminSettings from './pages/AdminSettings'
 import Layout from './components/Layout'
@@ -62,6 +66,12 @@ function App() {
           <Route path="/provider" element={<ProviderLanding />} />
           <Route path="/coordinator" element={<CoordinatorLanding />} />
           <Route path="/family" element={<FamilyLanding />} />
+
+          {/* Help Centre */}
+          <Route path="/help/participant" element={<ParticipantHelp />} />
+          <Route path="/help/provider" element={<ProviderHelp />} />
+          <Route path="/help/coordinator" element={<CoordinatorHelp />} />
+          <Route path="/help/family" element={<FamilyHelp />} />
 
           {/* Protected routes — all under /app/* */}
           <Route

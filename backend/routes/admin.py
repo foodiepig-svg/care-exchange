@@ -237,37 +237,52 @@ def run_migration_v9():
     if secret != os.getenv('MIGRATION_SECRET', 'care-exchange-migrate-2026'):
         return jsonify({'error': 'Forbidden'}), 403
 
-    # First verify which tables exist
     from sqlalchemy import text
+    from flask_migrate import downgrade, upgrade
+
+    # Check which tables exist and current alembic version
     try:
         result = db.session.execute(text("SELECT tablename FROM pg_tables WHERE schemaname = 'public'"))
-        tables = [row[0] for row in result]
-        has_consent_history = 'consent_history' in tables
-        has_goal_history = 'goal_history' in tables
+        tables = sorted([row[0] for row in result])
+        has_ch = 'consent_history' in tables
+        has_gh = 'goal_history' in tables
+        version_result = db.session.execute(text("SELECT version_num FROM alembic_version"))
+        version_rows = [row[0] for row in version_result]
+        current_version = version_rows[0] if version_rows else None
     except Exception as e:
-        return jsonify({'success': False, 'error': f'Cannot query tables: {e}'}), 500
+        return jsonify({'success': False, 'error': f'Cannot query DB: {e}'}), 500
 
-    # If tables already exist, just return success
-    if has_consent_history and has_goal_history:
+    if has_ch and has_gh:
         return jsonify({'success': True, 'message': 'Tables already exist', 'consent_history': True, 'goal_history': True})
 
-    # Run migration
-    from flask_migrate import upgrade
+    # If version is already at or past 009, we need to stamp back and re-run
+    # Otherwise flask_migrate upgrade() is a no-op
+    migration_ran = False
     try:
+        # Stamp to one before our migration
+        downgrade(revision='tickets_v1')
+        # Now run upgrade which should apply 009
         upgrade()
-        # Verify
-        result2 = db.session.execute(text("SELECT tablename FROM pg_tables WHERE schemaname = 'public'"))
-        tables2 = [row[0] for row in result2]
-        return jsonify({
-            'success': True,
-            'message': 'Migration 009 applied',
-            'tables_before': tables,
-            'tables_after': tables2,
-            'consent_history': 'consent_history' in tables2,
-            'goal_history': 'goal_history' in tables2,
-        })
+        migration_ran = True
     except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
+        return jsonify({'success': False, 'error': f'Migration failed: {e}'}), 500
+
+    # Verify
+    result2 = db.session.execute(text("SELECT tablename FROM pg_tables WHERE schemaname = 'public'"))
+    tables2 = sorted([row[0] for row in result2])
+    version_result2 = db.session.execute(text("SELECT version_num FROM alembic_version"))
+    version_rows2 = [row[0] for row in version_result2]
+    new_version = version_rows2[0] if version_rows2 else None
+
+    return jsonify({
+        'success': True,
+        'migration_ran': migration_ran,
+        'old_version': current_version,
+        'new_version': new_version,
+        'consent_history': 'consent_history' in tables2,
+        'goal_history': 'goal_history' in tables2,
+        'tables_added': [t for t in tables2 if t not in tables],
+    })
 
 
 # ─── Platform Settings ────────────────────────────────────────────────────────

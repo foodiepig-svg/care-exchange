@@ -24,16 +24,20 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true)
   const [referrals, setReferrals] = useState([])
   const [updates, setUpdates] = useState([])
+  const [goals, setGoals] = useState([])
+  const [participantsCount, setParticipantsCount] = useState(0)
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [referralsRes, updatesRes] = await Promise.all([
+        const [referralsRes, updatesRes, goalsRes] = await Promise.all([
           api.get('/referrals'),
-          api.get('/updates')
+          api.get('/updates'),
+          user?.role === 'participant' ? api.get('/goals') : Promise.resolve({ data: { goals: [] } }),
         ])
         setReferrals(referralsRes.data?.referrals || [])
         setUpdates(updatesRes.data?.updates || [])
+        setGoals(goalsRes.data?.goals || [])
       } catch (err) {
         console.error('Failed to fetch dashboard data:', err)
       } finally {
@@ -42,6 +46,20 @@ export default function Dashboard() {
     }
     fetchData()
   }, [])
+
+  // Fetch participants count for coordinator role
+  useEffect(() => {
+    if (user?.role === 'coordinator') {
+      // Try the dedicated count endpoint first, fall back to list endpoint
+      api.get('/participants/me/count')
+        .then(r => setParticipantsCount(r.data?.count || 0))
+        .catch(() => {
+          api.get('/participants')
+            .then(r => setParticipantsCount(r.data?.participants?.length || 0))
+            .catch(() => setParticipantsCount(0))
+        })
+    }
+  }, [user?.role])
 
   const activeStatuses = ['sent', 'accepted', 'active']
   const pendingStatuses = ['sent', 'viewed']
@@ -54,21 +72,27 @@ export default function Dashboard() {
   const uniqueProviderIds = new Set(acceptedReferrals.map(r => r.provider_id))
   const careTeamCount = uniqueProviderIds.size
 
+  // Compute goals progress for participant role
+  const totalGoals = goals.length
+  const completedGoals = goals.filter(g => g.status === 'completed').length
+  const avgProgress = totalGoals > 0 ? Math.round(completedGoals / totalGoals * 100) : 0
+  const goalsProgress = totalGoals > 0 ? `${avgProgress}%` : 'No goals'
+
   const statsConfig = {
     participant: [
       { label: 'Active Referrals', value: activeReferrals.length, icon: FileText, color: 'text-primary' },
       { label: 'Care Team', value: careTeamCount, icon: Users, color: 'text-secondary' },
-      { label: 'Goals Progress', value: '0%', icon: TrendingUp, color: 'text-green-600' },
+      { label: 'Goals Progress', value: goalsProgress, icon: TrendingUp, color: 'text-green-600' },
       { label: 'Recent Updates', value: updates.length, icon: Clock, color: 'text-amber-600' },
     ],
     provider: [
       { label: 'Pending Referrals', value: pendingReferrals.length, icon: AlertCircle, color: 'text-amber-600' },
       { label: 'Active Participants', value: activeReferrals.length, icon: Users, color: 'text-primary' },
       { label: 'Updates Sent', value: updates.length, icon: FileText, color: 'text-secondary' },
-      { label: 'This Month', value: '0h', icon: Clock, color: 'text-slate-500' },
+      { label: 'This Month', value: '0h', icon: Clock, color: 'text-slate-500' }, // TODO: hours tracking requires time_entries table
     ],
     coordinator: [
-      { label: 'My Participants', value: 0, icon: Users, color: 'text-primary' },
+      { label: 'My Participants', value: participantsCount, icon: Users, color: 'text-primary' },
       { label: 'Active Referrals', value: activeReferrals.length, icon: FileText, color: 'text-secondary' },
       { label: 'Completed', value: completedReferrals.length, icon: CheckCircle2, color: 'text-green-600' },
       { label: 'Pending Actions', value: pendingReferrals.length, icon: Clock, color: 'text-amber-600' },

@@ -2,7 +2,7 @@ from datetime import datetime
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app import db
-from models import Consent, Participant, User
+from models import Consent, ConsentHistory, Participant, User
 import json
 
 consents_bp = Blueprint('consents', __name__)
@@ -19,6 +19,20 @@ def list_consents():
 
     consents = Consent.query.filter_by(participant_id=participant.id).all()
     return jsonify({'consents': [c.to_dict() for c in consents]})
+
+
+@consents_bp.route('/history', methods=['GET'])
+@jwt_required()
+def get_consent_history():
+    """Get audit trail of all consent changes for current participant."""
+    user_id = int(get_jwt_identity())
+    participant = Participant.query.filter_by(user_id=user_id).first()
+    if not participant:
+        return jsonify({'error': 'Participant not found'}), 404
+
+    history = ConsentHistory.query.filter_by(participant_id=participant.id)\
+        .order_by(ConsentHistory.created_at.desc()).limit(50).all()
+    return jsonify({'history': [h.to_dict() for h in history]})
 
 
 @consents_bp.route('', methods=['POST'])
@@ -55,6 +69,20 @@ def grant_consent():
         existing.granted_at = datetime.utcnow()
         existing.revoked_at = None
         db.session.commit()
+
+        # Log to consent history
+        history_entry = ConsentHistory(
+            consent_id=existing.id,
+            participant_id=participant.id,
+            granted_to_id=granted_to_id,
+            data_categories=json.dumps(data_categories),
+            action='updated',
+            actor_id=user_id,
+            note='Categories updated'
+        )
+        db.session.add(history_entry)
+        db.session.commit()
+
         return jsonify({'consent': existing.to_dict()}), 200
 
     consent = Consent(
@@ -65,6 +93,19 @@ def grant_consent():
         expires_at=data.get('expires_at'),
     )
     db.session.add(consent)
+    db.session.flush()  # Get the consent.id before committing
+
+    # Log to consent history
+    history_entry = ConsentHistory(
+        consent_id=consent.id,
+        participant_id=participant.id,
+        granted_to_id=granted_to_id,
+        data_categories=json.dumps(data_categories),
+        action='granted',
+        actor_id=user_id,
+        note='Initial grant'
+    )
+    db.session.add(history_entry)
     db.session.commit()
     return jsonify({'consent': consent.to_dict()}), 201
 
@@ -99,4 +140,18 @@ def revoke_consent(consent_id):
 
     consent.revoked_at = datetime.utcnow()
     db.session.commit()
+
+    # Log to consent history
+    history_entry = ConsentHistory(
+        consent_id=consent.id,
+        participant_id=participant.id,
+        granted_to_id=consent.granted_to_id,
+        data_categories=consent.data_categories,
+        action='revoked',
+        actor_id=user_id,
+        note='Consent revoked by participant'
+    )
+    db.session.add(history_entry)
+    db.session.commit()
+
     return jsonify({'consent': consent.to_dict()})

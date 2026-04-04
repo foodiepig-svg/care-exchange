@@ -17,6 +17,7 @@ import {
   BarChart3,
   HelpCircle,
   LifeBuoy,
+  Target,
 } from 'lucide-react'
 import { api } from '../services/api'
 
@@ -31,6 +32,7 @@ const navItems = [
   { to: '/notifications', icon: Bell, label: 'Notifications' },
   { to: '/documents', icon: Paperclip, label: 'Documents', roles: ['participant', 'family'] },
   { to: '/consent', icon: ShieldCheck, label: 'Consent', roles: ['participant', 'family'] },
+  { to: '/goals', icon: Target, label: 'Goals', roles: ['participant'] },
   { to: '/app/support', icon: LifeBuoy, label: 'Help & Support', roles: ['participant', 'family', 'provider', 'coordinator'] },
   { to: '/app/help/participant', icon: HelpCircle, label: 'Help', roles: ['participant'] },
   { to: '/app/help/provider', icon: HelpCircle, label: 'Help', roles: ['provider'] },

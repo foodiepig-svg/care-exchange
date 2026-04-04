@@ -1,13 +1,10 @@
 import { test, expect } from '@playwright/test'
-import { readFileSync } from 'fs'
-import { join } from 'path'
-
-const env = Object.fromEntries(
-  readFileSync(join(__dirname, '.env'), 'utf8').trim().split('\n').map(l => l.split('='))
-)
 
 const BASE = 'https://care-exchange.onrender.com'
-const { PART_EMAIL, COORD_EMAIL, PROVIDER_EMAIL, PASS } = env
+const DEMO_PART = 'participant@demo.com'
+const DEMO_COORD = 'coordinator@demo.com'
+const DEMO_PROVIDER = 'provider@demo.com'
+const DEMO_PASS = 'Demo@1234'
 
 test.describe('Care Exchange E2E', { timeout: 60000 }, () => {
 
@@ -20,11 +17,10 @@ test.describe('Care Exchange E2E', { timeout: 60000 }, () => {
     const ctx = await browser.newContext()
     const p = await ctx.newPage()
     await p.goto(`${BASE}/login`, { waitUntil: 'networkidle' })
-    await p.locator('input[type="email"]').fill(PART_EMAIL)
-    await p.locator('input[type="password"]').fill(PASS)
+    await p.locator('input[type="email"]').fill(DEMO_PART)
+    await p.locator('input[type="password"]').fill(DEMO_PASS)
     await p.click('button[type="submit"]')
     await p.waitForURL(/dashboard/, { timeout: 30000 })
-    // Wait for React to finish hydrating
     await p.waitForFunction(() => document.querySelector('#root')?.children?.length > 0, { timeout: 10000 })
     const pages = ['care-team', 'referrals', 'messages', 'documents', 'consent']
     for (const pg of pages) {
@@ -40,8 +36,8 @@ test.describe('Care Exchange E2E', { timeout: 60000 }, () => {
     const ctx = await browser.newContext()
     const p = await ctx.newPage()
     await p.goto(`${BASE}/login`, { waitUntil: 'networkidle' })
-    await p.locator('input[type="email"]').fill(COORD_EMAIL)
-    await p.locator('input[type="password"]').fill(PASS)
+    await p.locator('input[type="email"]').fill(DEMO_COORD)
+    await p.locator('input[type="password"]').fill(DEMO_PASS)
     await p.click('button[type="submit"]')
     await p.waitForURL(/dashboard/, { timeout: 30000 })
     await p.waitForFunction(() => document.querySelector('#root')?.children?.length > 0, { timeout: 10000 })
@@ -58,8 +54,8 @@ test.describe('Care Exchange E2E', { timeout: 60000 }, () => {
     const ctx = await browser.newContext()
     const p = await ctx.newPage()
     await p.goto(`${BASE}/login`, { waitUntil: 'networkidle' })
-    await p.locator('input[type="email"]').fill(PROVIDER_EMAIL)
-    await p.locator('input[type="password"]').fill(PASS)
+    await p.locator('input[type="email"]').fill(DEMO_PROVIDER)
+    await p.locator('input[type="password"]').fill(DEMO_PASS)
     await p.click('button[type="submit"]')
     await p.waitForURL(/dashboard/, { timeout: 30000 })
     await p.waitForFunction(() => document.querySelector('#root')?.children?.length > 0, { timeout: 10000 })

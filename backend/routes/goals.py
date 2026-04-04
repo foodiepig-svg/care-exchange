@@ -52,6 +52,7 @@ def create_goal():
         created_by_id=user_id,
     )
     db.session.add(goal)
+    db.session.flush()  # assign goal.id before history references it
     history = GoalHistory(
         goal_id=goal.id,
         participant_id=participant.id,

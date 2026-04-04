@@ -245,6 +245,30 @@ function App() {
           >
             <Route index element={<Features />} />
           </Route>
+
+          {/* Find Providers — top-level protected route */}
+          <Route
+            path="/providers"
+            element={
+              <ProtectedRoute>
+                <Layout />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<ProviderDirectory />} />
+          </Route>
+
+          {/* Goals — top-level protected route */}
+          <Route
+            path="/goals"
+            element={
+              <ProtectedRoute>
+                <Layout />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<Goals />} />
+          </Route>
         </Routes>
       </BrowserRouter>
     </AuthProvider>

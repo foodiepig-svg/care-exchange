@@ -84,6 +84,9 @@ def create_app():
                     IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='providers' AND column_name='location') THEN
                         ALTER TABLE providers ADD COLUMN location VARCHAR(255);
                     END IF;
+                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='documents' AND column_name='storage_key') THEN
+                        ALTER TABLE documents ADD COLUMN storage_key VARCHAR(512);
+                    END IF;
                 END
                 $$;
             """))

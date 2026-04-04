@@ -23,6 +23,7 @@ class Document(db.Model):
     file_size = db.Column(db.Integer, nullable=True)  # bytes
     category = db.Column(db.String(50), default='general')  # assessment, report, plan, id_document, other
     description = db.Column(db.Text, nullable=True)
+    storage_key = db.Column(db.String(512), nullable=True)  # S3/R2 object key; if set, filename holds the key
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     # Relationships
@@ -42,6 +43,7 @@ class Document(db.Model):
             'file_size': self.file_size,
             'category': self.category,
             'description': self.description,
+            'storage_key': self.storage_key,
             'created_at': self.created_at.isoformat() if self.created_at else None,
         }
 

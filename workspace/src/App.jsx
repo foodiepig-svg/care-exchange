@@ -19,6 +19,7 @@ import Notifications from './pages/Notifications'
 import Documents from './pages/Documents'
 import ConsentSettings from './pages/ConsentSettings'
 import Goals from './pages/Goals'
+import CarePlans from './pages/CarePlans'
 import ProviderSendUpdates from './pages/ProviderSendUpdates'
 import ProviderDashboard from './pages/ProviderDashboard'
 import CoordinatorParticipants from './pages/CoordinatorParticipants'
@@ -96,6 +97,7 @@ function App() {
             <Route path="documents" element={<Documents />} />
             <Route path="consent" element={<ConsentSettings />} />
             <Route path="goals" element={<Goals />} />
+            <Route path="care-plans" element={<CarePlans />} />
             <Route path="coordinator/participants" element={<CoordinatorParticipants />} />
             <Route path="coordinator/referrals" element={<CoordinatorReferrals />} />
 

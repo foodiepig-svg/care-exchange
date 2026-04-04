@@ -218,20 +218,15 @@ def update_progress(goal_id):
 @jwt_required()
 def get_goal_history(goal_id):
     """Get history of all changes to a specific goal."""
-    try:
-        user_id = int(get_jwt_identity())
-        goal = db.session.get(Goal, goal_id)
-        if not goal:
-            return jsonify({'error': 'Goal not found'}), 404
+    user_id = int(get_jwt_identity())
+    goal = db.session.get(Goal, goal_id)
+    if not goal:
+        return jsonify({'error': 'Goal not found'}), 404
 
-        participant = Participant.query.filter_by(user_id=user_id).first()
-        if not participant or goal.participant_id != participant.id:
-            return jsonify({'error': 'Forbidden'}), 403
+    participant = Participant.query.filter_by(user_id=user_id).first()
+    if not participant or goal.participant_id != participant.id:
+        return jsonify({'error': 'Forbidden'}), 403
 
-        history = GoalHistory.query.filter_by(goal_id=goal_id)\
-            .order_by(GoalHistory.created_at.desc()).all()
-        return jsonify({'history': [h.to_dict() for h in history]})
-    except Exception as e:
-        import traceback
-        traceback.print_exc()
-        return jsonify({'error': str(e), 'type': type(e).__name__}), 500
+    history = GoalHistory.query.filter_by(goal_id=goal_id)\
+        .order_by(GoalHistory.created_at.desc()).all()
+    return jsonify({'history': [h.to_dict() for h in history]})

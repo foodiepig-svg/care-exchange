@@ -236,10 +236,36 @@ def run_migration_v9():
     secret = request.headers.get('X-Migration-Secret', '')
     if secret != os.getenv('MIGRATION_SECRET', 'care-exchange-migrate-2026'):
         return jsonify({'error': 'Forbidden'}), 403
+
+    # First verify which tables exist
+    from sqlalchemy import text
+    try:
+        result = db.session.execute(text("SELECT tablename FROM pg_tables WHERE schemaname = 'public'"))
+        tables = [row[0] for row in result]
+        has_consent_history = 'consent_history' in tables
+        has_goal_history = 'goal_history' in tables
+    except Exception as e:
+        return jsonify({'success': False, 'error': f'Cannot query tables: {e}'}), 500
+
+    # If tables already exist, just return success
+    if has_consent_history and has_goal_history:
+        return jsonify({'success': True, 'message': 'Tables already exist', 'consent_history': True, 'goal_history': True})
+
+    # Run migration
     from flask_migrate import upgrade
     try:
         upgrade()
-        return jsonify({'success': True, 'message': 'Migration 009 applied'})
+        # Verify
+        result2 = db.session.execute(text("SELECT tablename FROM pg_tables WHERE schemaname = 'public'"))
+        tables2 = [row[0] for row in result2]
+        return jsonify({
+            'success': True,
+            'message': 'Migration 009 applied',
+            'tables_before': tables,
+            'tables_after': tables2,
+            'consent_history': 'consent_history' in tables2,
+            'goal_history': 'goal_history' in tables2,
+        })
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 

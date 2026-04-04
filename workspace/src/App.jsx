@@ -233,6 +233,18 @@ function App() {
           >
             <Route index element={<ProviderSendUpdates />} />
           </Route>
+
+          {/* Feature Requests — top-level protected route */}
+          <Route
+            path="/features"
+            element={
+              <ProtectedRoute>
+                <Layout />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<Features />} />
+          </Route>
         </Routes>
       </BrowserRouter>
     </AuthProvider>

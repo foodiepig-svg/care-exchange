@@ -230,9 +230,12 @@ def _referral_dict(r):
 # TODO: REMOVE AFTER USE — one-shot migration to add consent_history and goal_history tables
 
 @admin_bp.route('/migrate-v9', methods=['POST'])
-@admin_required
 def run_migration_v9():
-    """Run migration 009 to create consent_history and goal_history tables. Safe to call multiple times."""
+    """Run migration 009 to create consent_history and goal_history tables. Protected by MIGRATION_SECRET header."""
+    import os
+    secret = request.headers.get('X-Migration-Secret', '')
+    if secret != os.getenv('MIGRATION_SECRET', 'care-exchange-migrate-2026'):
+        return jsonify({'error': 'Forbidden'}), 403
     from flask_migrate import upgrade
     try:
         upgrade()

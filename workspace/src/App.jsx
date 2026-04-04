@@ -67,12 +67,6 @@ function App() {
           <Route path="/coordinator" element={<CoordinatorLanding />} />
           <Route path="/family" element={<FamilyLanding />} />
 
-          {/* Help Centre */}
-          <Route path="/help/participant" element={<ParticipantHelp />} />
-          <Route path="/help/provider" element={<ProviderHelp />} />
-          <Route path="/help/coordinator" element={<CoordinatorHelp />} />
-          <Route path="/help/family" element={<FamilyHelp />} />
-
           {/* Protected routes — all under /app/* */}
           <Route
             path="/app/*"
@@ -97,6 +91,12 @@ function App() {
             <Route path="consent" element={<ConsentSettings />} />
             <Route path="coordinator/participants" element={<CoordinatorParticipants />} />
             <Route path="coordinator/referrals" element={<CoordinatorReferrals />} />
+
+            {/* In-app help pages */}
+            <Route path="help/participant" element={<ParticipantHelp />} />
+            <Route path="help/provider" element={<ProviderHelp />} />
+            <Route path="help/coordinator" element={<CoordinatorHelp />} />
+            <Route path="help/family" element={<FamilyHelp />} />
           </Route>
 
           {/* Admin routes — protected, with Layout */}

@@ -15,6 +15,7 @@ import {
   Search,
   Settings,
   BarChart3,
+  HelpCircle,
 } from 'lucide-react'
 import { api } from '../services/api'
 
@@ -29,6 +30,10 @@ const navItems = [
   { to: '/notifications', icon: Bell, label: 'Notifications' },
   { to: '/documents', icon: Paperclip, label: 'Documents', roles: ['participant', 'family'] },
   { to: '/consent', icon: ShieldCheck, label: 'Consent', roles: ['participant', 'family'] },
+  { to: '/app/help/participant', icon: HelpCircle, label: 'Help', roles: ['participant'] },
+  { to: '/app/help/provider', icon: HelpCircle, label: 'Help', roles: ['provider'] },
+  { to: '/app/help/coordinator', icon: HelpCircle, label: 'Help', roles: ['coordinator'] },
+  { to: '/app/help/family', icon: HelpCircle, label: 'Help', roles: ['family'] },
 ]
 
 const adminNavItems = [

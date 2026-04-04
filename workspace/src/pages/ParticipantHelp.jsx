@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import {
-  ShieldCheck, ChevronDown, ArrowRight, Search, BookOpen,
+  ChevronDown, Search, BookOpen,
   CheckCircle2, ArrowUpRight, Plus, Users, FileText, Bell,
-  HeartHandshake, Settings, Link2, Eye, LogIn, Home, Lock
+  HeartHandshake, Settings, Link2, Eye, LogIn, Home, Lock,
+  ArrowLeft
 } from 'lucide-react'
 
 function Section({ id, title, icon: Icon, children }) {
@@ -77,32 +78,16 @@ const tableOfContents = [
 ]
 
 export default function ParticipantHelp() {
+  const navigate = useNavigate()
+
   return (
     <div className="min-h-screen bg-slate-50">
+      <div className="max-w-5xl mx-auto px-6 py-8">
+        <button onClick={() => navigate(-1)} className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-teal-600 mb-6 transition-colors">
+          <ArrowLeft size={14} /> Back
+        </button>
 
-      {/* ── Header ─────────────────────────────────────────────── */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
-        <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link to="/" className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-teal-600 flex items-center justify-center">
-                <ShieldCheck size={18} className="text-white" />
-              </div>
-              <span className="font-bold text-slate-900 text-lg">Care Exchange</span>
-            </Link>
-            <span className="text-slate-300">›</span>
-            <span className="text-sm text-slate-500">Help Centre</span>
-            <span className="text-slate-300">›</span>
-            <span className="text-sm text-teal-600 font-semibold">Participant Guide</span>
-          </div>
-          <Link to="/login" className="text-sm font-medium text-slate-600 hover:text-teal-600 transition-colors">
-            Sign in →
-          </Link>
-        </div>
-      </header>
-
-      <div className="max-w-5xl mx-auto px-6 py-10">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-10">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
 
           {/* ── Sidebar ────────────────────────────────────────── */}
           <aside className="lg:col-span-1">
@@ -138,17 +123,17 @@ export default function ParticipantHelp() {
           <main className="lg:col-span-3">
 
             {/* Page header */}
-            <div className="bg-white rounded-2xl border border-slate-200 p-8 mb-8">
-              <div className="inline-flex items-center gap-2 bg-teal-100 text-teal-700 text-xs font-semibold px-3 py-1.5 rounded-full mb-4">
+            <div className="bg-white rounded-2xl border border-slate-200 p-6 mb-6">
+              <div className="inline-flex items-center gap-2 bg-teal-100 text-teal-700 text-xs font-semibold px-3 py-1.5 rounded-full mb-3">
                 Participant Guide
               </div>
-              <h1 className="text-3xl font-bold text-slate-900 mb-3">Help Centre: Participant Guide</h1>
-              <p className="text-slate-500 leading-relaxed">
+              <h1 className="text-2xl font-bold text-slate-900 mb-2">Help Centre: Participant Guide</h1>
+              <p className="text-slate-500 text-sm leading-relaxed">
                 Everything you need to know about using Care Exchange as a participant. From setting up your account to managing consent and sending referrals.
               </p>
             </div>
 
-            <div className="bg-white rounded-2xl border border-slate-200 divide-y divide-slate-200 px-8">
+            <div className="bg-white rounded-2xl border border-slate-200 divide-y divide-slate-200 px-6">
 
               {/* ── Getting Started ───────────────────────────────── */}
               <Section id="getting-started" title="Getting Started" icon={LogIn}>
@@ -310,19 +295,6 @@ export default function ParticipantHelp() {
             </div>
           </main>
         </div>
-      </div>
-
-      <footer className="bg-white border-t border-slate-200 py-8 mt-16">
-        <div className="max-w-5xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-7 h-7 rounded-lg bg-teal-600 flex items-center justify-center">
-              <ShieldCheck size={14} className="text-white" />
-            </div>
-            <span className="font-bold text-slate-700 text-sm">Care Exchange</span>
-          </div>
-          <p className="text-xs text-slate-400">Participant Help Centre. Last updated April 2026.</p>
-        </div>
-      </footer>
     </div>
   )
 }

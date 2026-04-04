@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import {
-  ShieldCheck, ChevronDown, Search, BookOpen,
+  ShieldCheck, ArrowLeft, ChevronDown, Search, BookOpen,
   ArrowUpRight, Users, Eye, Bell, MessageSquare,
   Settings, LogIn, HeartHandshake, Lock, AlertCircle
 } from 'lucide-react'
@@ -77,31 +77,17 @@ const tableOfContents = [
 ]
 
 export default function FamilyHelp() {
+  const navigate = useNavigate()
+
   return (
     <div className="min-h-screen bg-slate-50">
+      <div className="max-w-5xl mx-auto px-6 py-8">
+        <button onClick={() => navigate(-1)} className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-rose-600 mb-6 transition-colors">
+          <ArrowLeft size=14 /> Back
+        </button>
 
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
-        <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link to="/" className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-rose-500 flex items-center justify-center">
-                <ShieldCheck size={18} className="text-white" />
-              </div>
-              <span className="font-bold text-slate-900 text-lg">Care Exchange</span>
-            </Link>
-            <span className="text-slate-300">›</span>
-            <span className="text-sm text-slate-500">Help Centre</span>
-            <span className="text-slate-300">›</span>
-            <span className="text-sm text-rose-500 font-semibold">Family Guide</span>
-          </div>
-          <Link to="/login" className="text-sm font-medium text-slate-600 hover:text-rose-500 transition-colors">
-            Sign in →
-          </Link>
-        </div>
-      </header>
-
-      <div className="max-w-5xl mx-auto px-6 py-10">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-10">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+<div className="grid grid-cols-1 lg:grid-cols-4 gap-10">
 
           <aside className="lg:col-span-1">
             <div className="sticky top-24">
@@ -306,19 +292,11 @@ export default function FamilyHelp() {
             </div>
           </main>
         </div>
-      </div>
+      </div></div>
+  )
 
-      <footer className="bg-white border-t border-slate-200 py-8 mt-16">
-        <div className="max-w-5xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-7 h-7 rounded-lg bg-rose-500 flex items-center justify-center">
-              <ShieldCheck size={14} className="text-white" />
-            </div>
-            <span className="font-bold text-slate-700 text-sm">Care Exchange</span>
-          </div>
-          <p className="text-xs text-slate-400">Family & Carer Help Centre. Last updated April 2026.</p>
         </div>
-      </footer>
+      </div>
     </div>
   )
 }

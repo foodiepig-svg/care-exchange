@@ -119,30 +119,6 @@ const roles = [
   },
 ]
 
-const testimonials = [
-  {
-    quote: "Finally, a platform that puts the participant in the driver's seat. The consent model is exactly what NDIS needed.",
-    author: 'Sarah M.',
-    role: 'Support Coordinator, Melbourne',
-    avatar: 'SM',
-    color: 'bg-teal-600',
-  },
-  {
-    quote: "As a provider, I spend less time on paperwork and more time with clients. The structured updates are a game changer.",
-    author: 'James T.',
-    role: 'Physiotherapy Practice Manager, Brisbane',
-    avatar: 'JT',
-    color: 'bg-violet-600',
-  },
-  {
-    quote: "My daughter has a rare disability with six providers. Care Exchange means I finally know what's happening across all of them.",
-    author: 'Michelle R.',
-    role: 'Parent and Carer, Sydney',
-    avatar: 'MR',
-    color: 'bg-rose-600',
-  },
-]
-
 const faqs = [
   {
     q: 'Is Care Exchange an approved NDIS platform?',
@@ -530,44 +506,6 @@ export default function LandingPage() {
                     >
                       Learn more →
                     </Link>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ── Testimonials ──────────────────────────────────────────────── */}
-        <section className="py-24 bg-white border-t border-slate-200">
-          <div className="max-w-6xl mx-auto px-6">
-            <div className="text-center mb-16">
-              <div className="inline-flex items-center gap-2 bg-amber-50 text-amber-700 text-xs font-semibold px-3 py-1.5 rounded-full mb-4">
-                Early Feedback
-              </div>
-              <h2 className="text-4xl font-bold text-slate-900 mb-4">
-                What the NDIS community is saying
-              </h2>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {testimonials.map(({ quote, author, role, avatar, color }) => (
-                <div key={author} className="bg-slate-50 rounded-2xl p-7 border border-slate-200">
-                  <div className="flex items-center gap-1 mb-4">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} size={14} className="text-amber-400" fill="currentColor" />
-                    ))}
-                  </div>
-                  <blockquote className="text-slate-700 text-sm leading-relaxed mb-6">
-                    "{quote}"
-                  </blockquote>
-                  <div className="flex items-center gap-3">
-                    <div className={`w-9 h-9 rounded-full ${color} flex items-center justify-center text-white text-xs font-bold`}>
-                      {avatar}
-                    </div>
-                    <div>
-                      <div className="font-semibold text-slate-900 text-sm">{author}</div>
-                      <div className="text-slate-400 text-xs">{role}</div>
-                    </div>
                   </div>
                 </div>
               ))}

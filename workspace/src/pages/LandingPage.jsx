@@ -146,7 +146,7 @@ const faqs = [
   },
   {
     q: 'Is Care Exchange open for sign-ups?',
-    a: "We're currently in closed beta — we're personally reviewing every application to ensure the platform is ready before opening up. Register your interest below and we'll be in touch within 2-4 weeks.",
+    a: "We're currently in closed beta — a small group of coordinators, providers, and participants are already using it. Register below and you'll get login details to come and play.",
   },
 ]
 
@@ -575,7 +575,7 @@ export default function LandingPage() {
               </h2>
               <p className="text-slate-500 text-lg leading-relaxed">
                 We're reviewing every application personally before granting access.
-                Tell us about yourself and we'll be in touch within 2-4 weeks.
+                Tell us about yourself and we'll send you login details to come and play.
               </p>
             </div>
 
@@ -670,7 +670,7 @@ export default function LandingPage() {
                   )}
                 </button>
                 <p className="text-center text-xs text-slate-400">
-                  No spam. We'll review your application and respond within 2-4 weeks.
+                  No spam. You'll get login details via email shortly after registering.
                 </p>
               </form>
             </div>

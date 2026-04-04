@@ -87,8 +87,7 @@ class EmailService:
     <p>We've received your registration and we're excited to have you on the waitlist.</p>
     <p><strong>What happens next?</strong></p>
     <ul style="line-height: 1.8;">
-        <li>We review every application personally — this takes about 2-4 weeks.</li>
-        <li>If you're approved, we'll send you login details and an onboarding guide.</li>
+        <li>You'll get login details and a quick onboarding guide via email.</li>
         <li>We'll also send you a short survey to help us understand your needs better.</li>
     </ul>
     <p style="text-align: center; color: #6b7280; font-size: 14px; margin-top: 24px;">

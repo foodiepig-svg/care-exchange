@@ -31,8 +31,10 @@ import ParticipantHelp from './pages/ParticipantHelp'
 import ProviderHelp from './pages/ProviderHelp'
 import CoordinatorHelp from './pages/CoordinatorHelp'
 import FamilyHelp from './pages/FamilyHelp'
+import Support from './pages/Support'
 import AdminUsers from './pages/AdminUsers'
 import AdminSettings from './pages/AdminSettings'
+import AdminTickets from './pages/AdminTickets'
 import Layout from './components/Layout'
 
 function ProtectedRoute({ children }) {
@@ -97,6 +99,9 @@ function App() {
             <Route path="help/provider" element={<ProviderHelp />} />
             <Route path="help/coordinator" element={<CoordinatorHelp />} />
             <Route path="help/family" element={<FamilyHelp />} />
+
+            {/* Support */}
+            <Route path="support" element={<Support />} />
           </Route>
 
           {/* Admin routes — protected, with Layout */}
@@ -112,6 +117,7 @@ function App() {
           >
             <Route index element={<AdminDashboard />} />
             <Route path="users" element={<AdminUsers />} />
+            <Route path="tickets" element={<AdminTickets />} />
             <Route path="settings" element={<AdminSettings />} />
           </Route>
 

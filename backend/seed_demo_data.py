@@ -212,6 +212,62 @@ def create_demo_data(app, db):
         db.session.rollback()
         print(f"  [WARN] Could not create referrals: {e}")
 
+    # ── Create sample tickets ──────────────────────────────────────────────
+    try:
+        from models.ticket import Ticket, TicketComment
+
+        participant_user = User.query.filter_by(email="participant@demo.com").first()
+        provider_user = User.query.filter_by(email="provider@demo.com").first()
+        coordinator_user = User.query.filter_by(email="coordinator@demo.com").first()
+
+        if participant_user:
+            t1 = Ticket(
+                user_id=participant_user.id,
+                title="Cannot view provider updates on mobile",
+                description="When I open Care Exchange on my phone, I can see the care team but any updates from providers just show a spinner. This works fine on my laptop.",
+                type="issue",
+                status="open",
+                priority="high",
+            )
+            db.session.add(t1)
+            db.session.flush()
+
+            c1 = TicketComment(
+                ticket_id=t1.id,
+                author_id=participant_user.id,
+                author_role="participant",
+                comment="It's an iPhone 14, using Safari. I've attached a screenshot.",
+            )
+            db.session.add(c1)
+
+        if provider_user:
+            t2 = Ticket(
+                user_id=provider_user.id,
+                title="Request: bulk upload for progress notes",
+                description="We submit weekly progress notes for about 15 participants. Currently each update is entered individually. A CSV or bulk upload feature would save us significant time.",
+                type="feature",
+                status="triaged",
+                priority="medium",
+            )
+            db.session.add(t2)
+
+        if coordinator_user:
+            t3 = Ticket(
+                user_id=coordinator_user.id,
+                title="Referral notifications sometimes delayed by 10+ minutes",
+                description="We're noticing referral alerts don't come through for several minutes, which causes issues when we need to act quickly. Please investigate the notification queue.",
+                type="issue",
+                status="in_progress",
+                priority="high",
+            )
+            db.session.add(t3)
+
+        db.session.commit()
+        print("  [CREATED] Sample tickets")
+    except Exception as e:
+        db.session.rollback()
+        print(f"  [WARN] Could not create tickets: {e}")
+
     return created, errors
 
 

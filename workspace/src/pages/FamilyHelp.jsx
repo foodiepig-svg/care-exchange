@@ -77,17 +77,16 @@ const tableOfContents = [
 ]
 
 export default function FamilyHelp() {
-  const navigate = useNavigate()
-
   return (
     <div className="min-h-screen bg-slate-50">
-      <div className="max-w-5xl mx-auto px-6 py-8">
+
+
+      <div className="max-w-5xl mx-auto px-6 py-10">
         <button onClick={() => navigate(-1)} className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-rose-600 mb-6 transition-colors">
           <ArrowLeft size={14} /> Back
         </button>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-<div className="grid grid-cols-1 lg:grid-cols-4 gap-10">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-10">
 
           <aside className="lg:col-span-1">
             <div className="sticky top-24">
@@ -292,11 +291,8 @@ export default function FamilyHelp() {
             </div>
           </main>
         </div>
-      </div></div>
-  )
-
-        </div>
       </div>
+
     </div>
   )
 }

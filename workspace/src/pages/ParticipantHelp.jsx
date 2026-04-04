@@ -1,10 +1,9 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {
-  ChevronDown, Search, BookOpen,
+  ShieldCheck, ArrowLeft, ChevronDown, ArrowRight, Search, BookOpen,
   CheckCircle2, ArrowUpRight, Plus, Users, FileText, Bell,
-  HeartHandshake, Settings, Link2, Eye, LogIn, Home, Lock,
-  ArrowLeft
+  HeartHandshake, Settings, Link2, Eye, LogIn, Home, Lock
 } from 'lucide-react'
 
 function Section({ id, title, icon: Icon, children }) {
@@ -78,16 +77,17 @@ const tableOfContents = [
 ]
 
 export default function ParticipantHelp() {
-  const navigate = useNavigate()
-
   return (
     <div className="min-h-screen bg-slate-50">
-      <div className="max-w-5xl mx-auto px-6 py-8">
-        <button onClick={() => navigate(-1)} className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-teal-600 mb-6 transition-colors">
+
+      {/* ── Header ─────────────────────────────────────────────── */}
+
+      <div className="max-w-5xl mx-auto px-6 py-10">
+        <button onClick={() => navigate(-1)} className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-amber-600 mb-6 transition-colors">
           <ArrowLeft size={14} /> Back
         </button>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-10">
 
           {/* ── Sidebar ────────────────────────────────────────── */}
           <aside className="lg:col-span-1">
@@ -123,17 +123,17 @@ export default function ParticipantHelp() {
           <main className="lg:col-span-3">
 
             {/* Page header */}
-            <div className="bg-white rounded-2xl border border-slate-200 p-6 mb-6">
-              <div className="inline-flex items-center gap-2 bg-teal-100 text-teal-700 text-xs font-semibold px-3 py-1.5 rounded-full mb-3">
+            <div className="bg-white rounded-2xl border border-slate-200 p-8 mb-8">
+              <div className="inline-flex items-center gap-2 bg-teal-100 text-teal-700 text-xs font-semibold px-3 py-1.5 rounded-full mb-4">
                 Participant Guide
               </div>
-              <h1 className="text-2xl font-bold text-slate-900 mb-2">Help Centre: Participant Guide</h1>
-              <p className="text-slate-500 text-sm leading-relaxed">
+              <h1 className="text-3xl font-bold text-slate-900 mb-3">Help Centre: Participant Guide</h1>
+              <p className="text-slate-500 leading-relaxed">
                 Everything you need to know about using Care Exchange as a participant. From setting up your account to managing consent and sending referrals.
               </p>
             </div>
 
-            <div className="bg-white rounded-2xl border border-slate-200 divide-y divide-slate-200 px-6">
+            <div className="bg-white rounded-2xl border border-slate-200 divide-y divide-slate-200 px-8">
 
               {/* ── Getting Started ───────────────────────────────── */}
               <Section id="getting-started" title="Getting Started" icon={LogIn}>
@@ -295,6 +295,8 @@ export default function ParticipantHelp() {
             </div>
           </main>
         </div>
+      </div>
+
     </div>
   )
 }

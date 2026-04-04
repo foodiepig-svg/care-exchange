@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import LandingPage from './pages/LandingPage'
+import ProjectPage from './pages/ProjectPage'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import Dashboard from './pages/Dashboard'
@@ -61,6 +62,7 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/project" element={<ProjectPage />} />
           <Route path="/app/dashboard" element={<Navigate to="/dashboard" replace />} />
 
           {/* Role-specific landing pages */}

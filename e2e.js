@@ -14,8 +14,8 @@
 const { chromium } = require('playwright');
 const crypto = require('crypto');
 
-const BASE_URL     = 'http://localhost:3000';
-const API_BASE     = 'http://localhost:5000/api';
+const BASE_URL     = 'https://care-exchange.onrender.com';
+const API_BASE     = 'https://care-exchange.onrender.com/api';
 const RESULTS      = [];
 let   browser;
 let   context;

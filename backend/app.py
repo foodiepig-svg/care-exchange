@@ -57,6 +57,7 @@ def create_app():
     from routes.admin import admin_bp
     from routes.tickets import ticket_bp
     from routes.feature_requests import feature_bp
+    from routes.interest import interest_bp
 
     app.register_blueprint(auth_bp, url_prefix='/api/v1/auth')
     app.register_blueprint(participants_bp, url_prefix='/api/v1/participants')
@@ -73,6 +74,7 @@ def create_app():
     app.register_blueprint(admin_bp, url_prefix='/api/v1/admin')
     app.register_blueprint(ticket_bp, url_prefix='/api/v1')
     app.register_blueprint(feature_bp, url_prefix='/api/v1/feature-requests')
+    app.register_blueprint(interest_bp, url_prefix='/api/v1')
 
     # Auto-migrate: add any columns that exist in model but not in DB (failsafe)
     with app.app_context():
@@ -88,6 +90,21 @@ def create_app():
                     END IF;
                     IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='documents' AND column_name='storage_key') THEN
                         ALTER TABLE documents ADD COLUMN storage_key VARCHAR(512);
+                    END IF;
+                    IF NOT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name='interest_registrations') THEN
+                        CREATE TABLE interest_registrations (
+                            id SERIAL PRIMARY KEY,
+                            email VARCHAR(255) NOT NULL,
+                            full_name VARCHAR(255) NOT NULL,
+                            role VARCHAR(50) NOT NULL,
+                            organisation VARCHAR(255),
+                            notes TEXT,
+                            status VARCHAR(20) DEFAULT 'pending',
+                            survey_completed BOOLEAN DEFAULT FALSE,
+                            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                        );
+                        CREATE INDEX ix_interest_registrations_email ON interest_registrations(email);
                     END IF;
                 END
                 $$;

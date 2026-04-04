@@ -144,6 +144,10 @@ const faqs = [
     q: 'What happens to my data if I stop using the platform?',
     a: "You can export all your data at any time as a PDF or structured file. If you close your account, we delete your personal data within 30 days in accordance with privacy laws.",
   },
+  {
+    q: 'Is Care Exchange open for sign-ups?',
+    a: "We're currently in closed beta — we're personally reviewing every application to ensure the platform is ready before opening up. Register your interest below and we'll be in touch within 2-4 weeks.",
+  },
 ]
 
 // ── Accordion item ────────────────────────────────────────────────────────────
@@ -193,15 +197,26 @@ function Nav() {
         </nav>
 
         <div className="hidden md:flex items-center gap-3">
-          <Link to="/login" className="text-sm font-medium text-slate-600 hover:text-teal-600 transition-colors px-3 py-2">
-            Sign in
-          </Link>
-          <Link
-            to="/register"
+          <a href="#features" className="text-sm font-medium text-slate-600 hover:text-teal-600 transition-colors px-3 py-2">
+            Features
+          </a>
+          <a href="#how-it-works" className="text-sm font-medium text-slate-600 hover:text-teal-600 transition-colors px-3 py-2">
+            How it Works
+          </a>
+          <a href="#who-its-for" className="text-sm font-medium text-slate-600 hover:text-teal-600 transition-colors px-3 py-2">
+            Who It's For
+          </a>
+          <a href="#faq" className="text-sm font-medium text-slate-600 hover:text-teal-600 transition-colors px-3 py-2">
+            FAQ
+          </a>
+          <button
+            onClick={() => {
+              document.getElementById('register-interest')?.scrollIntoView({ behavior: 'smooth' })
+            }}
             className="inline-flex items-center gap-1.5 bg-teal-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-teal-700 transition-colors"
           >
-            Get Started <ArrowRight size={14} />
-          </Link>
+            Register Interest <ArrowRight size={14} />
+          </button>
         </div>
 
         <button className="md:hidden p-2 text-slate-500" onClick={() => setOpen(v => !v)}>
@@ -215,13 +230,16 @@ function Nav() {
           <a href="#how-it-works" onClick={() => setOpen(false)} className="block text-sm text-slate-600 py-2">How it Works</a>
           <a href="#who-its-for" onClick={() => setOpen(false)} className="block text-sm text-slate-600 py-2">Who It's For</a>
           <a href="#faq" onClick={() => setOpen(false)} className="block text-sm text-slate-600 py-2">FAQ</a>
-          <div className="pt-2 border-t border-slate-100 flex gap-3">
-            <Link to="/login" onClick={() => setOpen(false)} className="flex-1 text-center text-sm font-medium text-slate-600 border border-slate-200 rounded-lg py-2">
-              Sign in
-            </Link>
-            <Link to="/register" onClick={() => setOpen(false)} className="flex-1 text-center text-sm font-semibold text-white bg-teal-600 rounded-lg py-2">
-              Get Started
-            </Link>
+          <div className="pt-2 border-t border-slate-100">
+            <button
+              onClick={() => {
+                setOpen(false)
+                document.getElementById('register-interest')?.scrollIntoView({ behavior: 'smooth' })
+              }}
+              className="w-full text-center text-sm font-semibold text-white bg-teal-600 rounded-lg py-2.5"
+            >
+              Register Interest
+            </button>
           </div>
         </div>
       )}
@@ -232,6 +250,38 @@ function Nav() {
 // ── Main component ─────────────────────────────────────────────────────────────
 
 export default function LandingPage() {
+  const [formData, setFormData] = useState({ full_name: '', email: '', role: '', organisation: '', notes: '' })
+  const [interestSubmitting, setInterestSubmitting] = useState(false)
+  const [interestMessage, setInterestMessage] = useState('')
+  const [interestError, setInterestError] = useState(false)
+
+  async function handleInterestSubmit(e) {
+    e.preventDefault()
+    setInterestSubmitting(true)
+    setInterestMessage('')
+    try {
+      const res = await fetch('/api/v1/register-interest', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      })
+      const data = await res.json()
+      if (res.ok) {
+        setInterestMessage(data.message)
+        setInterestError(false)
+        setFormData({ full_name: '', email: '', role: '', organisation: '', notes: '' })
+      } else {
+        setInterestMessage(data.error || 'Something went wrong. Please try again.')
+        setInterestError(true)
+      }
+    } catch {
+      setInterestMessage('Network error. Please check your connection and try again.')
+      setInterestError(true)
+    } finally {
+      setInterestSubmitting(false)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
 
@@ -252,7 +302,7 @@ export default function LandingPage() {
               {/* Badge */}
               <div className="inline-flex items-center gap-2 bg-teal-50 border border-teal-200 text-teal-700 text-xs font-semibold px-3 py-1.5 rounded-full mb-8">
                 <span className="w-1.5 h-1.5 bg-teal-500 rounded-full animate-pulse" />
-                Now in open beta — free during launch
+                Now accepting waitlist applications
               </div>
 
               {/* Headline */}
@@ -509,6 +559,120 @@ export default function LandingPage() {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── Register Interest ─────────────────────────────────────────── */}
+        <section id="register-interest" className="py-24 scroll-mt-20 bg-white border-t border-slate-200">
+          <div className="max-w-2xl mx-auto px-6">
+            <div className="text-center mb-10">
+              <div className="inline-flex items-center gap-2 bg-teal-50 text-teal-700 text-xs font-semibold px-3 py-1.5 rounded-full mb-4">
+                Closed Beta
+              </div>
+              <h2 className="text-4xl font-bold text-slate-900 mb-4">
+                Join the waitlist
+              </h2>
+              <p className="text-slate-500 text-lg leading-relaxed">
+                We're reviewing every application personally before granting access.
+                Tell us about yourself and we'll be in touch within 2-4 weeks.
+              </p>
+            </div>
+
+            <div className="bg-slate-50 rounded-2xl border border-slate-200 p-8">
+              <form onSubmit={handleInterestSubmit} className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1.5">Full name *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. Sarah Mitchell"
+                      className="w-full px-4 py-2.5 border border-slate-200 rounded-lg text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent bg-white"
+                      value={formData.full_name}
+                      onChange={e => setFormData(d => ({ ...d, full_name: e.target.value }))}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1.5">Email address *</label>
+                    <input
+                      type="email"
+                      required
+                      placeholder="you@example.com"
+                      className="w-full px-4 py-2.5 border border-slate-200 rounded-lg text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent bg-white"
+                      value={formData.email}
+                      onChange={e => setFormData(d => ({ ...d, email: e.target.value }))}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1.5">Your role *</label>
+                    <select
+                      required
+                      className="w-full px-4 py-2.5 border border-slate-200 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent bg-white"
+                      value={formData.role}
+                      onChange={e => setFormData(d => ({ ...d, role: e.target.value }))}
+                    >
+                      <option value="">Select role...</option>
+                      <option value="coordinator">Support Coordinator</option>
+                      <option value="provider">Service Provider</option>
+                      <option value="participant">NDIS Participant</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1.5">Organisation</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Bright Path Support Co."
+                      className="w-full px-4 py-2.5 border border-slate-200 rounded-lg text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent bg-white"
+                      value={formData.organisation}
+                      onChange={e => setFormData(d => ({ ...d, organisation: e.target.value }))}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                    Anything else you'd like us to know?
+                  </label>
+                  <textarea
+                    rows={3}
+                    placeholder="e.g. I manage 30 participants and currently track everything in spreadsheets..."
+                    className="w-full px-4 py-2.5 border border-slate-200 rounded-lg text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent bg-white resize-none"
+                    value={formData.notes}
+                    onChange={e => setFormData(d => ({ ...d, notes: e.target.value }))}
+                  />
+                </div>
+
+                {interestMessage && (
+                  <div className={`rounded-lg px-4 py-3 text-sm ${interestError ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-teal-50 text-teal-700 border border-teal-200'}`}>
+                    {interestMessage}
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={interestSubmitting}
+                  className="w-full bg-teal-600 hover:bg-teal-700 disabled:bg-teal-400 text-white text-sm font-semibold py-3 rounded-lg transition-colors flex items-center justify-center gap-2"
+                >
+                  {interestSubmitting ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      Submitting...
+                    </>
+                  ) : (
+                    <>
+                      Join the waitlist <ArrowRight size={14} />
+                    </>
+                  )}
+                </button>
+                <p className="text-center text-xs text-slate-400">
+                  No spam. We'll review your application and respond within 2-4 weeks.
+                </p>
+              </form>
             </div>
           </div>
         </section>

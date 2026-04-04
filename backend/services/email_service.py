@@ -82,6 +82,27 @@ class EmailService:
     <p>If you didn't request a password reset, you can safely ignore this email — your password will not be changed.</p>
     """
 
+    INTEREST_REGISTRATION_CONTENT = """
+    <h2>Thanks for your interest in Care Exchange!</h2>
+    <p>We've received your registration and we're excited to have you on the waitlist.</p>
+    <p><strong>What happens next?</strong></p>
+    <ul style="line-height: 1.8;">
+        <li>We review every application personally — this takes about 2-4 weeks.</li>
+        <li>If you're approved, we'll send you login details and an onboarding guide.</li>
+        <li>We'll also send you a short survey to help us understand your needs better.</li>
+    </ul>
+    <p style="text-align: center; color: #6b7280; font-size: 14px; margin-top: 24px;">
+        In the meantime, here's a quick summary of what Care Exchange does:
+    </p>
+    <p style="background: #f0fdf4; border-left: 4px solid #10b981; padding: 16px; border-radius: 0 8px 8px 0; font-size: 14px;">
+        Care Exchange is the participant-controlled coordination layer for the NDIS — connecting support coordinators, providers, and participants through secure referral links, structured updates, and shared goal tracking.
+    </p>
+    <p style="text-align: center; margin-top: 24px;">
+        <a href="$survey_url" class="button" style="background: #10b981;">Complete our feedback survey</a>
+    </p>
+    <p style="text-align: center; color: #6b7280; font-size: 13px;">The survey takes less than 5 minutes and helps us build something that actually works for you.</p>
+    """
+
     @classmethod
     def send_email(cls, to_email, subject, html_content):
         """Sends an email via Elastic Email HTTP API.
@@ -161,3 +182,18 @@ class EmailService:
         subject = "Reset your Care Exchange password"
         html_content = cls.PASSWORD_RESET_CONTENT.replace("$reset_url", reset_url)
         return cls.send_email(user.email, subject, html_content)
+
+    @classmethod
+    def send_interest_registration_email(cls, registration, survey_url=""):
+        """Sends a confirmation email to someone who registered interest.
+
+        Args:
+            registration: InterestRegistration model instance
+            survey_url: URL to the feedback survey
+
+        Returns:
+            True if email was sent
+        """
+        subject = "You're on the Care Exchange waitlist"
+        html_content = cls.INTEREST_REGISTRATION_CONTENT.replace("$survey_url", survey_url)
+        return cls.send_email(registration.email, subject, html_content)

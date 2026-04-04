@@ -226,6 +226,21 @@ def _referral_dict(r):
     }
 
 
+# ─── One-shot migration runner ────────────────────────────────────────────────
+# TODO: REMOVE AFTER USE — one-shot migration to add consent_history and goal_history tables
+
+@admin_bp.route('/migrate-v9', methods=['POST'])
+@admin_required
+def run_migration_v9():
+    """Run migration 009 to create consent_history and goal_history tables. Safe to call multiple times."""
+    from flask_migrate import upgrade
+    try:
+        upgrade()
+        return jsonify({'success': True, 'message': 'Migration 009 applied'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
 # ─── Platform Settings ────────────────────────────────────────────────────────
 
 @admin_bp.route('/settings', methods=['GET'])

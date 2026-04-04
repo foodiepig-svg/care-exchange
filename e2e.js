@@ -196,10 +196,15 @@ async function testRegisterPage() {
   log('Email input present', (await emailInput.count()) > 0 ? 'PASS' : 'FAIL', '');
   log('Password input present', (await pwdInput.count()) > 0 ? 'PASS' : 'FAIL', '');
 
-  // Submit without role selected — click the form submit button
+  // Fill required fields (name + email) so browser doesn't block form submission
+  await nameInput.fill('Test User');
+  await emailInput.fill('test@example.com');
+  await pwdInput.fill('Test@1234');
+
+  // Submit without role selected — should show "Please select a role"
   const submitBtn = p.locator('button[type="submit"]');
   await submitBtn.click();
-  await p.waitForTimeout(800);
+  await p.waitForTimeout(1000);
   // The error message appears on the form — look for "Please select a role" text
   const errorMsg = p.locator('text=Please select a role');
   log('Empty submit shows error', (await errorMsg.count()) > 0 ? 'PASS' : 'FAIL', '');
@@ -229,7 +234,8 @@ async function testLoginFlow() {
     finalUrl.includes('dashboard') || finalUrl === BASE_URL + '/' ? 'PASS' : 'FAIL',
     finalUrl);
 
-  await p.close();
+  // Keep page open for authenticated tests that follow in the same page
+  return p; // hand off page to next test
 }
 
 async function testDashboard() {
@@ -238,10 +244,18 @@ async function testDashboard() {
   const p = await context.newPage();
   const errors = await captureErrors(p);
 
+  // Login first, then navigate within the same page
   await loginAs(p, DEMO_ACCOUNTS.participant.email, TEST_PWD);
-  await p.goto(`${BASE_URL}/dashboard`, { waitUntil: 'networkidle', timeout: 15000 });
+  await p.waitForTimeout(1000);
 
-  // Check that main content area has rendered — sidebar nav items exist
+  // Use window.location to navigate — but first check if we're on a page with sidebar links
+  await p.evaluate(() => { window.location.href = '/dashboard'; });
+  await p.waitForTimeout(5000);
+
+  const dashUrl = p.url();
+  log('Dashboard URL correct', dashUrl.includes('dashboard') || dashUrl === BASE_URL + '/' ? 'PASS' : 'FAIL', dashUrl);
+
+  // Check that main content area has rendered
   const navItems = p.locator('[class*="sidebar"] a, [class*="nav"] a, nav a');
   log('Dashboard layout renders', (await navItems.count()) > 0 ? 'PASS' : 'FAIL',
     `found ${await navItems.count()} nav links`);
@@ -249,8 +263,9 @@ async function testDashboard() {
   const body = await p.locator('body').textContent();
   log('Dashboard has content', body.length > 50 ? 'PASS' : 'FAIL', `chars: ${body.length}`);
 
-  // Navigate to project page
-  await p.goto(`${BASE_URL}/project`, { waitUntil: 'networkidle', timeout: 15000 });
+  // Navigate to project page via window.location
+  await p.evaluate(() => { window.location.href = '/project'; });
+  await p.waitForTimeout(5000);
   const projectLoaded = await p.locator('h1').first().isVisible();
   log('Can navigate to project page', projectLoaded ? 'PASS' : 'FAIL', '');
 
@@ -315,7 +330,13 @@ async function testTicketsUser() {
   const errors = await captureErrors(p);
 
   await loginAs(p, DEMO_ACCOUNTS.participant.email, TEST_PWD);
-  await p.goto(`${BASE_URL}/app/support`, { waitUntil: 'networkidle', timeout: 15000 });
+  await p.waitForTimeout(1000);
+
+  // Use window.location to navigate — preserves React Router/AuthContext state
+  await p.evaluate(() => { window.location.href = '/app/support'; });
+  await p.waitForTimeout(5000);
+  const supportUrl = p.url();
+  log('Support page URL correct', supportUrl.includes('/app/support') ? 'PASS' : 'FAIL', supportUrl);
 
   log('Support page loads', (await p.locator('h1:has-text("Help & Support")').isVisible()) ? 'PASS' : 'FAIL', '');
 

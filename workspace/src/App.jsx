@@ -39,7 +39,8 @@ import AdminTickets from './pages/AdminTickets'
 import Layout from './components/Layout'
 
 function ProtectedRoute({ children }) {
-  const { user } = useAuth()
+  const { user, loading } = useAuth()
+  if (loading) return null  // Wait for AuthContext to validate token
   return user ? children : <Navigate to="/login" replace />
 }
 

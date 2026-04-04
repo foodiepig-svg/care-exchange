@@ -52,7 +52,7 @@ export default function Layout() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    api.get('/api/v1/notifications/unread-count')
+    api.get('/notifications/unread-count')
       .then(res => setNotifCount(res.data.unread_count || 0))
       .catch(() => {})
   }, [])

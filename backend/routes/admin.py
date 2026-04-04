@@ -238,47 +238,71 @@ def run_migration_v9():
         return jsonify({'error': 'Forbidden'}), 403
 
     from sqlalchemy import text
-    from flask_migrate import downgrade, upgrade
 
-    # Check which tables exist and current alembic version
+    # Check which tables exist
     try:
         result = db.session.execute(text("SELECT tablename FROM pg_tables WHERE schemaname = 'public'"))
         tables = sorted([row[0] for row in result])
-        has_ch = 'consent_history' in tables
-        has_gh = 'goal_history' in tables
-        version_result = db.session.execute(text("SELECT version_num FROM alembic_version"))
-        version_rows = [row[0] for row in version_result]
-        current_version = version_rows[0] if version_rows else None
     except Exception as e:
         return jsonify({'success': False, 'error': f'Cannot query DB: {e}'}), 500
+
+    has_ch = 'consent_history' in tables
+    has_gh = 'goal_history' in tables
 
     if has_ch and has_gh:
         return jsonify({'success': True, 'message': 'Tables already exist', 'consent_history': True, 'goal_history': True})
 
-    # If version is already at or past 009, we need to stamp back and re-run
-    # Otherwise flask_migrate upgrade() is a no-op
-    migration_ran = False
+    # No alembic_version table — run raw DDL directly
     try:
-        # Stamp to one before our migration
-        downgrade(revision='tickets_v1')
-        # Now run upgrade which should apply 009
-        upgrade()
-        migration_ran = True
+        # Create consent_history table
+        if not has_ch:
+            db.session.execute(text("""
+                CREATE TABLE consent_history (
+                    id SERIAL PRIMARY KEY,
+                    consent_id INTEGER REFERENCES consents(id),
+                    participant_id INTEGER NOT NULL REFERENCES participants(id),
+                    granted_to_id INTEGER NOT NULL REFERENCES users(id),
+                    data_categories TEXT,
+                    action VARCHAR(20) NOT NULL,
+                    actor_id INTEGER NOT NULL REFERENCES users(id),
+                    note VARCHAR(255),
+                    created_at TIMESTAMP DEFAULT NOW()
+                )
+            """))
+            db.session.execute(text("CREATE INDEX ix_consent_history_participant_id ON consent_history(participant_id)"))
+            db.session.execute(text("CREATE INDEX ix_consent_history_consent_id ON consent_history(consent_id)"))
+
+        # Create goal_history table
+        if not has_gh:
+            db.session.execute(text("""
+                CREATE TABLE goal_history (
+                    id SERIAL PRIMARY KEY,
+                    goal_id INTEGER NOT NULL REFERENCES goals(id),
+                    participant_id INTEGER NOT NULL REFERENCES participants(id),
+                    actor_id INTEGER REFERENCES users(id),
+                    action VARCHAR(50) NOT NULL,
+                    field_changed VARCHAR(50),
+                    old_value TEXT,
+                    new_value TEXT,
+                    note VARCHAR(255),
+                    created_at TIMESTAMP DEFAULT NOW()
+                )
+            """))
+            db.session.execute(text("CREATE INDEX ix_goal_history_goal_id ON goal_history(goal_id)"))
+            db.session.execute(text("CREATE INDEX ix_goal_history_participant_id ON goal_history(participant_id)"))
+
+        db.session.commit()
     except Exception as e:
-        return jsonify({'success': False, 'error': f'Migration failed: {e}'}), 500
+        db.session.rollback()
+        return jsonify({'success': False, 'error': f'DDL failed: {e}'}), 500
 
     # Verify
     result2 = db.session.execute(text("SELECT tablename FROM pg_tables WHERE schemaname = 'public'"))
     tables2 = sorted([row[0] for row in result2])
-    version_result2 = db.session.execute(text("SELECT version_num FROM alembic_version"))
-    version_rows2 = [row[0] for row in version_result2]
-    new_version = version_rows2[0] if version_rows2 else None
 
     return jsonify({
         'success': True,
-        'migration_ran': migration_ran,
-        'old_version': current_version,
-        'new_version': new_version,
+        'message': 'Tables created',
         'consent_history': 'consent_history' in tables2,
         'goal_history': 'goal_history' in tables2,
         'tables_added': [t for t in tables2 if t not in tables],

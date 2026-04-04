@@ -222,7 +222,12 @@ export default function Messages() {
         <p className="text-slate-500 mt-1">Communicate with your care team.</p>
       </div>
 
-      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden" style={{ height: 'calc(100vh - 220px)', minHeight: '500px' }}>
+      <div
+        className="bg-white rounded-xl border border-slate-200 overflow-hidden
+          flex flex-col
+          md:h-[calc(100vh-220px)] md:min-h-[500px] md:max-h-[calc(100vh-140px)]
+          md:flex-row"
+      >
         <div className="flex h-full">
           {(!isMobile || !showMobileThread) && (
             <div className="w-80 border-r border-slate-200 flex flex-col">
@@ -357,7 +362,7 @@ export default function Messages() {
           )}
 
           {(!isMobile || showMobileThread) && (
-            <div className="flex-1 flex flex-col">
+            <div className="flex-1 flex flex-col min-h-0">
               {selectedThread ? (
                 <>
                   <div className="p-4 border-b border-slate-200 flex items-center gap-3">
@@ -372,7 +377,7 @@ export default function Messages() {
                     </div>
                   </div>
 
-                  <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                  <div className="flex-1 overflow-y-auto p-4 space-y-3 min-h-0">
                     {threadMessages.length === 0 ? (
                       <div className="flex flex-col items-center justify-center h-full text-center">
                         <MessageSquare size={24} className="text-slate-300 mb-2" />

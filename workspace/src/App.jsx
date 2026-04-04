@@ -39,6 +39,7 @@ import AdminUsers from './pages/AdminUsers'
 import AdminSettings from './pages/AdminSettings'
 import AdminTickets from './pages/AdminTickets'
 import Layout from './components/Layout'
+import FamilyDashboard from './pages/FamilyDashboard'
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth()
@@ -73,6 +74,7 @@ function App() {
           <Route path="/provider" element={<ProviderLanding />} />
           <Route path="/coordinator" element={<CoordinatorLanding />} />
           <Route path="/family" element={<FamilyLanding />} />
+          <Route path="/family/dashboard" element={<FamilyDashboard />} />
 
           {/* Protected routes — all under /app/* */}
           <Route

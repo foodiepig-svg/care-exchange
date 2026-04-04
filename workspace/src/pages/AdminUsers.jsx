@@ -13,6 +13,7 @@ export default function AdminUsers() {
   const [activeFilter, setActiveFilter] = useState('')
   const [selectedUser, setSelectedUser] = useState(null)
   const [actionLoading, setActionLoading] = useState(false)
+  const [confirmAction, setConfirmAction] = useState(null) // { userId, action: 'suspend' | 'activate' }
 
   const fetchUsers = (p = 1) => {
     setLoading(true)
@@ -44,23 +45,20 @@ export default function AdminUsers() {
   }
 
   const handleSuspend = async (user) => {
-    if (!confirm(`Suspend ${user.full_name || user.email}?`)) return
-    setActionLoading(true)
-    try {
-      await api.put(`/admin/users/${user.id}/status`, { is_active: false })
-      fetchUsers(page)
-      setSelectedUser(null)
-    } catch (err) {
-      alert(err.response?.data?.error || 'Failed to update user')
-    } finally {
-      setActionLoading(false)
-    }
+    setConfirmAction({ userId: user.id, action: 'suspend', name: user.full_name || user.email })
   }
 
   const handleActivate = async (user) => {
+    setConfirmAction({ userId: user.id, action: 'activate', name: user.full_name || user.email })
+  }
+
+  const executeAction = async () => {
+    if (!confirmAction) return
+    const { userId, action } = confirmAction
     setActionLoading(true)
     try {
-      await api.put(`/admin/users/${user.id}/status`, { is_active: true })
+      await api.put(`/admin/users/${userId}/status`, { is_active: action === 'activate' })
+      setConfirmAction(null)
       fetchUsers(page)
       setSelectedUser(null)
     } catch (err) {
@@ -70,11 +68,19 @@ export default function AdminUsers() {
     }
   }
 
+  const [confirmRole, setConfirmRole] = useState(null) // { userId, newRole, name }
+
   const handleChangeRole = async (user, newRole) => {
-    if (!confirm(`Change ${user.full_name || user.email} role to "${newRole}"?`)) return
+    setConfirmRole({ userId: user.id, newRole, name: user.full_name || user.email })
+  }
+
+  const executeRoleChange = async () => {
+    if (!confirmRole) return
+    const { userId, newRole } = confirmRole
     setActionLoading(true)
     try {
-      await api.put(`/admin/users/${user.id}/role`, { role: newRole })
+      await api.put(`/admin/users/${userId}/role`, { role: newRole })
+      setConfirmRole(null)
       fetchUsers(page)
       setSelectedUser(null)
     } catch (err) {
@@ -169,13 +175,13 @@ export default function AdminUsers() {
                       </span>
                     </td>
                     <td className="px-4 py-3">
-                      {user.verified ? (
+                      {(user.is_active !== false) ? (
                         <span className="inline-flex items-center text-xs text-green-600">
                           <span className="w-1.5 h-1.5 rounded-full bg-green-500 mr-1.5"></span>Active
                         </span>
                       ) : (
-                        <span className="inline-flex items-center text-xs text-slate-400">
-                          <span className="w-1.5 h-1.5 rounded-full bg-slate-300 mr-1.5"></span>Unverified
+                        <span className="inline-flex items-center text-xs text-red-500">
+                          <span className="w-1.5 h-1.5 rounded-full bg-red-400 mr-1.5"></span>Suspended
                         </span>
                       )}
                     </td>
@@ -242,8 +248,8 @@ export default function AdminUsers() {
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">Verified</span>
-                <span className="text-slate-900">{selectedUser.verified ? 'Yes' : 'No'}</span>
+                <span className="text-slate-500">Status</span>
+                <span className="text-slate-900">{selectedUser.is_active !== false ? 'Active' : 'Suspended'}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-500">Joined</span>
@@ -268,7 +274,7 @@ export default function AdminUsers() {
             </div>
 
             <div className="mt-4 pt-4 border-t border-slate-100">
-              {selectedUser.verified ? (
+              {selectedUser.is_active !== false ? (
                 <button
                   onClick={() => handleSuspend(selectedUser)}
                   disabled={actionLoading}
@@ -285,6 +291,70 @@ export default function AdminUsers() {
                   Activate User
                 </button>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Inline confirm dialog — suspend/activate */}
+      {confirmAction && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60]">
+          <div className="bg-white rounded-xl shadow-xl max-w-sm w-full mx-4 p-6">
+            <h3 className="text-base font-semibold text-slate-900 mb-2">
+              {confirmAction.action === 'suspend' ? 'Suspend user?' : 'Activate user?'}
+            </h3>
+            <p className="text-sm text-slate-500 mb-5">
+              {confirmAction.action === 'suspend'
+                ? `${confirmAction.name} will lose access to the platform. This can be undone.`
+                : `${confirmAction.name} will regain access to the platform.`}
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setConfirmAction(null)}
+                disabled={actionLoading}
+                className="flex-1 px-4 py-2 border border-slate-200 rounded-lg text-sm text-slate-600 hover:bg-slate-50 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={executeAction}
+                disabled={actionLoading}
+                className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium text-white disabled:opacity-50 ${
+                  confirmAction.action === 'suspend'
+                    ? 'bg-red-500 hover:bg-red-600'
+                    : 'bg-teal-600 hover:bg-teal-700'
+                }`}
+              >
+                {actionLoading ? 'Please wait...' : confirmAction.action === 'suspend' ? 'Suspend' : 'Activate'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Inline confirm dialog — role change */}
+      {confirmRole && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60]">
+          <div className="bg-white rounded-xl shadow-xl max-w-sm w-full mx-4 p-6">
+            <h3 className="text-base font-semibold text-slate-900 mb-2">Change role?</h3>
+            <p className="text-sm text-slate-500 mb-5">
+              Change <strong>{confirmRole.name}</strong> to <strong className="capitalize">{confirmRole.newRole}</strong>?
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setConfirmRole(null)}
+                disabled={actionLoading}
+                className="flex-1 px-4 py-2 border border-slate-200 rounded-lg text-sm text-slate-600 hover:bg-slate-50 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={executeRoleChange}
+                disabled={actionLoading}
+                className="flex-1 px-4 py-2 bg-teal-600 text-white rounded-lg text-sm font-medium hover:bg-teal-700 disabled:opacity-50"
+              >
+                {actionLoading ? 'Please wait...' : 'Change Role'}
+              </button>
             </div>
           </div>
         </div>

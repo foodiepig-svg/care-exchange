@@ -29,6 +29,9 @@ class User(db.Model):
     provider = db.relationship('Provider', backref='user', uselist=False, lazy=True)
     coordinator = db.relationship('Coordinator', backref='user', uselist=False, lazy=True)
 
+    # Early access feedback tracking
+    feedback_submitted_at = db.Column(db.DateTime, nullable=True)
+
     def set_password(self, password):
         self.password_hash = generate_password_hash(password, method='pbkdf2:sha256')
 
@@ -42,5 +45,6 @@ class User(db.Model):
             'role': self.role,
             'full_name': self.full_name,
             'verified': bool(self.verified_at),
-            'created_at': self.created_at.isoformat() if self.created_at else None
+            'feedback_submitted_at': self.feedback_submitted_at.isoformat() if self.feedback_submitted_at else None,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
         }

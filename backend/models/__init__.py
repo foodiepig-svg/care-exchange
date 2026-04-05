@@ -15,3 +15,4 @@ from .document import Document
 from .ticket import Ticket, TicketComment
 from .feature_request import FeatureRequest, FeatureVote
 from .interest import InterestRegistration
+from .feedback import Feedback

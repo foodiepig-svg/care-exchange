@@ -19,6 +19,7 @@ import {
   LifeBuoy,
   Target,
   Lightbulb,
+  ThumbsUp,
 } from 'lucide-react'
 import { api } from '../services/api'
 
@@ -42,12 +43,14 @@ const navItems = [
   { to: '/app/help/provider', icon: HelpCircle, label: 'How to Guide', roles: ['provider'] },
   { to: '/app/help/coordinator', icon: HelpCircle, label: 'How to Guide', roles: ['coordinator'] },
   { to: '/app/help/family', icon: HelpCircle, label: 'How to Guide', roles: ['family'] },
+  { to: '/app/feedback', icon: MessageSquare, label: 'Early Access Feedback', roles: ['participant', 'family', 'provider', 'coordinator'], badge: 'New' },
 ]
 
 const adminNavItems = [
   { to: '/admin', icon: BarChart3, label: 'Overview', adminOnly: true },
   { to: '/admin/users', icon: Users, label: 'Users', adminOnly: true },
   { to: '/admin/tickets', icon: MessageSquare, label: 'Tickets', adminOnly: true },
+  { to: '/admin/feedback', icon: ThumbsUp, label: 'Feedback', adminOnly: true },
   { to: '/admin/settings', icon: Settings, label: 'Settings', adminOnly: true },
 ]
 
@@ -118,7 +121,7 @@ export default function Layout() {
 
           {/* Nav */}
           <nav className="flex-1 px-3 py-4 space-y-1">
-            {filteredNav.map(({ to, icon: Icon, label }) => (
+            {filteredNav.map(({ to, icon: Icon, label, badge }) => (
               <NavLink
                 key={to}
                 to={to}
@@ -132,6 +135,9 @@ export default function Layout() {
               >
                 <Icon size={18} />
                 {label}
+                {badge && (
+                  <span className="ml-auto text-[10px] font-semibold bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded-full">{badge}</span>
+                )}
               </NavLink>
             ))}
             {isAdmin && (

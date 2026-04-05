@@ -1,5 +1,5 @@
 """
-Feedback API routes — early access product validation survey.
+Feedback API routes — early access validation survey for test accounts.
 """
 from datetime import datetime
 from flask import Blueprint, request, jsonify
@@ -10,8 +10,7 @@ from models.feedback import Feedback
 
 feedback_bp = Blueprint('feedback', __name__)
 
-VALID_WOULD_USE = ('yes_regaily', 'yes_sometimes', 'maybe_not', 'no')
-VALID_WOULD_PAY = ('yes_monthly', 'yes_once', 'maybe', 'no')
+VALID_USE_CASES = ('referrals', 'care_team', 'goals_tracking', 'compliance', 'not_sure', 'other')
 
 
 @feedback_bp.route('/feedback', methods=['POST'])
@@ -28,25 +27,36 @@ def submit_feedback():
 
     data = request.get_json() or {}
 
-    would_use = data.get('would_use')
-    would_pay = data.get('would_pay')
-    pay_amount = data.get('pay_amount', '').strip() or None
-    top_frustration = data.get('top_frustration', '').strip() or None
-    top_feature = data.get('top_feature', '').strip() or None
+    use_case = data.get('use_case')
+    use_case_other = data.get('use_case_other', '').strip() or None
+    recommend_condition = data.get('recommend_condition', '').strip() or None
+    most_useful = data.get('most_useful', '').strip() or None
+    waste_of_time = data.get('waste_of_time', '').strip() or None
+    trust_first = data.get('trust_first', '').strip() or None
+    comparison = data.get('comparison', '').strip() or None
     other_comments = data.get('other_comments', '').strip() or None
 
-    if would_use not in VALID_WOULD_USE:
-        return jsonify({'error': f'would_use must be one of: {VALID_WOULD_USE}'}), 400
-    if would_pay not in VALID_WOULD_PAY:
-        return jsonify({'error': f'would_pay must be one of: {VALID_WOULD_PAY}'}), 400
+    if use_case not in VALID_USE_CASES:
+        return jsonify({'error': f'use_case must be one of: {VALID_USE_CASES}'}), 400
+
+    # Detect test account from email domain or explicit flag
+    test_account = bool(data.get('test_account')) or (
+        user.email.endswith('@example.com') or
+        user.email.endswith('@test.com') or
+        user.email.endswith('@dummy.com') or
+        'test' in user.email.lower()
+    )
 
     fb = Feedback(
         user_id=user_id,
-        would_use=would_use,
-        would_pay=would_pay,
-        pay_amount=pay_amount,
-        top_frustration=top_frustration,
-        top_feature=top_feature,
+        test_account=test_account,
+        use_case=use_case,
+        use_case_other=use_case_other,
+        recommend_condition=recommend_condition,
+        most_useful=most_useful,
+        waste_of_time=waste_of_time,
+        trust_first=trust_first,
+        comparison=comparison,
         other_comments=other_comments,
     )
     db.session.add(fb)
@@ -82,13 +92,14 @@ def _admin_check():
 @feedback_bp.route('/admin/feedback', methods=['GET'])
 @jwt_required()
 def admin_list_feedback():
-    """Paginated list of all registrations with optional has_feedback filter."""
+    """Paginated list of all registrations with optional filters."""
     if not _admin_check():
         return jsonify({'error': 'Admin access required'}), 403
 
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 20, type=int)
     has_feedback = request.args.get('has_feedback', '')
+    test_accounts = request.args.get('test_accounts', '')  # 'true' | 'false' | ''
     search = request.args.get('search', '')
 
     q = User.query
@@ -97,6 +108,27 @@ def admin_list_feedback():
         q = q.filter(User.feedback_submitted_at.isnot(None))
     elif has_feedback == 'false':
         q = q.filter(User.feedback_submitted_at.is_(None))
+
+    if test_accounts == 'true':
+        q = q.filter(
+            db.or_(
+                User.email.ilike('%@example.com'),
+                User.email.ilike('%@test.com'),
+                User.email.ilike('%@dummy.com'),
+                User.email.ilike('%test%'),
+            )
+        )
+    elif test_accounts == 'false':
+        q = q.filter(
+            db.not_(
+                db.or_(
+                    User.email.ilike('%@example.com'),
+                    User.email.ilike('%@test.com'),
+                    User.email.ilike('%@dummy.com'),
+                    User.email.ilike('%test%'),
+                )
+            )
+        )
 
     if search:
         q = q.filter(

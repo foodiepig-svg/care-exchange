@@ -7,16 +7,20 @@ class Feedback(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, index=True)
-    # Q1: Would you use it?
-    would_use = db.Column(db.String(30), nullable=True)  # yes_regaily | yes_sometimes | maybe_not | no
-    # Q2: Would you pay?
-    would_pay = db.Column(db.String(30), nullable=True)  # yes_monthly | yes_once | maybe | no
-    pay_amount = db.Column(db.String(80), nullable=True)
-    # Q3: What would make it worth it?
-    top_feature = db.Column(db.Text, nullable=True)
-    # Q3 follow-up: what would tip "maybe" into "yes"
-    top_frustration = db.Column(db.Text, nullable=True)
-    # Q4: Anything else
+    test_account = db.Column(db.Boolean, default=False)
+    # Q1: What would you use it for?
+    use_case = db.Column(db.String(50), nullable=True)  # referrals | care_team | goals_tracking | compliance | not_sure | other
+    use_case_other = db.Column(db.String(255), nullable=True)
+    # Q2: Would you recommend? What would need to be true?
+    recommend_condition = db.Column(db.Text, nullable=True)
+    # Q3: Most useful / waste of time
+    most_useful = db.Column(db.Text, nullable=True)
+    waste_of_time = db.Column(db.Text, nullable=True)
+    # Q4: What would you trust with real data first?
+    trust_first = db.Column(db.Text, nullable=True)
+    # Q5: How does it compare to current way?
+    comparison = db.Column(db.Text, nullable=True)
+    # Q6: Anything else
     other_comments = db.Column(db.Text, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -27,11 +31,14 @@ class Feedback(db.Model):
         return {
             'id': self.id,
             'user_id': self.user_id,
-            'would_use': self.would_use,
-            'would_pay': self.would_pay,
-            'pay_amount': self.pay_amount,
-            'top_feature': self.top_feature,
-            'top_frustration': self.top_frustration,
+            'test_account': self.test_account,
+            'use_case': self.use_case,
+            'use_case_other': self.use_case_other,
+            'recommend_condition': self.recommend_condition,
+            'most_useful': self.most_useful,
+            'waste_of_time': self.waste_of_time,
+            'trust_first': self.trust_first,
+            'comparison': self.comparison,
             'other_comments': self.other_comments,
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'user_name': self.user.full_name if self.user else None,

@@ -4,7 +4,7 @@ import {
   ShieldCheck, ArrowLeft, ChevronDown, ArrowRight, Search, BookOpen,
   CheckCircle2, ArrowUpRight, Inbox, FileText, UserCheck,
   BarChart3, MessageSquare, Bell, Settings, Link2, Users,
-  LogIn, Plus, Download, Tag
+  LogIn, Plus, Download, Tag, FolderOpen, User, Shield
 } from 'lucide-react'
 
 function Section({ id, title, icon: Icon, children }) {
@@ -70,11 +70,13 @@ const tableOfContents = [
   { id: 'getting-started', label: 'Getting Started', icon: LogIn },
   { id: 'your-dashboard', label: 'Provider Dashboard', icon: BarChart3 },
   { id: 'referrals', label: 'Managing Referrals', icon: Inbox },
+  { id: 'participant-lookup', label: 'Participant Lookup', icon: User },
   { id: 'updates', label: 'Submitting Updates', icon: FileText },
   { id: 'participants', label: 'Participant Records', icon: Users },
+  { id: 'care-plans', label: 'Care Plans', icon: FileText },
+  { id: 'documents', label: 'Documents', icon: FolderOpen },
   { id: 'messages', label: 'Care Team Messaging', icon: MessageSquare },
   { id: 'ndis-categories', label: 'NDIS Categories', icon: Tag },
-  { id: 'plan-reviews', label: 'Plan Review Exports', icon: Download },
   { id: 'settings', label: 'Account Settings', icon: Settings },
   { id: 'faq', label: 'FAQ', icon: Search },
 ]
@@ -128,7 +130,7 @@ export default function ProviderHelp() {
               </div>
               <h1 className="text-3xl font-bold text-slate-900 mb-3">How to Guide: Service Provider</h1>
               <p className="text-slate-500 leading-relaxed">
-                How to use Care Exchange as an NDIS service provider — from accepting referrals to submitting structured updates and coordinating with care teams.
+                How to use Care Exchange as an NDIS service provider — from registering your organisation to managing referrals, submitting updates, and coordinating with care teams.
               </p>
             </div>
 
@@ -159,11 +161,11 @@ export default function ProviderHelp() {
                 <Step num={1} title="Stat cards at a glance"
                   desc="The top of your dashboard shows key stats: Active Participants (how many participants you're currently delivering services to), Pending Referrals (awaiting your response), Updates Sent (this month), and Goals Met (milestones achieved)."
                 />
-                <Step num={2} title="Received Referrals list"
+                <Step num={2} title="Received Referrals"
                   desc="Below the stats, see all incoming referrals sorted by date. Each shows the participant's name, service type, when the referral was sent, and current status."
                 />
-                <Step num={3} title="Participant roster"
-                  desc="Click 'Participants' in the left sidebar to see every participant you've accepted. Sort by name, last update date, or goal status."
+                <Step num={3} title="Participant lookup"
+                  desc="Use the 'Participant Lookup' section to search for participants by name or NDIS number — if they have previously granted you consent, their record will appear."
                 />
                 <Step num={4} title="Filter and search"
                   desc="Use the search bar to find specific participants by name. Use the status filter to show only Active, Paused, or Completed participants."
@@ -173,10 +175,10 @@ export default function ProviderHelp() {
               {/* Referrals */}
               <Section id="referrals" title="Managing Referrals" icon={Inbox}>
                 <p className="text-slate-500 text-sm leading-relaxed">
-                  When a participant sends you a referral, you'll see it in your inbox. You can review their care summary and consent scope before deciding whether to accept.
+                  When a participant sends you a referral, you'll see it in your Received Referrals inbox. You can review their care summary and consent scope before deciding whether to accept.
                 </p>
                 <Step num={1} title="Review the referral"
-                  desc="Open the referral from your inbox. You'll see the participant's name, care summary (goals, current providers, relevant history), and the consent categories they've approved for you."
+                  desc="Open the referral from your Received Referrals inbox. You'll see the participant's name, care summary (goals, current providers, relevant history), and the consent categories they've approved for you."
                   tip="This is your chance to decide if the referral is appropriate for your services before accepting. You can decline referrals that don't fit your scope."
                 />
                 <Step num={2} title="Accept or decline"
@@ -191,6 +193,26 @@ export default function ProviderHelp() {
                 <InfoBox color="violet">
                   <strong>Consent is pre-granted:</strong> When you accept a referral, the participant has already consented to your involvement. You don't need to chase a separate consent form.
                 </InfoBox>
+              </Section>
+
+              {/* Participant Lookup */}
+              <Section id="participant-lookup" title="Participant Lookup" icon={User}>
+                <p className="text-slate-500 text-sm leading-relaxed">
+                  Search for participants by name or NDIS number to access their care record — if they have previously granted you consent to access their information.
+                </p>
+                <Step num={1} title="Search for a participant"
+                  desc="Go to 'Participant Lookup' in the sidebar. Enter the participant's full name or NDIS number in the search bar and click Search."
+                />
+                <Step num={2} title="Understand your access level"
+                  desc="Each participant card shows your consent status: Full Access (all data categories shared), Partial Access (specific categories only), or Limited Access (basic information only)."
+                />
+                <Step num={3} title="View their care record"
+                  desc="If the participant has granted you access, click 'View Care Record' to open their full record. The button is disabled if no access has been granted."
+                  tip="Participant Lookup only shows participants who have already granted you some level of consent. New participants must send you a referral first."
+                />
+                <Step num={4} title="Access updates as granted"
+                  desc="Once you have access, you can view the participant's care record, submit updates, and message their care team — within the scope of what they have consented to share."
+                />
               </Section>
 
               {/* Submitting Updates */}
@@ -233,15 +255,53 @@ export default function ProviderHelp() {
                 <Step num={3} title="View update history"
                   desc="The Updates tab shows all updates you've submitted for this participant, sorted by date. You can filter by update type."
                 />
-                <Step num={4} title="Update participant details"
+                <Step num={4} title="Participant details"
                   desc="The Details tab shows the participant's profile — their plan type, support categories, and contact information. This information was provided by the participant when they sent the referral."
                 />
+              </Section>
+
+              {/* Care Plans */}
+              <Section id="care-plans" title="Care Plans" icon={FileText}>
+                <p className="text-slate-500 text-sm leading-relaxed">
+                  When a participant grants you access to their Care Plans, you can view the structured support plans they have in place — including support categories, frequencies, and review notes.
+                </p>
+                <Step num={1} title="View shared care plans"
+                  desc="If the participant has consented to share their care plans with you, you'll be able to access them from the participant's record. Care plans show the participant's structured support arrangements."
+                />
+                <Step num={2} title="Understand plan status"
+                  desc="Each care plan has a status: Draft (being prepared), Active (in use), On Hold (paused), or Completed. This tells you whether the plan is currently relevant."
+                />
+                <Step num={3} title="Use care plans to inform your work"
+                  desc="Reviewing a participant's care plans helps you understand their full support context — what they're working towards, which providers are involved in each area, and what support categories are already covered."
+                />
+                <InfoBox color="teal">
+                  <strong>View-only:</strong> Providers can view but not edit care plans. Only the participant can create, modify, or delete their care plans.
+                </InfoBox>
+              </Section>
+
+              {/* Documents */}
+              <Section id="documents" title="Documents" icon={FolderOpen}>
+                <p className="text-slate-500 text-sm leading-relaxed">
+                  If a participant has granted you access to their documents, you can view and download files they have uploaded — including assessments, reports, NDIS plans, and other relevant records.
+                </p>
+                <Step num={1} title="Access shared documents"
+                  desc="When a participant grants consent to share documents, they become visible from their care record. Click 'Documents' within the participant's record to see what's available."
+                />
+                <Step num={2} title="Filter by category"
+                  desc="Documents are organised by type: Assessment, Report, Plan, ID Document, or Other. Use the category tabs to quickly find the document you need."
+                />
+                <Step num={3} title="Download documents"
+                  desc="Click the download icon on any document to open or save it. This is useful for reviewing supporting documentation before sessions or for your own record-keeping."
+                />
+                <InfoBox color="violet">
+                  <strong>Privacy:</strong> You can only see documents the participant has explicitly consented to share with you. Documents they keep private are not accessible.
+                </InfoBox>
               </Section>
 
               {/* Messages */}
               <Section id="messages" title="Care Team Messaging" icon={MessageSquare}>
                 <p className="text-slate-500 text-sm leading-relaxed">
-                  Message the participant and their support coordinator directly — without needing external email or phone calls. All messages are attached to the referral thread.
+                  Message the participant and their support coordinator directly — without needing external email or phone calls. All messages are attached to the relevant referral thread.
                 </p>
                 <Step num={1} title="Start a message"
                   desc="Open a participant's record and click the 'Messages' tab. Type your message and click Send. The message is visible to the participant, their coordinator, and any other providers in the thread."
@@ -271,25 +331,6 @@ export default function ProviderHelp() {
                 <Step num={3} title="Category accuracy"
                   desc="Tag accurately — only use categories that genuinely relate to the support you're delivering. Incorrect tagging doesn't affect funding but may confuse participants during plan reviews."
                 />
-              </Section>
-
-              {/* Plan Reviews */}
-              <Section id="plan-reviews" title="Plan Review Exports" icon={Download}>
-                <p className="text-slate-500 text-sm leading-relaxed">
-                  When a participant's NDIS plan is coming up for review, you can export a structured summary of all your updates and goal progress — ready for the participant to take to their review meeting.
-                </p>
-                <Step num={1} title="Open the participant's record"
-                  desc="From your dashboard, open the participant whose plan review is approaching."
-                />
-                <Step num={2} title="Generate the export"
-                  desc="Click 'Export Care Summary'. Choose the date range (e.g., the last 12 months of your involvement). The export includes all your updates, tagged NDIS categories, and goal notes."
-                />
-                <Step num={3} title="Review and deliver"
-                  desc="The export opens as a downloadable document. Review it for accuracy. Send it to the participant via the care team messaging, or let the participant know it's ready to download from their record."
-                />
-                <InfoBox color="violet">
-                  <strong>Note:</strong> The export only includes updates YOU submitted. The participant's coordinator can combine multiple providers' exports for a full picture.
-                </InfoBox>
               </Section>
 
               {/* Settings */}

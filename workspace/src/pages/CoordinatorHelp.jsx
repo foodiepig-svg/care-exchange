@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import {
   ShieldCheck, ArrowLeft, ChevronDown, Search, BookOpen,
   ArrowUpRight, Users, BarChart3, Bell, Eye, MessageSquare,
-  Settings, LogIn, Download, AlertCircle, TrendingUp, Link2
+  Settings, LogIn, Download, AlertCircle, TrendingUp, Link2, FolderOpen, FileText
 } from 'lucide-react'
 
 function Section({ id, title, icon: Icon, children }) {
@@ -70,10 +70,11 @@ const tableOfContents = [
   { id: 'participant-roster', label: 'Participant Roster', icon: Users },
   { id: 'cross-provider', label: 'Cross-Provider Visibility', icon: Eye },
   { id: 'goals', label: 'Goal Tracking', icon: TrendingUp },
+  { id: 'care-plans', label: 'Care Plans', icon: FileText },
+  { id: 'documents', label: 'Documents', icon: FolderOpen },
   { id: 'referrals', label: 'Referral Coordination', icon: Link2 },
   { id: 'alerts', label: 'Alerts & Notifications', icon: Bell },
   { id: 'messages', label: 'Care Team Messaging', icon: MessageSquare },
-  { id: 'plan-reviews', label: 'Plan Review Exports', icon: Download },
   { id: 'settings', label: 'Settings', icon: Settings },
   { id: 'faq', label: 'FAQ', icon: Search },
 ]
@@ -127,7 +128,7 @@ export default function CoordinatorHelp() {
               </div>
               <h1 className="text-3xl font-bold text-slate-900 mb-3">How to Guide: Coordinator</h1>
               <p className="text-slate-500 leading-relaxed">
-                How to use Care Exchange as a support coordinator — managing your participant roster, tracking cross-provider updates, monitoring goals, and preparing plan review exports.
+                How to use Care Exchange as a support coordinator — managing your participant roster, tracking cross-provider updates, monitoring care plans, and preparing plan review exports.
               </p>
             </div>
 
@@ -192,7 +193,7 @@ export default function CoordinatorHelp() {
               </Section>
 
               {/* Goal Tracking */}
-              <Section id="goals" title="Goal Tracking" icon={ TrendingUp}>
+              <Section id="goals" title="Goal Tracking" icon={TrendingUp}>
                 <p className="text-slate-500 text-sm leading-relaxed">
                   Track NDIS plan goals across all providers — see which are on track, which need attention, and which providers are contributing to each one.
                 </p>
@@ -208,6 +209,50 @@ export default function CoordinatorHelp() {
                 <Step num={4} title="Goal progress export"
                   desc="When a participant's plan review is approaching, go to Goals → Export. You'll get a structured document of all goals, their progress, and contributing providers — ready to take to the plan review meeting."
                 />
+              </Section>
+
+              {/* Care Plans */}
+              <Section id="care-plans" title="Care Plans" icon={FileText}>
+                <p className="text-slate-500 text-sm leading-relaxed">
+                  View and monitor the structured care plans your participants have in place. Care Plans give you a clear picture of the supports a participant is receiving across all providers.
+                </p>
+                <Step num={1} title="View care plans for any participant"
+                  desc="Open a participant's record and click 'Care Plans'. You'll see all the care plans they have created — with title, status (Draft, Active, On Hold, or Completed), and date range."
+                />
+                <Step num={2} title="See support items"
+                  desc="Click on any care plan to expand it and see the full detail: support categories (Medical, Therapy, Home Care, Transport, Social), descriptions, and frequencies for each support item."
+                />
+                <Step num={3} title="Use care plans to identify gaps"
+                  desc="Reviewing a participant's care plans alongside their goal progress helps you identify where supports may be missing or where providers haven't been submitting updates against planned supports."
+                />
+                <Step num={4} title="Prep for plan reviews"
+                  desc="Before an NDIS plan review, review the participant's care plans alongside their goal history. Use this to identify what has been working, what hasn't, and what supports should be continued or added."
+                />
+                <InfoBox color="emerald">
+                  <strong>View-only:</strong> Coordinators can view but not create or edit care plans. Only the participant can manage their own care plans.
+                </InfoBox>
+              </Section>
+
+              {/* Documents */}
+              <Section id="documents" title="Documents" icon={FolderOpen}>
+                <p className="text-slate-500 text-sm leading-relaxed">
+                  Access and download documents participants have shared with you — including assessments, reports, NDIS plans, and ID documents.
+                </p>
+                <Step num={1} title="Access shared documents"
+                  desc="Open a participant's record and click 'Documents'. If the participant has consented to share documents with you, you'll see their uploaded files here."
+                />
+                <Step num={2} title="Filter by category"
+                  desc="Documents are organised into categories: Assessment, Report, Plan, ID Document, or Other. Use the category tabs to find the document type you need."
+                />
+                <Step num={3} title="Download documents"
+                  desc="Click the download icon on any document to open or save it. This is useful when preparing for plan reviews or when you need to review a participant's supporting documentation."
+                />
+                <Step num={4} title="Your own documents"
+                  desc="You can upload and manage your own documents (e.g., coordination notes, reports) which are stored separately and are only visible to you."
+                />
+                <InfoBox color="teal">
+                  <strong>Privacy:</strong> You can only see documents the participant has explicitly consented to share with you. Documents they keep private are not accessible.
+                </InfoBox>
               </Section>
 
               {/* Referral Coordination */}
@@ -267,28 +312,6 @@ export default function CoordinatorHelp() {
                 </InfoBox>
               </Section>
 
-              {/* Plan Reviews */}
-              <Section id="plan-reviews" title="Plan Review Exports" icon={Download}>
-                <p className="text-slate-500 text-sm leading-relaxed">
-                  Generate a complete care summary for any participant — all updates, goals, and provider notes — in one structured export, ready for their NDIS plan review.
-                </p>
-                <Step num={1} title="Start the export"
-                  desc="Open a participant's record and click 'Export Care Summary'. Choose the date range — typically the full plan period or the last 12 months."
-                />
-                <Step num={2} title="Review the summary contents"
-                  desc="The export includes: participant details, all active and completed goals with progress notes, all provider updates by category, NDIS category usage breakdown, referral history, and care team contacts."
-                />
-                <Step num={3} title="Share with the participant"
-                  desc="Once generated, the summary is available in the participant's record for them to download. You can also send it directly via care team messaging or email."
-                />
-                <Step num={4} title="Prepare for the review meeting"
-                  desc="Use the summary to identify goals not on track, categories with unused funds, and providers who may need to be engaged more. Bring the document to the plan review meeting as a reference."
-                />
-                <InfoBox color="emerald">
-                  <strong>Before the plan review:</strong> Ask each provider to submit any outstanding updates before you generate the export. A summary with gaps is less useful than one with a complete picture.
-                </InfoBox>
-              </Section>
-
               {/* Settings */}
               <Section id="settings" title="Settings" icon={Settings}>
                 <Step num={1} title="Update your profile"
@@ -309,7 +332,7 @@ export default function CoordinatorHelp() {
               <Section id="faq" title="Frequently Asked Questions" icon={Search}>
                 <div className="space-y-0">
                   {[
-                    { q: 'How is my coordinator access different from a provider?', a: 'As a coordinator, you have read-only access to each participant\'s care record. You can see updates, goals, and messages but cannot modify anything. Providers submit updates and manage the clinical side. You have oversight, not control.' },
+                    { q: 'How is my coordinator access different from a provider?', a: 'As a coordinator, you have read-only access to each participant\'s care record. You can see updates, goals, care plans, and messages but cannot modify anything. Providers submit updates and manage the clinical side. You have oversight, not control.' },
                     { q: 'Can I send a referral on behalf of a participant?', a: 'No — only the participant can initiate a referral. You can guide them through the process and encourage them to send a referral to a specific provider, but the action must be taken by the participant.' },
                     { q: 'What if a participant hasn\'t updated their goals?', a: 'You can prompt the participant via care team messaging to review and update their goals. Goals belong to the participant — you can encourage and remind, but you cannot set or modify them yourself.' },
                     { q: 'Can I export data for my own reporting?', a: 'Yes — coordinator accounts can export participant data for NDIS reporting and plan review preparation. See our Data Management Policy for your obligations around data handling.' },

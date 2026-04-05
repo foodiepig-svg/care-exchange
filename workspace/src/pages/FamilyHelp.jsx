@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import {
   ShieldCheck, ArrowLeft, ChevronDown, Search, BookOpen,
   ArrowUpRight, Users, Eye, Bell, MessageSquare,
-  Settings, LogIn, HeartHandshake, Lock, AlertCircle
+  Settings, LogIn, HeartHandshake, Lock, AlertCircle, FolderOpen
 } from 'lucide-react'
 
 function Section({ id, title, icon: Icon, children }) {
@@ -70,6 +70,8 @@ const tableOfContents = [
   { id: 'your-view', label: 'What You Can See', icon: Eye },
   { id: 'updates', label: 'Provider Updates', icon: HeartHandshake },
   { id: 'goals', label: 'Goal Progress', icon: HeartHandshake },
+  { id: 'care-plans', label: 'Care Plans', icon: HeartHandshake },
+  { id: 'documents', label: 'Documents', icon: FolderOpen },
   { id: 'messages', label: 'Messaging the Care Team', icon: MessageSquare },
   { id: 'notifications', label: 'Notifications', icon: Bell },
   { id: 'privacy', label: 'Privacy & Access Control', icon: Lock },
@@ -125,7 +127,7 @@ export default function FamilyHelp() {
               </div>
               <h1 className="text-3xl font-bold text-slate-900 mb-3">How to Guide: Family & Carer</h1>
               <p className="text-slate-500 leading-relaxed">
-                How to use Care Exchange as a family member or carer — staying informed about your family member's care, messaging providers, and tracking goal progress.
+                How to use Care Exchange as a family member or carer — staying informed about your family member's care, viewing care plans, messaging providers, and tracking goal progress.
               </p>
             </div>
 
@@ -143,8 +145,8 @@ export default function FamilyHelp() {
                 <Step num={3} title="Understand your access level"
                   desc="What you can see depends entirely on what your family member has consented to share. When you first log in, you'll see exactly what access you have. Your family member can change this at any time."
                 />
-                <Step num={4} title="Explore your dashboard"
-                  desc="After logging in, your dashboard shows your family member's name, their current providers, recent updates, and goal progress at a glance."
+                <Step num={4} title="Explore your family dashboard"
+                  desc="After logging in, your dashboard shows your family member's name, their current providers, recent updates, and goal progress at a glance. You can access this any time by clicking 'Dashboard' in the sidebar."
                 />
                 <InfoBox color="rose">
                   <strong>Your access is always view-only.</strong> You can see everything your family member has consented to share, but you cannot submit updates, modify goals, or change any settings. Only the participant can do that.
@@ -209,6 +211,47 @@ export default function FamilyHelp() {
                 <Step num={4} title="Goal history"
                   desc="Completed goals remain visible in the 'History' tab so you can see what has been achieved over time."
                 />
+              </Section>
+
+              {/* Care Plans */}
+              <Section id="care-plans" title="Care Plans" icon={HeartHandshake}>
+                <p className="text-slate-500 text-sm leading-relaxed">
+                  Care Plans give you visibility into the structured support plans your family member has in place — including support categories, frequencies, and review notes.
+                </p>
+                <Step num={1} title="View care plans"
+                  desc="Click 'Care Plans' in the sidebar. You'll see all care plans the participant has created, each showing title, status (Draft, Active, On Hold, or Completed), and date range."
+                />
+                <Step num={2} title="See support items"
+                  desc="Click on any care plan to expand it and see the individual support items — each with a category (Medical, Therapy, Home Care, Transport, Social, or Other), description, and frequency."
+                />
+                <Step num={3} title="Use care plans for context"
+                  desc="Understanding the participant's care plans helps you see the full picture of their supports — what they're working towards and which providers are involved in each area."
+                />
+                <InfoBox color="rose">
+                  <strong>You can view but not edit.</strong> Only the participant can create, modify, or delete care plans. If you think a care plan needs updating, discuss it with your family member.
+                </InfoBox>
+              </Section>
+
+              {/* Documents */}
+              <Section id="documents" title="Documents" icon={FolderOpen}>
+                <p className="text-slate-500 text-sm leading-relaxed">
+                  If the participant has consented to share documents with you, you can view, download, and manage documents they've uploaded — including assessments, reports, NDIS plans, and ID documents.
+                </p>
+                <Step num={1} title="View shared documents"
+                  desc="Click 'Documents' in the sidebar. You'll see all documents the participant has uploaded and chosen to share with you, organised by category."
+                />
+                <Step num={2} title="Filter by category"
+                  desc="Use the category tabs (All, Assessment, Report, Plan, ID, or Other) to find specific document types quickly."
+                />
+                <Step num={3} title="Download a document"
+                  desc="Click the download icon on any document to open or save it to your device."
+                />
+                <Step num={4} title="What you can upload"
+                  desc="Family accounts can upload their own documents — such as records, correspondence, or supporting documents — which are stored separately from the participant's records."
+                />
+                <InfoBox color="teal">
+                  <strong>Privacy:</strong> Documents are only visible to people the participant has granted access to. You cannot see documents they have kept private.
+                </InfoBox>
               </Section>
 
               {/* Messaging */}

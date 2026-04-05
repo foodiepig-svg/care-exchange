@@ -3,7 +3,8 @@ import { Link, useNavigate } from 'react-router-dom'
 import {
   ShieldCheck, ArrowLeft, ChevronDown, ArrowRight, Search, BookOpen,
   CheckCircle2, ArrowUpRight, Plus, Users, FileText, Bell,
-  HeartHandshake, Settings, Link2, Eye, LogIn, Home, Lock
+  HeartHandshake, Settings, Link2, Eye, LogIn, Home, Lock,
+  FolderOpen, Search as SearchIcon, File
 } from 'lucide-react'
 
 function Section({ id, title, icon: Icon, children }) {
@@ -71,6 +72,9 @@ const tableOfContents = [
   { id: 'consent', label: 'Managing Consent', icon: Lock },
   { id: 'referrals', label: 'Sending Referrals', icon: Link2 },
   { id: 'goals', label: 'Tracking Goals', icon: HeartHandshake },
+  { id: 'care-plans', label: 'Care Plans', icon: FileText },
+  { id: 'provider-directory', label: 'Find Providers', icon: SearchIcon },
+  { id: 'documents', label: 'Documents', icon: FolderOpen },
   { id: 'family-access', label: 'Family Access', icon: Users },
   { id: 'alerts', label: 'Alerts & Notifications', icon: Bell },
   { id: 'faq', label: 'FAQ', icon: Search },
@@ -129,7 +133,7 @@ export default function ParticipantHelp() {
               </div>
               <h1 className="text-3xl font-bold text-slate-900 mb-3">How to Guide: Participant</h1>
               <p className="text-slate-500 leading-relaxed">
-                Everything you need to know about using Care Exchange as a participant. From setting up your account to managing consent and sending referrals.
+                Everything you need to know about using Care Exchange as a participant. From setting up your account to managing consent, sending referrals, and tracking your care plans.
               </p>
             </div>
 
@@ -200,20 +204,24 @@ export default function ParticipantHelp() {
                 <p className="text-slate-500 text-sm leading-relaxed">
                   A referral is how you connect with a new service provider. You send them a secure link to your care record — they review it and decide whether to accept.
                 </p>
-                <Step num={1} title="Start a new referral"
-                  desc="Click 'Send Referral' from your dashboard or the Referrals section. Search for the provider by name or browse by NDIS support category (e.g., Physiotherapy, Psychology, Occupational Therapy)."
+                <Step num={1} title="Find a provider"
+                  desc="Go to 'Find Providers' in the sidebar to browse registered NDIS service providers. Search by name or filter by service category (e.g., Physiotherapy, Psychology, Occupational Therapy)."
+                  tip="You can also go directly to 'Send Referral' from your dashboard to search for providers while preparing a referral."
                 />
-                <Step num={2} title="Review your consent scope"
+                <Step num={2} title="Start a new referral"
+                  desc="Click 'Send Referral' from your dashboard or the Referrals section. Search for the provider by name or browse by NDIS support category."
+                />
+                <Step num={3} title="Review your consent scope"
                   desc="Before sending, you'll see what information the provider will receive. Adjust your consent settings here if needed — you can choose to share more or less than your default settings."
                 />
-                <Step num={3} title="Add a personal note (optional)"
+                <Step num={4} title="Add a personal note (optional)"
                   desc="You can add a brief note to the referral explaining your goals, what you're hoping to achieve, or anything specific you want the provider to know before they accept."
                 />
-                <Step num={4} title="Send the referral"
+                <Step num={5} title="Send the referral"
                   desc="Click 'Send'. The provider receives an email notification with a secure link to your care summary. They review it and accept or decline within their dashboard."
                   tip="If a provider declines, you'll be notified and can send a referral to a different provider. Declined referrals are not shared with anyone."
                 />
-                <Step num={5} title="Track referral status"
+                <Step num={6} title="Track referral status"
                   desc="Go to Referrals → Sent. You'll see each referral's status: Pending (waiting for provider response), Accepted (provider is now in your care team), or Declined. If pending for more than a few days, you can follow up with the provider directly."
                 />
               </Section>
@@ -237,10 +245,77 @@ export default function ParticipantHelp() {
                 />
               </Section>
 
+              {/* ── Care Plans ──────────────────────────────────────── */}
+              <Section id="care-plans" title="Care Plans" icon={FileText}>
+                <p className="text-slate-500 text-sm leading-relaxed">
+                  Care Plans let you create and manage structured support plans — including support categories, frequencies, and review notes. Plans can be set to Draft, Active, On Hold, or Completed.
+                </p>
+                <Step num={1} title="View your care plans"
+                  desc="Click 'Care Plans' in the sidebar. You'll see all your care plans, each showing title, status, date range, and a preview of support items."
+                />
+                <Step num={2} title="Create a new care plan"
+                  desc="Click 'Create Care Plan'. Fill in the title, description, start and end dates. Then add support items — each with a category (Medical, Therapy, Home Care, Transport, Social, or Other), description, and frequency."
+                />
+                <Step num={3} title="Manage plan status"
+                  desc="Each plan has a status: Draft (being prepared), Active (currently in use), On Hold (paused), or Completed. Change the status at any time using the status filter tabs."
+                />
+                <Step num={4} title="Edit or delete a plan"
+                  desc="Click the edit icon on any care plan to modify it. Use the delete icon to remove a plan entirely — you'll be asked to confirm before it's deleted."
+                />
+                <Step num={5} title="Add support items"
+                  desc="When creating or editing a plan, click 'Add Support Item' to add multiple categories of support. Each item has a category, description, and frequency field."
+                />
+                <InfoBox color="teal">
+                  <strong>Sharing:</strong> Your care plans are visible to providers and coordinators you have granted access to. They can see the plan details to help coordinate your supports.
+                </InfoBox>
+              </Section>
+
+              {/* ── Find Providers ──────────────────────────────────── */}
+              <Section id="provider-directory" title="Find Providers" icon={SearchIcon}>
+                <p className="text-slate-500 text-sm leading-relaxed">
+                  Browse and search for registered NDIS service providers on Care Exchange. You can filter by service category to find providers that match your needs.
+                </p>
+                <Step num={1} title="Browse the provider directory"
+                  desc="Go to 'Find Providers' in the sidebar. You'll see a list of all registered providers, including their organisation name, service categories, and contact information."
+                />
+                <Step num={2} title="Filter by service category"
+                  desc="Use the category filter to narrow down providers by the type of support they offer (e.g., Physiotherapy, Psychology, Occupational Therapy, Support Coordination)."
+                />
+                <Step num={3} title="Send a referral directly"
+                  desc="From the provider directory, click 'Send Referral' on any provider to start the referral process immediately. You'll be guided through consent and can add a personal note."
+                />
+                <InfoBox color="amber">
+                  <strong>Not all providers may be shown</strong> — providers must be registered on Care Exchange to appear in the directory. If you have a provider in mind who isn't listed, ask them to register.
+                </InfoBox>
+              </Section>
+
+              {/* ── Documents ───────────────────────────────────────── */}
+              <Section id="documents" title="Documents" icon={FolderOpen}>
+                <p className="text-slate-500 text-sm leading-relaxed">
+                  Store and manage important documents in Care Exchange — such as assessments, reports, NDIS plans, and ID documents. All files are encrypted and stored securely.
+                </p>
+                <Step num={1} title="Upload a document"
+                  desc="Click 'Upload' at the top of the Documents page. Choose the file from your device, give it a title, select a category (Assessment, Report, Plan, ID Document, or Other), and optionally add a description."
+                  tip="Supported file types include PDF, Word documents, Excel spreadsheets, and images."
+                />
+                <Step num={2} title="Organise with categories"
+                  desc="Filter your documents by category using the tabs: All, Assessment, Report, Plan, ID, or Other. This makes it easy to find specific documents quickly."
+                />
+                <Step num={3} title="Download a document"
+                  desc="Click the download icon on any document to open or save it. The document will open in a new tab or download to your device."
+                />
+                <Step num={4} title="Delete a document"
+                  desc="Click the delete icon on any document. You'll be asked to confirm before the document is permanently removed."
+                />
+                <InfoBox color="teal">
+                  <strong>Privacy:</strong> Documents you upload are only visible to you and people you grant access to. Providers and coordinators can only see documents you have consented to share with them.
+                </InfoBox>
+              </Section>
+
               {/* ── Family Access ─────────────────────────────────── */}
               <Section id="family-access" title="Family & Carer Access" icon={Users}>
                 <p className="text-slate-500 text-sm leading-relaxed">
-                  You can invite family members or trusted carers to view your care record. You control exactly what they can see — and you can revoke access at any time.
+                  You can invite family members or trusted carers to view your care record. You control exactly what they see — and you can revoke access at any time.
                 </p>
                 <Step num={1} title="Invite a family member"
                   desc="Go to Settings → Family Access → Invite. Enter their name and email address. Choose what access to grant them — you can let them see care updates, goal progress, or limit to summary information only."

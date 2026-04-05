@@ -220,6 +220,8 @@ export default function Support() {
                 placeholder={type === 'issue' ? "Brief description of the issue..." : "What would you like to see?"}
                 maxLength={200}
                 className="w-full text-sm border border-slate-200 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                required
+                aria-required="true"
               />
               <p className="text-xs text-slate-400 mt-1 text-right">{title.length}/200</p>
             </div>
@@ -234,6 +236,8 @@ export default function Support() {
                   : "Describe the feature and why it would be useful..."}
                 rows={5}
                 className="w-full text-sm border border-slate-200 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none"
+                required
+                aria-required="true"
               />
             </div>
 

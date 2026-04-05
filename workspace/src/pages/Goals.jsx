@@ -205,7 +205,7 @@ export default function Goals() {
             {editingGoalId ? 'Edit Goal' : 'Create New Goal'}
           </h2>
           {formError && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+            <div role="alert" className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
               {formError}
             </div>
           )}
@@ -220,6 +220,8 @@ export default function Goals() {
                 onChange={(e) => setGoalForm({ ...goalForm, title: e.target.value })}
                 className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter goal title"
+                required
+                aria-required="true"
               />
             </div>
             <div>
@@ -367,19 +369,17 @@ export default function Goals() {
                   <span className="text-sm text-slate-600">Progress</span>
                   <span className="text-sm font-medium text-slate-800">{goal.progress || 0}%</span>
                 </div>
-                <div
-                  className="w-full bg-slate-100 rounded-full h-2.5"
-                  role="progressbar"
-                  aria-valuenow={goal.progress || 0}
-                  aria-valuemin="0"
-                  aria-valuemax="100"
-                  aria-label={`Goal progress: ${goal.progress || 0}%`}
+                <button
+                  type="button"
+                  onClick={() => setProgressUpdate({ ...progressUpdate, [goal.id]: true })}
+                  className="w-full bg-slate-100 rounded-full h-2.5 text-left cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  aria-label={`Update progress for ${goal.title}: currently ${goal.progress || 0}%`}
                 >
                   <div
                     className="bg-green-500 rounded-full h-2.5 transition-all"
                     style={{ width: `${goal.progress || 0}%` }}
                   />
-                </div>
+                </button>
                 {progressUpdate[goal.id] && (
                   <div className="mt-3 flex items-center gap-3">
                     <input

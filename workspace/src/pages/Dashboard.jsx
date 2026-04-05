@@ -184,7 +184,7 @@ export default function Dashboard() {
             {recentActivity.map((item, idx) => {
               const Icon = getActivityIcon(item)
               return (
-                <div key={`${item.type}-${item.id}-${idx}`} className="flex items-start gap-3 p-3 rounded-lg hover:bg-slate-50">
+                <button key={`${item.type}-${item.id}-${idx}`} className="w-full flex items-start gap-3 p-3 rounded-lg hover:bg-slate-50 text-left">
                   <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
                     <Icon size={14} className="text-primary" />
                   </div>
@@ -193,7 +193,7 @@ export default function Dashboard() {
                     <p className="text-xs text-slate-500 mt-0.5">{formatRelativeTime(item.sortDate)}</p>
                   </div>
                   <ArrowRight size={14} className="text-slate-300 flex-shrink-0 mt-2" />
-                </div>
+                </button>
               )
             })}
           </div>

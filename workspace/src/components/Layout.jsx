@@ -28,7 +28,6 @@ const navItems = [
   { to: '/family/dashboard', icon: LayoutDashboard, label: 'Dashboard', roles: ['family'] },
   { to: '/providers', icon: Search, label: 'Find Providers', roles: ['participant'] },
   { to: '/referrals', icon: FileText, label: 'Referrals', roles: ['participant', 'coordinator', 'provider'] },
-  { to: '/care-record', icon: ShieldCheck, label: 'Care Record', roles: ['participant', 'family'] },
   { to: '/care-team', icon: Users, label: 'Care Team', roles: ['participant', 'family'] },
   { to: '/updates', icon: FileText, label: 'Updates', roles: ['provider', 'coordinator'] },
   { to: '/messages', icon: MessageSquare, label: 'Messages' },

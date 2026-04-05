@@ -94,7 +94,7 @@ function App() {
             <Route path="providers" element={<ProviderDirectory />} />
             <Route path="provider/referrals/received" element={<ProviderReceivedReferrals />} />
             <Route path="provider" element={<ProviderDashboard />} />
-            <Route path="care-record" element={<CareRecord />} />
+            <Route path="care-record" element={<Navigate to="/dashboard" replace />} />
             <Route path="care-team" element={<CareTeam />} />
             <Route path="messages" element={<Messages />} />
             <Route path="updates" element={<Updates />} />

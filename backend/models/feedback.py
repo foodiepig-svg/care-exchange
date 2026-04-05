@@ -7,11 +7,16 @@ class Feedback(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, index=True)
-    rating = db.Column(db.Integer, nullable=True)  # 1-5 stars
-    nps = db.Column(db.Integer, nullable=True)  # 0-10
-    tried_features = db.Column(db.Text, nullable=True)  # JSON array of feature strings
-    confusing = db.Column(db.Text, nullable=True)
-    broken_missing = db.Column(db.Text, nullable=True)
+    # Q1: Would you use it?
+    would_use = db.Column(db.String(30), nullable=True)  # yes_regaily | yes_sometimes | maybe_not | no
+    # Q2: Would you pay?
+    would_pay = db.Column(db.String(30), nullable=True)  # yes_monthly | yes_once | maybe | no
+    pay_amount = db.Column(db.String(80), nullable=True)
+    # Q3: What would make it worth it?
+    top_feature = db.Column(db.Text, nullable=True)
+    # Q3 follow-up: what would tip "maybe" into "yes"
+    top_frustration = db.Column(db.Text, nullable=True)
+    # Q4: Anything else
     other_comments = db.Column(db.Text, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -19,21 +24,14 @@ class Feedback(db.Model):
     user = db.relationship('User', backref='feedback', lazy=True)
 
     def to_dict(self):
-        import json
-        tried = []
-        if self.tried_features:
-            try:
-                tried = json.loads(self.tried_features)
-            except Exception:
-                tried = []
         return {
             'id': self.id,
             'user_id': self.user_id,
-            'rating': self.rating,
-            'nps': self.nps,
-            'tried_features': tried,
-            'confusing': self.confusing,
-            'broken_missing': self.broken_missing,
+            'would_use': self.would_use,
+            'would_pay': self.would_pay,
+            'pay_amount': self.pay_amount,
+            'top_feature': self.top_feature,
+            'top_frustration': self.top_frustration,
             'other_comments': self.other_comments,
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'user_name': self.user.full_name if self.user else None,

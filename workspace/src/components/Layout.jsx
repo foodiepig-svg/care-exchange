@@ -46,6 +46,27 @@ const navItems = [
   { to: '/app/feedback', icon: MessageSquare, label: 'Early Access Feedback', roles: ['participant', 'family', 'provider', 'coordinator'], badge: 'New' },
 ]
 
+// ─── Test environment banner ───────────────────────────────────────────────────
+function TestEnvironmentBanner() {
+  const [dismissed, setDismissed] = useState(false)
+  if (dismissed) return null
+  return (
+    <div className="bg-amber-50 border-b border-amber-200 px-4 py-2.5 flex items-center justify-between gap-3">
+      <p className="text-xs text-amber-800">
+        <strong>Early access test environment.</strong>{' '}
+        Please do not enter real participant, NDIS plan, or health data until we launch. Use test data only.
+      </p>
+      <button
+        onClick={() => setDismissed(true)}
+        className="text-amber-600 hover:text-amber-800 p-1 rounded"
+        aria-label="Dismiss test environment notice"
+      >
+        <X size={14} />
+      </button>
+    </div>
+  )
+}
+
 const adminNavItems = [
   { to: '/admin', icon: BarChart3, label: 'Overview', adminOnly: true },
   { to: '/admin/users', icon: Users, label: 'Users', adminOnly: true },
@@ -209,6 +230,9 @@ export default function Layout() {
             </div>
           </div>
         </header>
+
+        {/* Test environment notice */}
+        <TestEnvironmentBanner />
 
         {/* Content */}
         <main id="main-content" ref={mainContentRef} className="flex-1 p-4 lg:p-8" tabIndex="-1">

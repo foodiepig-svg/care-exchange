@@ -123,7 +123,7 @@ export default function FamilyHelp() {
               <div className="inline-flex items-center gap-2 bg-rose-100 text-rose-700 text-xs font-semibold px-3 py-1.5 rounded-full mb-4">
                 Family & Carer Guide
               </div>
-              <h1 className="text-3xl font-bold text-slate-900 mb-3">Help Centre: Family & Carer Guide</h1>
+              <h1 className="text-3xl font-bold text-slate-900 mb-3">How to Guide: Family & Carer</h1>
               <p className="text-slate-500 leading-relaxed">
                 How to use Care Exchange as a family member or carer — staying informed about your family member's care, messaging providers, and tracking goal progress.
               </p>

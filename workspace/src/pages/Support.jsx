@@ -135,9 +135,9 @@ export default function Support() {
     }
   }
 
-  const helpGuideTitle = user?.role === 'provider' ? 'Provider Help' :
-                         user?.role === 'coordinator' ? 'Coordinator Help' :
-                         user?.role === 'family' ? 'Family Help' : 'Help Centre'
+  const helpGuideTitle = user?.role === 'provider' ? 'Provider How to Guide' :
+                         user?.role === 'coordinator' ? 'Coordinator How to Guide' :
+                         user?.role === 'family' ? 'Family How to Guide' : 'How to Guide'
 
   const helpGuidePath = `/app/help/${user?.role === 'family' ? 'family' : user?.role === 'coordinator' ? 'coordinator' : user?.role === 'provider' ? 'provider' : 'participant'}`
 
@@ -146,15 +146,15 @@ export default function Support() {
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Help & Support</h1>
-          <p className="text-sm text-slate-500 mt-1">Submit a bug report or feature request</p>
+          <h1 className="text-2xl font-bold text-slate-800">Log an Issue</h1>
+          <p className="text-sm text-slate-500 mt-1">Submit a bug report or issue</p>
         </div>
         <div className="flex gap-3">
           <button
             onClick={() => navigate(helpGuidePath)}
             className="text-sm text-slate-500 hover:text-slate-700 border border-slate-200 px-4 py-2 rounded-lg hover:bg-slate-50 transition-colors"
           >
-            View Help Guide
+            View How to Guide
           </button>
           <button
             onClick={() => setShowForm(true)}
@@ -192,7 +192,6 @@ export default function Support() {
               <div className="flex gap-3">
                 {[
                   { value: 'issue', label: 'Bug Report', icon: AlertCircle, color: 'text-rose-600 bg-rose-50 border-rose-200' },
-                  { value: 'feature', label: 'Feature Request', icon: Lightbulb, color: 'text-violet-600 bg-violet-50 border-violet-200' },
                 ].map(opt => {
                   const Icon = opt.icon
                   return (

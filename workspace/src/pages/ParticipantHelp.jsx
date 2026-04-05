@@ -127,7 +127,7 @@ export default function ParticipantHelp() {
               <div className="inline-flex items-center gap-2 bg-teal-100 text-teal-700 text-xs font-semibold px-3 py-1.5 rounded-full mb-4">
                 Participant Guide
               </div>
-              <h1 className="text-3xl font-bold text-slate-900 mb-3">Help Centre: Participant Guide</h1>
+              <h1 className="text-3xl font-bold text-slate-900 mb-3">How to Guide: Participant</h1>
               <p className="text-slate-500 leading-relaxed">
                 Everything you need to know about using Care Exchange as a participant. From setting up your account to managing consent and sending referrals.
               </p>

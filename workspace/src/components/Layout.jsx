@@ -37,7 +37,7 @@ const navItems = [
   { to: '/consent', icon: ShieldCheck, label: 'Consent', roles: ['participant', 'family'] },
   { to: '/goals', icon: Target, label: 'Goals', roles: ['participant'] },
   { to: '/app/care-plans', icon: FileText, label: 'Care Plans', roles: ['participant', 'coordinator', 'provider'] },
-  { to: '/app/support', icon: LifeBuoy, label: 'Help & Support', roles: ['participant', 'family', 'provider', 'coordinator'] },
+  { to: '/app/support', icon: LifeBuoy, label: 'Log an Issue', roles: ['participant', 'family', 'provider', 'coordinator'] },
   { to: '/app/help/participant', icon: HelpCircle, label: 'Help', roles: ['participant'] },
   { to: '/app/help/provider', icon: HelpCircle, label: 'Help', roles: ['provider'] },
   { to: '/app/help/coordinator', icon: HelpCircle, label: 'Help', roles: ['coordinator'] },

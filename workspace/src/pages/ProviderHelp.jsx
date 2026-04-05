@@ -126,7 +126,7 @@ export default function ProviderHelp() {
               <div className="inline-flex items-center gap-2 bg-violet-100 text-violet-700 text-xs font-semibold px-3 py-1.5 rounded-full mb-4">
                 Provider Guide
               </div>
-              <h1 className="text-3xl font-bold text-slate-900 mb-3">Help Centre: Service Provider Guide</h1>
+              <h1 className="text-3xl font-bold text-slate-900 mb-3">How to Guide: Service Provider</h1>
               <p className="text-slate-500 leading-relaxed">
                 How to use Care Exchange as an NDIS service provider — from accepting referrals to submitting structured updates and coordinating with care teams.
               </p>

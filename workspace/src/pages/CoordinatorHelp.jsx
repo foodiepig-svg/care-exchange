@@ -125,7 +125,7 @@ export default function CoordinatorHelp() {
               <div className="inline-flex items-center gap-2 bg-emerald-100 text-emerald-700 text-xs font-semibold px-3 py-1.5 rounded-full mb-4">
                 Support Coordinator Guide
               </div>
-              <h1 className="text-3xl font-bold text-slate-900 mb-3">Help Centre: Coordinator Guide</h1>
+              <h1 className="text-3xl font-bold text-slate-900 mb-3">How to Guide: Coordinator</h1>
               <p className="text-slate-500 leading-relaxed">
                 How to use Care Exchange as a support coordinator — managing your participant roster, tracking cross-provider updates, monitoring goals, and preparing plan review exports.
               </p>
